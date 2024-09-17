@@ -10,6 +10,7 @@ import { OneNoteImporter } from './formats/onenote';
 import { RoamJSONImporter } from './formats/roam-json';
 import { TextbundleImporter } from './formats/textbundle';
 import { truncateText } from './util';
+import { EbookImporter } from './formats/ebooks';
 
 declare global {
 	interface Window {
@@ -249,6 +250,13 @@ export default class ImporterPlugin extends Plugin {
 				optionText: 'Evernote (.enex)',
 				importer: EvernoteEnexImporter,
 				helpPermalink: 'import/evernote',
+			},
+			'ebooks': {
+				name: 'E-books',
+				optionText: 'E-books (.epub)',
+				importer: EbookImporter,
+				helpPermalink: 'import/ebooks',
+				formatDescription: 'Electronic Book formats'
 			},
 			'keep': {
 				name: 'Google Keep',
