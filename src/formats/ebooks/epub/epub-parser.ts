@@ -96,15 +96,15 @@ abstract class ImportableAsset {
 class PageAsset extends ImportableAsset {
     page?: Document;
     pageTitle: string;
-    linkTargetIDs = new Map<string,string>();
+    linkTargetIDs = new Map<string, string>();
 
     constructor(source: ZipEntryFile, href: string, mimetype: string) {
         super(source, href, mimetype);
     }
 
     registerLinkTarget(targetID: string): string {
-        const sanitized = targetID.replace(/[_]+/g,"-");
-        this.linkTargetIDs.set(targetID,sanitized);
+        const sanitized = targetID.replace(/[_]+/g, "-");
+        this.linkTargetIDs.set(targetID, sanitized);
         return sanitized;
     }
 
@@ -130,20 +130,20 @@ class PageAsset extends ImportableAsset {
         }
 
         // mark all link targets
-        for (const [id,sanitizedID] of this.linkTargetIDs) {
+        for (const [id, sanitizedID] of this.linkTargetIDs) {
             const e = this.page.querySelector("#" + id);
             if (e) {
                 const marker = this.page.createElement("code");
                 marker.setText(`{{^${sanitizedID}}}`);
-                e.parentNode?.insertBefore(marker,e);
+                e.parentNode?.insertBefore(marker, e);
             }
         }
 
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
             markdown = htmlToMarkdown(this.page)
-                .replace(/[\n\s]*{{(\^[^\{\}]+)}}[\s\n]*/g,"\n\n$1\n")
-                .replace(/\n[\n\s]*\n/g,"\n\n");
+                .replace(/[\n\s]*{{(\^[^\{\}]+)}}[\s\n]*/g, "\n\n$1\n")
+                .replace(/\n[\n\s]*\n/g, "\n\n");
         return bookOutpuFolder.vault.create(outputPath, markdown);
     }
 }
@@ -216,6 +216,9 @@ class NavLink {
 class TocAsset extends ImportableAsset {
     bookTitle?: string;
     bookAuthor?: string;
+    bookCoverImage?: string;
+    bookDescription?: string;
+    bookPublisher?: string;
     tags?: string[];
     // a flat version of the content map
     navList: NavLink[] = [];
@@ -230,8 +233,19 @@ class TocAsset extends ImportableAsset {
     }
 
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
-        const path = await this.getVaultOutputPath(bookOutpuFolder);
-        let content: string[] = ["# " + this.bookTitle];
+        const
+            path = await this.getVaultOutputPath(bookOutpuFolder),
+            description = htmlToMarkdown(this.bookDescription as string ?? "-")
+                .split("\n")
+                .map(l => "> " + l);
+        let content: string[] = [
+            "",
+            `> [!abstract] ${this.bookTitle}`,
+            `> <span style="float:Right;">![[${this.bookCoverImage}|300]]</span>`,
+            ...description,
+            "",
+             "# " + this.bookTitle,
+        ];
         content.push("# Book Content Map");
         for (const navlink of this.navList) {
             content.push(navlink.markdownListItem);
@@ -258,8 +272,10 @@ class TocAsset extends ImportableAsset {
             docAuthor = doc.querySelector('ncx > docAuthor > text'),
             navMap = doc.querySelector('ncx > navMap');
 
-        this.bookTitle = docTitle?.textContent ?? this.getBookMetaProperty(meta, 'title');
+        this.bookTitle = docTitle?.textContent ?? meta.title as string;
         this.bookAuthor = docAuthor?.textContent ?? this.getBookMetaProperty(meta, 'creator');
+        this.bookCoverImage = meta.cover as string;
+        this.bookDescription = meta.description as string;
         this.tags = Array.isArray(meta.subject) ? meta.subject : [meta.subject ?? 'e-book'];
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
@@ -331,24 +347,36 @@ export class EpubDocument {
             for (let i = 0; i < cCount; i++) {
                 const
                     node = c[i],
-                    nodeName = node.nodeName,
+                    nodeName = node.nodeName;
+                let
+                    key: string | null,
+                    value: string | null;
+
+                if (nodeName === "meta") {
+                    key = node.getAttribute("name");
+                    value = node.getAttribute("content");
+                } else  {
+                    key = nodeName;
                     value = node.textContent;
-                if (value) {
-                    const
-                        colonIndex = nodeName.indexOf(':'),
-                        propertyName = colonIndex >= 0 ? nodeName.slice(colonIndex + 1) : nodeName,
-                        meta = this.bookMeta[propertyName];
+                    if (key) {
+                        const colonIndex = key.indexOf(':');
+                        key = colonIndex >= 0 ? key.slice(colonIndex + 1) : key;
+                    }
+                }
+
+                if (key && value) {
+                    const meta = this.bookMeta[key];
 
                     if (meta) {
                         if (Array.isArray(meta)) {
                             meta.push(value);
                         }
                         else {
-                            this.bookMeta[propertyName] = [meta, value];
+                            this.bookMeta[key] = [meta, value];
                         }
                     }
                     else {
-                        this.bookMeta[propertyName] = value;
+                        this.bookMeta[key] = value;
                     }
                 }
             }
