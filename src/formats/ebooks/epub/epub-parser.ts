@@ -141,7 +141,9 @@ class PageAsset extends ImportableAsset {
 
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
-            markdown = htmlToMarkdown(this.page).replace(/[\n\s]*{{(\^[^\{\}]+)}}[\s\n]*/g,"\n\n$1\n");
+            markdown = htmlToMarkdown(this.page)
+                .replace(/[\n\s]*{{(\^[^\{\}]+)}}[\s\n]*/g,"\n\n$1\n")
+                .replace(/\n[\n\s]*\n/g,"\n\n");
         return bookOutpuFolder.vault.create(outputPath, markdown);
     }
 }
