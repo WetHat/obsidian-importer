@@ -168,28 +168,30 @@ class MediaAsset extends ImportableAsset {
 }
 
 class NavLink {
-	sourceHref: string;
+	assetHref: string;
 	targetID: string;
 	level: number;
 	linkText: string;
 
-	constructor(level: number, navpoint: Element) {
+	constructor(level: number, navpoint: Element,assetMap: Map<string, ImportableAsset>) {
 		this.level = level;
 		const
 			text = navpoint.querySelector(':scope > navLabel > text'),
 			content = navpoint.querySelector(':scope > content'),
 			contentSrc = content?.getAttribute('src');
 		if (contentSrc) {
-			const [srcHref, id] = contentSrc.split('#');
-			this.sourceHref = srcHref;
+			const
+                [srcHref, id] = contentSrc.split('#'),
+                asset = assetMap.get(srcHref);
+			this.assetHref = asset ? asset.outputHref : srcHref;
 			this.targetID = id;
 		}
 		this.linkText = text?.textContent ?? 'unknown';
 	}
 
-	getMarkdownListItem(outputHref: String): string {
+	get markdownListItem(): string {
 		const padding = ' '.repeat(this.level * 2);
-		return `${padding}- [[${outputHref}|${this.linkText}]]`;
+		return `${padding}- [[${this.assetHref}|${this.linkText}]]`;
 	}
 }
 
@@ -200,7 +202,6 @@ class NavLink {
  */
 
 class TocAsset extends ImportableAsset {
-
 	bookTitle?: string;
 	bookAuthor?: string;
 	tags?: string[];
@@ -218,18 +219,23 @@ class TocAsset extends ImportableAsset {
 
 	async import(bookOutpuFolder: TFolder): Promise<TFile> {
         const path = await this.getVaultOutputPath(bookOutpuFolder);
-        return bookOutpuFolder.vault.create(path, `# ${this.bookTitle}`);
+        let content: string[] = ["# " + this.bookTitle];
+        content.push("# Book Content Map");
+        for (const navlink of this.navList) {
+            content.push(navlink.markdownListItem);
+        }
+        return bookOutpuFolder.vault.create(path, content.join("\n"));
 	}
 
 	get outputHref(): string {
 		return this.makeOutputHref('§ Title Page', 'md');
 	}
 
-	private parseNavPoint(level: number, navPoint: Element): NavLink {
-		const navlink = new NavLink(level, navPoint);
+	private parseNavPoint(level: number, navPoint: Element,assetMap: Map<string, ImportableAsset>): NavLink {
+		const navlink = new NavLink(level, navPoint,assetMap);
 		this.navList.push(navlink);
 		navPoint.querySelectorAll(':scope > navPoint')
-			.forEach(pt => this.parseNavPoint(level + 1, pt));
+			.forEach(pt => this.parseNavPoint(level + 1, pt,assetMap));
 		return navlink;
 	}
 
@@ -250,8 +256,8 @@ class TocAsset extends ImportableAsset {
 			for (let i = 0; i < navPointCount; i++) {
 				const
 					navPoint = navPoints[i],
-					navlink = this.parseNavPoint(0, navPoint),
-					asset = assetMap.get(navlink.sourceHref);
+					navlink = this.parseNavPoint(0, navPoint,assetMap),
+					asset = assetMap.get(navlink.assetHref);
 				if (asset instanceof PageAsset) {
 					asset.pageTitle = navlink.linkText;
 				}
