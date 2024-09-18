@@ -45,10 +45,12 @@ function sanitizeTagname(tagname: string) {
     return tagname
         .replace(/\#/g, "＃")
         .replace(/\./g, "〭")
-        .replace(/&/g, ", ")
-        .replace(/[:;\\/]/g, " ")
-        .replace(/\s+/, " ")
-        .trim();
+        .replace(/[&/\[\(\{]/g, ",")
+        .replace(/:/g, "꞉")
+        .replace(/[;/\)\]\}]/, "")
+        .trim()
+        .replace(/\s+|[\\;]/, "-")
+       ;
 }
 
 /**
@@ -263,7 +265,7 @@ class TocAsset extends ImportableAsset {
     bookCoverImage?: string;
     bookDescription?: string;
     bookPublisher?: string;
-    tags?: string[];
+    tags: string[] = [];
     // a flat version of the content map
     navList: NavLink[] = [];
 
@@ -283,6 +285,11 @@ class TocAsset extends ImportableAsset {
                 .split("\n")
                 .map(l => "> " + l);
         let content: string[] = [
+            "---",
+            `author: "${this.bookAuthor}"`,
+            `publisher: "${this.bookPublisher}"`,
+            `tags: [${this.tags.join(",")}]`,
+            "---",
             "",
             `> [!abstract] ${this.bookTitle}`,
             `> <span style="float:Right;">![[${this.bookCoverImage}|300]]</span>`,
@@ -318,9 +325,11 @@ class TocAsset extends ImportableAsset {
 
         this.bookTitle = docTitle?.textContent ?? meta.title as string;
         this.bookAuthor = docAuthor?.textContent ?? this.getBookMetaProperty(meta, 'creator');
+        this.bookPublisher = meta.publisher as string;
         this.bookCoverImage = meta.cover as string;
         this.bookDescription = meta.description as string;
         this.tags = Array.isArray(meta.subject) ? meta.subject : [meta.subject ?? 'e-book'];
+        this.tags = this.tags.map(t => sanitizeTagname(t));
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
         if (navPoints) {
