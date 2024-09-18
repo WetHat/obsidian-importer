@@ -3,9 +3,53 @@ import { parseFilePath, PickedFile } from 'filesystem';
 import { ImportContext } from 'main';
 import { htmlToMarkdown, TFile, TFolder, Vault } from 'obsidian';
 import { readZip, ZipEntryFile } from 'zip';
-import { applyCreatedAtTemplate } from '../../yarle/utils/templates/apply-functions/apply-createdat-template';
 
 type TStringPropertyBag = { [key: string]: string | string[] | undefined };
+
+const FILENAME_CHAR_MAP = [
+    ["?", "❓"],
+    [".", "․"],
+    [":", "꞉"],
+    ['"', "″"],
+    ['<', "＜"],
+    ['>', "＞"],
+    ['|', "∣"],
+    ["\\", "/"],
+    ["/", "╱"],
+    ["[", "{"],
+    ["]", "}"],
+    ["#", "＃"],
+    ["^", "△"],
+    ["&", "+"],
+    ["*", "✱"],
+];
+
+/**
+ * Utility to convert a string into a valid filename.
+ * @param name - A string, such as a title, to create a filename for.
+ * @returns valid filename without file extension.
+ */
+function sanitizeFilename(filename: string): string {
+
+    let sanitized = filename;
+
+    for (let [from, to] of FILENAME_CHAR_MAP) {
+        const re = new RegExp("\\"+ from,"g");
+        sanitized = sanitized.replace(re,to);
+    }
+
+    return sanitized.trim();
+}
+
+function sanitizeTagname(tagname: string) {
+    return tagname
+        .replace(/\#/g, "＃")
+        .replace(/\./g, "〭")
+        .replace(/&/g, ", ")
+        .replace(/[:;\\/]/g, " ")
+        .replace(/\s+/, " ")
+        .trim();
+}
 
 /**
  * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
@@ -42,26 +86,28 @@ abstract class ImportableAsset {
     }
 
     /**
-     * A utility function to build a relative link to an asset in the
-     * output folder.
+     * A utility function to build a relative link to an asset.
      *
      * @param basename the asset file's basename
      * @param extension THe asset file's extension
      * @returns a link realtive to the book in the output folder.
      */
-    protected makeOutputHref(basename: string, extension: string): string {
+    protected makeHref(basename: string, extension: string): string {
         return [...this.assetFolderPath, basename + '.' + extension].join('/');
     }
 
     /**
      * This property is computed by derived classes.
      *
-     * @see makeOutputHref
+     * @see makeHref
      *
      * @return Link of the asset relative to the book in the output folder.
      */
     abstract get outputHref(): string;
 
+    get sourceHref() : string {
+        return this.makeHref(this.source.basename,this.source.extension);
+    }
     /**
      *
      * @param bookOutpuFolder Import the asset to the book's output folder.
@@ -95,7 +141,7 @@ abstract class ImportableAsset {
 
 class PageAsset extends ImportableAsset {
     page?: Document;
-    pageTitle: string;
+    pageTitle?: string;
     linkTargetIDs = new Map<string, string>();
 
     constructor(source: ZipEntryFile, href: string, mimetype: string) {
@@ -109,13 +155,8 @@ class PageAsset extends ImportableAsset {
     }
 
     get outputHref(): string {
-        // TODO use a better name
-        return this.makeOutputHref(this.source.basename, "md");
-    }
-
-    protected get outputFilename(): string {
-        // TODO use a proper name
-        return this.makeOutputHref(this.source.basename, 'md');
+        const basename = sanitizeFilename(this.pageTitle ?? this.source.basename);
+        return this.makeHref(basename, "md");
     }
 
     async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>): Promise<void> {
@@ -159,7 +200,7 @@ class MediaAsset extends ImportableAsset {
     }
 
     get outputHref(): string {
-        return this.makeOutputHref(this.source.basename, this.source.extension);
+        return this.makeHref(this.source.basename, this.source.extension);
     }
 
     /**
@@ -186,19 +227,22 @@ class NavLink {
             text = navpoint.querySelector(':scope > navLabel > text'),
             content = navpoint.querySelector(':scope > content'),
             contentSrc = content?.getAttribute('src');
+
+        this.linkText = text?.textContent ?? 'unknown';
         if (contentSrc) {
             const
                 [srcHref, id] = contentSrc.split('#'),
                 asset = assetMap.get(srcHref);
-            this.assetHref = asset ? asset.outputHref : srcHref;
-
             if (asset instanceof PageAsset) {
                 this.targetID = asset.registerLinkTarget(id);
+                if (level === 0) {
+                    asset.pageTitle = text?.textContent ?? undefined;
+                }
             } else {
                 this.targetID = id;
             }
+            this.assetHref = asset ? asset.outputHref : srcHref;
         }
-        this.linkText = text?.textContent ?? 'unknown';
     }
 
     get markdownListItem(): string {
@@ -244,7 +288,7 @@ class TocAsset extends ImportableAsset {
             `> <span style="float:Right;">![[${this.bookCoverImage}|300]]</span>`,
             ...description,
             "",
-             "# " + this.bookTitle,
+            "# " + this.bookTitle,
         ];
         content.push("# Book Content Map");
         for (const navlink of this.navList) {
@@ -254,7 +298,7 @@ class TocAsset extends ImportableAsset {
     }
 
     get outputHref(): string {
-        return this.makeOutputHref('§ Title Page', 'md');
+        return this.makeHref('§ Title Page', 'md');
     }
 
     private parseNavPoint(level: number, navPoint: Element, assetMap: Map<string, ImportableAsset>): NavLink {
@@ -282,13 +326,7 @@ class TocAsset extends ImportableAsset {
         if (navPoints) {
             const navPointCount = navPoints.length;
             for (let i = 0; i < navPointCount; i++) {
-                const
-                    navPoint = navPoints[i],
-                    navlink = this.parseNavPoint(0, navPoint, assetMap),
-                    asset = assetMap.get(navlink.assetHref);
-                if (asset instanceof PageAsset) {
-                    asset.pageTitle = navlink.linkText;
-                }
+                this.parseNavPoint(0, navPoints[i], assetMap);
             }
         }
     }
@@ -355,7 +393,7 @@ export class EpubDocument {
                 if (nodeName === "meta") {
                     key = node.getAttribute("name");
                     value = node.getAttribute("content");
-                } else  {
+                } else {
                     key = nodeName;
                     value = node.textContent;
                     if (key) {
@@ -435,7 +473,7 @@ export class EpubDocument {
 
     async import(outputFolder: TFolder): Promise<void> {
         const
-            bookFolderPath = outputFolder.path + '/' + this.bookMeta.title as string,
+            bookFolderPath = outputFolder.path + '/' + sanitizeFilename(this.bookMeta.title as string),
             bookFolder = await this.vault.createFolder(bookFolderPath);
         console.log(`Saving Ebook to ${bookFolder.path}`);
 
