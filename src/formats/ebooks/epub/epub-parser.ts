@@ -39,7 +39,7 @@ function tidyFilename(filename: string): string {
     return sanitized.trim();
 }
 
-function sanitizeTagname(tagname: string) {
+function tidyTagname(tagname: string) {
     return tagname
         .replace(/\#/g, "＃")
         .replace(/\./g, "〭")
@@ -48,7 +48,7 @@ function sanitizeTagname(tagname: string) {
         .replace(/[;/\)\]\}]/, "")
         .trim()
         .replace(/\s+|[\\;]/, "-")
-       ;
+        ;
 }
 
 /**
@@ -105,8 +105,8 @@ abstract class ImportableAsset {
      */
     abstract get outputHref(): string;
 
-    get sourceHref() : string {
-        return this.makeHref(this.source.basename,this.source.extension);
+    get sourceHref(): string {
+        return this.makeHref(this.source.basename, this.source.extension);
     }
     /**
      *
