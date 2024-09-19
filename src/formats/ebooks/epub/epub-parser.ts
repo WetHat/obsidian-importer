@@ -9,7 +9,7 @@ type TStringPropertyBag = { [key: string]: string | string[] | undefined };
 const FILENAME_CHAR_MAP = [
     [/\?/g, "❓"],
     [/\:/g, "꞉"],
-    [/"/g,  "'"],
+    [/"/g, "'"],
     [/\</g, "＜"],
     [/\>/g, "＞"],
     [/\|/g, "∣"],
