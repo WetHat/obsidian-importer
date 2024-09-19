@@ -163,10 +163,33 @@ class PageAsset extends ImportableAsset {
 
     async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>): Promise<void> {
         const html = (await this.source.readText())
-            .replace(/(&lt;|&gt;)/g,"\\$1"); // precess html entities.
-        this.page = parser.parseFromString(html, "application/xhtml+xml");
-        // TODO make the html Obsidian friendly
+            .replace(/(&lt;|&gt;)/g, "\\$1"); // precess html entities.
+        // we need to use the `text/html`so that Obsidian produces usable Markdown
+        this.page = parser.parseFromString(html, "text/html");
+        // Make the html Obsidian friendly
+        // Look for <pre> tags and make sure their first child is always a <code> tag.
+        const pres = this.page.body.getElementsByTagName("pre");
+        for (let i = 0; i < pres.length; i++) {
+            const pre = pres[i];
+            let firstChild = pre.firstChild;
 
+            // remove emptylines
+            while (firstChild?.nodeType === Node.TEXT_NODE && firstChild.textContent?.trim().length === 0) {
+                firstChild.remove();
+                firstChild = pre.firstChild;
+            }
+
+            if (firstChild && firstChild.nodeName !== "code") {
+                const code = this.page.createElement("code");
+                code.setAttribute("class","language-undefined");
+                let child;
+                while (firstChild) {
+                    code.append(firstChild);
+                    firstChild = pre.firstChild;
+                }
+                pre.append(code);
+            }
+        }
     }
 
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
