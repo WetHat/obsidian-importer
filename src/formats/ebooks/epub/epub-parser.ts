@@ -1,3 +1,4 @@
+import { BookingWorkHours } from '@microsoft/microsoft-graph-types';
 import { ZipReader } from '@zip.js/zip.js';
 import { parseFilePath, PickedFile } from 'filesystem';
 import { ImportContext } from 'main';
@@ -215,13 +216,21 @@ class PageAsset extends ImportableAsset {
         const html = (await this.source.readText())
             .replace(/&lt;/g, "＜")
             .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
-        // we need to use the `text/html`so that Obsidian produces usable Markdown
+        // we need to use the `text/html`so that Obsidian produces usable Markdown!
         this.page = parser.parseFromString(html, "text/html");
-        // Make the html Obsidian friendly
+
+        // Apply document transformations to make the html Obsidian friendly
         this.injectCodeBlock();
         this.hoistTableCaptions();
     }
 
+    /**
+     * A page transformation to hoist '<caption>' elements inside a `<table>` to the first positions
+     * for Obsidian to process them correctly.
+     *
+     * In addidtion a `{{newline}}` post-processing marker is added to make sure there
+     * is an empty line between caption and table.
+     */
     private hoistTableCaptions() {
         if (!this.page) {
             return;
@@ -232,7 +241,7 @@ class PageAsset extends ImportableAsset {
                 if (table) {
                     if (table.firstElementChild?.nodeName !== caption.nodeName) {
                         // hoist to top
-                        table.insertBefore(caption,table.firstElementChild);
+                        table.insertBefore(caption, table.firstElementChild);
                     }
                 }
                 // mark the caption for postprocessing
@@ -240,8 +249,9 @@ class PageAsset extends ImportableAsset {
             });
     }
     /**
-     * Look for `<pre` tags which are not immediately followed by a `<code>` block
-     * and inject one. WIthout this Obsidian will not generate a markdown code block.
+     * A page transformation looking for `<pre>` tags which are **not** immediately followed by a `<code>` block
+     * and inject one.
+     *  Without this Obsidian will not generate a markdown code block and obfuscates any code contained in the '<pre>'.
      */
     private injectCodeBlock() {
         if (!this.page) {
@@ -291,7 +301,7 @@ class PageAsset extends ImportableAsset {
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
             markdown = htmlToMarkdown(this.page.body)
                 .replace(/[\n\s]*`{{(\^[^\{\}]+)}}`[\s\n]*/g, "\n\n$1\n") // link targets
-                .replace(/{{newline}}/g,"\n");
+                .replace(/{{newline}}/g, "\n");
 
         return bookOutpuFolder.vault.create(outputPath, markdown);
     }
@@ -361,7 +371,7 @@ class NavLink {
 /**
  * The book's content map.
  *
- * WHen implrted creates the books title page
+ * WHen imported creates the book's title page.
  */
 
 class TocAsset extends ImportableAsset {
