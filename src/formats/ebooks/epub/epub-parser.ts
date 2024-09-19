@@ -166,7 +166,36 @@ class PageAsset extends ImportableAsset {
         // we need to use the `text/html`so that Obsidian produces usable Markdown
         this.page = parser.parseFromString(html, "text/html");
         // Make the html Obsidian friendly
-        // Look for <pre> tags and make sure their first child is always a <code> tag.
+        this.injectCodeBlock();
+        this.hoistTableCaptions();
+    }
+
+    private hoistTableCaptions() {
+        if (!this.page) {
+            return;
+        }
+        this.page.body.querySelectorAll("table > caption")
+            .forEach(caption => {
+                const table = caption.parentElement;
+                if (table) {
+                    if (table.firstElementChild?.nodeName !== caption.nodeName) {
+                        // hoist to top
+                        table.insertBefore(caption,table.firstElementChild);
+                    }
+                }
+                // mark the caption for postprocessing
+                caption.setText(caption?.textContent + "{{newline}}")
+            });
+    }
+    /**
+     * Look for `<pre` tags which are not immediately followed by a `<code>` block
+     * and inject one. WIthout this Obsidian will not generate a markdown code block.
+     */
+    private injectCodeBlock() {
+        if (!this.page) {
+            return;
+        }
+
         const pres = this.page.body.getElementsByTagName("pre");
         for (let i = 0; i < pres.length; i++) {
             const pre = pres[i];
@@ -209,7 +238,8 @@ class PageAsset extends ImportableAsset {
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
             markdown = htmlToMarkdown(this.page.body)
-                .replace(/[\n\s]*`{{(\^[^\{\}]+)}}`[\s\n]*/g, "\n\n$1\n");
+                .replace(/[\n\s]*`{{(\^[^\{\}]+)}}`[\s\n]*/g, "\n\n$1\n") // link targets
+                .replace(/{{newline}}/g,"\n");
 
         return bookOutpuFolder.vault.create(outputPath, markdown);
     }
