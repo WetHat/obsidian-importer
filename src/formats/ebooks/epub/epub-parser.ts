@@ -162,7 +162,9 @@ class PageAsset extends ImportableAsset {
     }
 
     async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>): Promise<void> {
-        this.page = parser.parseFromString(await this.source.readText(), "application/xhtml+xml");
+        const html = (await this.source.readText())
+            .replace(/(&lt;|&gt;)/g,"\\$1"); // precess html entities.
+        this.page = parser.parseFromString(html, "application/xhtml+xml");
         // TODO make the html Obsidian friendly
 
     }
