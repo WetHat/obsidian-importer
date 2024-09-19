@@ -163,7 +163,8 @@ class PageAsset extends ImportableAsset {
 
     async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>): Promise<void> {
         const html = (await this.source.readText())
-            .replace(/(&lt;|&gt;)/g, "\\$1"); // precess html entities.
+            .replace(/&lt;/g, "＜")
+            .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
         // we need to use the `text/html`so that Obsidian produces usable Markdown
         this.page = parser.parseFromString(html, "text/html");
         // Make the html Obsidian friendly
