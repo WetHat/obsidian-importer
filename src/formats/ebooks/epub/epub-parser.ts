@@ -4,8 +4,6 @@ import { ImportContext } from 'main';
 import { htmlToMarkdown, TFile, TFolder, Vault } from 'obsidian';
 import { readZip, ZipEntryFile } from 'zip';
 
-type TStringPropertyBag = { [key: string]: string | string[] | undefined };
-
 const FILENAME_CHAR_MAP = [
     [/\?/g, "❓"],
     [/\:/g, "꞉"],
@@ -49,6 +47,60 @@ function tidyTagname(tagname: string) {
         .trim()
         .replace(/\s+|[\\;]/, "-")
         ;
+}
+
+class BookMetadata {
+    private meta = new Map<string, string[]>();
+
+    constructor (metadata: Element) {
+        if (metadata) {
+            const
+                c = metadata.children,
+                cCount = c.length;
+            for (let i = 0; i < cCount; i++) {
+                // extract the metadata
+                const
+                    node = c[i],
+                    nodeName = node.nodeName;
+                let
+                    key: string | null,
+                    value: string | null;
+
+                if (nodeName === "meta") {
+                    key = node.getAttribute("name");
+                    value = node.getAttribute("content");
+                } else {
+                    key = nodeName;
+                    value = node.textContent;
+                    if (key) {
+                        const colonIndex = key.indexOf(':');
+                        key = colonIndex >= 0 ? key.slice(colonIndex + 1) : key;
+                    }
+                }
+
+                if (key && value) {
+                    this.setProperty(key,value); // capture the metadata
+                }
+            }
+        }
+    }
+
+    private setProperty(name: string, value: string) {
+        const entry = this.meta.get(name);
+        if (entry) {
+            entry.push(value);
+        } else {
+            this.meta.set(name, [value]);
+        }
+    }
+
+    asString(name: string): string | undefined {
+        return this.meta.get(name)?.join(",");
+    }
+
+    asArray(name:string) : string[] | undefined {
+        return this.meta.get(name);
+    }
 }
 
 /**
@@ -326,11 +378,6 @@ class TocAsset extends ImportableAsset {
         super(source, href, mimetype);
     }
 
-    private getBookMetaProperty(meta: TStringPropertyBag, key: string): string | undefined {
-        const value = meta[key];
-        return Array.isArray(value) ? value.join(',') : value;
-    }
-
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
         const
             path = await this.getVaultOutputPath(bookOutpuFolder),
@@ -369,19 +416,19 @@ class TocAsset extends ImportableAsset {
         return navlink;
     }
 
-    async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>, meta: TStringPropertyBag): Promise<void> {
+    async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>, meta: BookMetadata): Promise<void> {
         const
             doc = parser.parseFromString(await this.source.readText(), 'application/xml'),
             docTitle = doc.querySelector('ncx > docTitle > text'),
             docAuthor = doc.querySelector('ncx > docAuthor > text'),
             navMap = doc.querySelector('ncx > navMap');
 
-        this.bookTitle = docTitle?.textContent ?? meta.title as string;
-        this.bookAuthor = docAuthor?.textContent ?? this.getBookMetaProperty(meta, 'creator');
-        this.bookPublisher = meta.publisher as string;
-        this.bookCoverImage = meta.cover as string;
-        this.bookDescription = meta.description as string;
-        this.tags = Array.isArray(meta.subject) ? meta.subject : [meta.subject ?? 'e-book'];
+        this.bookTitle = docTitle?.textContent ?? meta.asString("title");
+        this.bookAuthor = docAuthor?.textContent ?? meta.asString("creator");
+        this.bookPublisher = meta.asString("publisher");
+        this.bookCoverImage = meta.asString("cover");
+        this.bookDescription = meta.asString("description");
+        this.tags = meta.asArray("subject") ?? ["e-book"];
         this.tags = this.tags.map(t => tidyTagname(t));
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
@@ -404,10 +451,10 @@ export class EpubDocument {
     private mimeMap = new Map<string, string>(); // href => mimetype
     private assetMap = new Map<string, ImportableAsset>(); // href => book asset
     private parser = new DOMParser();
-    private bookMeta: TStringPropertyBag = {};
+    private bookMeta: BookMetadata;
 
     get bookTitle(): string {
-        return this.bookMeta.title as string ?? 'Book';
+        return this.bookMeta.asString("title") ?? 'Untitled Book';
     }
     constructor(vault: Vault) {
         this.vault = vault;
@@ -441,45 +488,7 @@ export class EpubDocument {
         // extract the book meta information;
         const metadata = root.querySelector('metadata');
         if (metadata) {
-            const
-                c = metadata.children,
-                cCount = c.length;
-            for (let i = 0; i < cCount; i++) {
-                const
-                    node = c[i],
-                    nodeName = node.nodeName;
-                let
-                    key: string | null,
-                    value: string | null;
-
-                if (nodeName === "meta") {
-                    key = node.getAttribute("name");
-                    value = node.getAttribute("content");
-                } else {
-                    key = nodeName;
-                    value = node.textContent;
-                    if (key) {
-                        const colonIndex = key.indexOf(':');
-                        key = colonIndex >= 0 ? key.slice(colonIndex + 1) : key;
-                    }
-                }
-
-                if (key && value) {
-                    const meta = this.bookMeta[key];
-
-                    if (meta) {
-                        if (Array.isArray(meta)) {
-                            meta.push(value);
-                        }
-                        else {
-                            this.bookMeta[key] = [meta, value];
-                        }
-                    }
-                    else {
-                        this.bookMeta[key] = value;
-                    }
-                }
-            }
+            this.bookMeta = new BookMetadata(metadata);
         }
     }
 
@@ -535,7 +544,7 @@ export class EpubDocument {
 
     async import(outputFolder: TFolder): Promise<void> {
         const
-            bookFolderPath = outputFolder.path + '/' + tidyFilename(this.bookMeta.title as string),
+            bookFolderPath = outputFolder.path + '/' + tidyFilename(this.bookTitle),
             bookFolder = await this.vault.createFolder(bookFolderPath);
         console.log(`Saving Ebook to ${bookFolder.path}`);
 
