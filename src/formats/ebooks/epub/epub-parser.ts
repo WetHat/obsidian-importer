@@ -481,7 +481,7 @@ export class EpubDocument {
                         const page = new PageAsset(source, href, mimetype);
                         // we need to parse right away so that all pages are
                         // available when the TOC is parsed.
-                        page.parse(this.parser, this.assetMap);
+                        await page.parse(this.parser, this.assetMap);
                         this.assetMap.set(href, page);
                         break;
                     case 'application/x-dtbncx+xml':
