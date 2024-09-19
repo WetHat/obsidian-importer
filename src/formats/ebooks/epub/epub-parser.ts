@@ -7,21 +7,20 @@ import { readZip, ZipEntryFile } from 'zip';
 type TStringPropertyBag = { [key: string]: string | string[] | undefined };
 
 const FILENAME_CHAR_MAP = [
-    ["?", "❓"],
-    [".", "․"],
-    [":", "꞉"],
-    ['"', "″"],
-    ['<', "＜"],
-    ['>', "＞"],
-    ['|', "∣"],
-    ["\\", "/"],
-    ["/", "╱"],
-    ["[", "{"],
-    ["]", "}"],
-    ["#", "＃"],
-    ["^", "△"],
-    ["&", "+"],
-    ["*", "✱"],
+    [/\?/g, "❓"],
+    [/\:/g, "꞉"],
+    [/"/g,  "'"],
+    [/\</g, "＜"],
+    [/\>/g, "＞"],
+    [/\|/g, "∣"],
+    [/\\/g, "/"],
+    [/\//g, "╱"],
+    [/\[/g, "⟦"],
+    [/\]/g, "⟧"],
+    [/\#/g, "＃"],
+    [/\^/g, "⌃"],
+    [/\&/g, "＆"],
+    [/\*/g, "✱"],
 ];
 
 /**
@@ -29,13 +28,12 @@ const FILENAME_CHAR_MAP = [
  * @param name - A string, such as a title, to create a filename for.
  * @returns valid filename without file extension.
  */
-function sanitizeFilename(filename: string): string {
+function tidyFilename(filename: string): string {
 
     let sanitized = filename;
 
     for (let [from, to] of FILENAME_CHAR_MAP) {
-        const re = new RegExp("\\"+ from,"g");
-        sanitized = sanitized.replace(re,to);
+        sanitized = sanitized.replace(from as RegExp, to as string);
     }
 
     return sanitized.trim();
@@ -157,7 +155,7 @@ class PageAsset extends ImportableAsset {
     }
 
     get outputHref(): string {
-        const basename = sanitizeFilename(this.pageTitle ?? this.source.basename);
+        const basename = tidyFilename(this.pageTitle ?? this.source.basename);
         return this.makeHref(basename, "md");
     }
 
@@ -354,7 +352,7 @@ class TocAsset extends ImportableAsset {
         this.bookCoverImage = meta.cover as string;
         this.bookDescription = meta.description as string;
         this.tags = Array.isArray(meta.subject) ? meta.subject : [meta.subject ?? 'e-book'];
-        this.tags = this.tags.map(t => sanitizeTagname(t));
+        this.tags = this.tags.map(t => tidyTagname(t));
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
         if (navPoints) {
@@ -507,7 +505,7 @@ export class EpubDocument {
 
     async import(outputFolder: TFolder): Promise<void> {
         const
-            bookFolderPath = outputFolder.path + '/' + sanitizeFilename(this.bookMeta.title as string),
+            bookFolderPath = outputFolder.path + '/' + tidyFilename(this.bookMeta.title as string),
             bookFolder = await this.vault.createFolder(bookFolderPath);
         console.log(`Saving Ebook to ${bookFolder.path}`);
 
