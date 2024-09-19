@@ -209,7 +209,7 @@ class PageAsset extends ImportableAsset {
 
             if (firstChild && firstChild.nodeName !== "code") {
                 const code = this.page.createElement("code");
-                code.setAttribute("class","language-undefined");
+                code.setAttribute("class", "language-undefined");
                 let child;
                 while (firstChild) {
                     code.append(firstChild);
