@@ -232,7 +232,7 @@ class PageAsset extends ImportableAsset {
                 const marker = this.page.createElement("code");
                 marker.setText(`{{^${sanitizedID}}}`);
                 e.parentNode?.insertBefore(marker, e);
-    }
+            }
         }
         return link;
     }
@@ -243,12 +243,12 @@ class PageAsset extends ImportableAsset {
         return this.makeAssetPath(basename, "md");
     }
 
-    async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>): Promise<void> {
+    async parse(book : EpubBook): Promise<void> {
         const html = (await this.source.readText())
             .replace(/&lt;/g, "＜")
             .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
         // we need to use the `text/html`so that Obsidian produces usable Markdown!
-        this.page = parser.parseFromString(html, "text/html");
+        this.page = book.parser.parseFromString(html, "text/html");
 
         // Apply document transformations to make the html Obsidian friendly
         this.injectCodeBlock();
@@ -372,7 +372,7 @@ class NavLink {
     level: number;
     linkText: string;
 
-    constructor(level: number, navpoint: Element, assetMap: Map<string, ImportableAsset>) {
+    constructor(level: number, navpoint: Element, book : EpubBook) {
         this.level = level;
         const
             text = navpoint.querySelector(':scope > navLabel > text'),
@@ -383,7 +383,7 @@ class NavLink {
         if (contentSrc) {
             const
                 [srcPath, id] = contentSrc.split('#'),
-                asset = assetMap.get(srcPath);
+                asset = book.getAsset(srcPath);
             if (asset instanceof PageAsset) {
                 this.assetLink = asset.getOutputPageLink(id);
                 if (level === 0) {
@@ -451,17 +451,18 @@ class TocAsset extends ImportableAsset {
         return this.makeAssetPath('§ Title Page', 'md');
     }
 
-    private parseNavPoint(level: number, navPoint: Element, assetMap: Map<string, ImportableAsset>): NavLink {
-        const navlink = new NavLink(level, navPoint, assetMap);
+    private parseNavPoint(level: number, navPoint: Element, book: EpubBook): NavLink {
+        const navlink = new NavLink(level, navPoint, book);
         this.navList.push(navlink);
         navPoint.querySelectorAll(':scope > navPoint')
-            .forEach(pt => this.parseNavPoint(level + 1, pt, assetMap));
+            .forEach(pt => this.parseNavPoint(level + 1, pt, book));
         return navlink;
     }
 
-    async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>, meta: BookMetadata): Promise<void> {
+    async parse(book: EpubBook): Promise<void> {
         const
-            doc = parser.parseFromString(await this.source.readText(), 'application/xml'),
+            doc = book.parser.parseFromString(await this.source.readText(), 'application/xml'),
+            meta = book.bookMeta,
             docTitle = doc.querySelector('ncx > docTitle > text'),
             docAuthor = doc.querySelector('ncx > docAuthor > text'),
             navMap = doc.querySelector('ncx > navMap');
@@ -478,7 +479,7 @@ class TocAsset extends ImportableAsset {
         if (navPoints) {
             const navPointCount = navPoints.length;
             for (let i = 0; i < navPointCount; i++) {
-                this.parseNavPoint(0, navPoints[i], assetMap);
+                this.parseNavPoint(0, navPoints[i], book);
             }
         }
     }
@@ -493,10 +494,10 @@ export class EpubBook {
     private vault: Vault;
     private toc: TocAsset;
     private sourcePrefix: string; // the ZIP parent directory path to the e-book
-    private mimeMap = new Map<string, string>(); // href => mimetype
-    private assetMap = new Map<string, ImportableAsset>(); // href => book asset
-    private parser = new DOMParser();
-    private bookMeta: BookMetadata;
+    private mimeMap = new Map<string, string>(); // asset source path => mimetype
+    private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
+    readonly parser = new DOMParser(); // the parser instance to use
+    bookMeta: BookMetadata; // The books metadata
 
     get bookTitle(): string {
         return this.bookMeta.asString("title") ?? 'Untitled Book';
@@ -567,7 +568,7 @@ export class EpubBook {
                         const page = new PageAsset(source, href, mimetype);
                         // we need to parse right away so that all pages are
                         // available when the TOC is parsed.
-                        await page.parse(this.parser, this.assetMap);
+                        await page.parse(this);
                         this.assetMap.set(href, page);
                         break;
                     case 'application/x-dtbncx+xml':
@@ -598,7 +599,7 @@ export class EpubBook {
         console.log(`Saving Ebook to ${bookFolder.path}`);
 
         // prepare the assets for import
-        await this.toc.parse(this.parser, this.assetMap, this.bookMeta);
+        await this.toc.parse(this);
 
         // mark the link targets in all pages
 
