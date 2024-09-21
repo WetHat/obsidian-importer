@@ -120,12 +120,13 @@ abstract class ImportableAsset {
     assetFolderPath: string[];
 
     /**
-     * The mimetype of the asset.
+     * The mimetype of the asset as defined in the book's manifest.
      */
     mimetype: string;
 
     /**
-     * Create anew instance of an importable asset
+     * Create anew instance of an importable asset.
+     *
      * @param source The ZIP file source of the asset.
      * @param href The book relative hyperlink of the asset
      * @param mimetype Asset mimetype
@@ -363,6 +364,9 @@ class MediaAsset extends ImportableAsset {
     }
 }
 
+/**
+ * A link descriptor for one link in the content map defined in (toc.ncx)
+ */
 class NavLink {
     assetLink: string;
     level: number;
@@ -481,7 +485,9 @@ class TocAsset extends ImportableAsset {
 }
 
 /**
- * Representation of am e-pub book which can be imported to Obsidian.
+ * Representation of an e-pub book prepared for imported to Obsidian.
+ *
+ * This class also defines and executes the necessary import workflow.
  */
 export class EpubBook {
     private vault: Vault;
