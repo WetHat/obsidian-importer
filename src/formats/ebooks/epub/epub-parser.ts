@@ -39,7 +39,8 @@ function tidyFilename(basename: string): string {
 
 function tidyTagname(tagname: string) {
     return tagname
-        .replace(/\#/g, "＃")
+        .replace(/^#/g, "") // get rid of the leading #
+        .replace(/#/g, "＃") // transform internal hashes
         .replace(/\./g, "〭")
         .replace(/[&/\[\(\{]/g, ",")
         .replace(/:/g, "꞉")
