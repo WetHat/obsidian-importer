@@ -194,6 +194,9 @@ abstract class ImportableAsset {
     }
 }
 
+/**
+ * Representation of a page in the book to be imported.
+ */
 class PageAsset extends ImportableAsset {
     page?: Document;
     pageTitle?: string;
