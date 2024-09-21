@@ -1,4 +1,3 @@
-import { BookingWorkHours } from '@microsoft/microsoft-graph-types';
 import { ZipReader } from '@zip.js/zip.js';
 import { parseFilePath, PickedFile } from 'filesystem';
 import { ImportContext } from 'main';
@@ -53,7 +52,7 @@ function tidyTagname(tagname: string) {
 class BookMetadata {
     private meta = new Map<string, string[]>();
 
-    constructor (metadata: Element) {
+    constructor(metadata: Element) {
         if (metadata) {
             const
                 c = metadata.children,
@@ -80,7 +79,7 @@ class BookMetadata {
                 }
 
                 if (key && value) {
-                    this.setProperty(key,value); // capture the metadata
+                    this.setProperty(key, value); // capture the metadata
                 }
             }
         }
@@ -99,7 +98,7 @@ class BookMetadata {
         return this.meta.get(name)?.join(",");
     }
 
-    asArray(name:string) : string[] | undefined {
+    asArray(name: string): string[] | undefined {
         return this.meta.get(name);
     }
 }
@@ -139,27 +138,29 @@ abstract class ImportableAsset {
     }
 
     /**
-     * A utility function to build a relative link to an asset.
+     * A utility function to build a relative path to an asset.
      *
-     * @param basename the asset file's basename
+     * Works for botu source and output links as they share a common, relative folder path.
+     *
+     * @param basename the asset file's basename either in the book source or in the output folder.
      * @param extension THe asset file's extension
-     * @returns a link realtive to the book in the output folder.
+     * @returns a link realtive to the book in the output or source folder.
      */
-    protected makeHref(basename: string, extension: string): string {
+    protected makeAssetPath(basename: string, extension: string): string {
         return [...this.assetFolderPath, basename + '.' + extension].join('/');
     }
 
     /**
      * This property is computed by derived classes.
      *
-     * @see makeHref
+     * @see makeAssetPath
      *
-     * @return Link of the asset relative to the book in the output folder.
+     * @return Relative path of the asset relative to the book in the output folder.
      */
-    abstract get outputHref(): string;
+    abstract get outputAssetPath(): string;
 
-    get sourceHref(): string {
-        return this.makeHref(this.source.basename, this.source.extension);
+    get sourceAssetPath(): string {
+        return this.makeAssetPath(this.source.basename, this.source.extension);
     }
     /**
      *
@@ -188,7 +189,7 @@ abstract class ImportableAsset {
                 await vault.createFolder(folderPath);
             }
         }
-        return bookOutputFolder.path + '/' + this.outputHref;
+        return bookOutputFolder.path + '/' + this.outputAssetPath;
     }
 }
 
@@ -207,9 +208,9 @@ class PageAsset extends ImportableAsset {
         return sanitized;
     }
 
-    get outputHref(): string {
+    get outputAssetPath(): string {
         const basename = tidyFilename(this.pageTitle ?? this.source.basename);
-        return this.makeHref(basename, "md");
+        return this.makeAssetPath(basename, "md");
     }
 
     async parse(parser: DOMParser, assetMap: Map<string, ImportableAsset>): Promise<void> {
@@ -316,8 +317,8 @@ class MediaAsset extends ImportableAsset {
         this.source = source;
     }
 
-    get outputHref(): string {
-        return this.makeHref(this.source.basename, this.source.extension);
+    get outputAssetPath(): string {
+        return this.makeAssetPath(this.source.basename, this.source.extension);
     }
 
     /**
@@ -333,7 +334,7 @@ class MediaAsset extends ImportableAsset {
 }
 
 class NavLink {
-    assetHref: string;
+    assetLink: string;
     targetID: string;
     level: number;
     linkText: string;
@@ -348,8 +349,8 @@ class NavLink {
         this.linkText = text?.textContent ?? 'unknown';
         if (contentSrc) {
             const
-                [srcHref, id] = contentSrc.split('#'),
-                asset = assetMap.get(srcHref);
+                [srcPath, id] = contentSrc.split('#'),
+                asset = assetMap.get(srcPath);
             if (asset instanceof PageAsset) {
                 this.targetID = asset.registerLinkTarget(id);
                 if (level === 0) {
@@ -358,13 +359,13 @@ class NavLink {
             } else {
                 this.targetID = id;
             }
-            this.assetHref = asset ? asset.outputHref : srcHref;
+            this.assetLink = asset ? asset.outputAssetPath : srcPath;
         }
     }
 
     get markdownListItem(): string {
         const padding = ' '.repeat(this.level * 2);
-        return `${padding}- [[${this.assetHref}#^${this.targetID}|${this.linkText}]]`;
+        return `${padding}- [[${this.assetLink}#^${this.targetID}|${this.linkText}]]`;
     }
 }
 
@@ -414,8 +415,8 @@ class TocAsset extends ImportableAsset {
         return bookOutpuFolder.vault.create(path, content.join("\n"));
     }
 
-    get outputHref(): string {
-        return this.makeHref('§ Title Page', 'md');
+    get outputAssetPath(): string {
+        return this.makeAssetPath('§ Title Page', 'md');
     }
 
     private parseNavPoint(level: number, navPoint: Element, assetMap: Map<string, ImportableAsset>): NavLink {
@@ -454,7 +455,7 @@ class TocAsset extends ImportableAsset {
 /**
  * Representation of am e-pub book which can be imported to Obsidian.
  */
-export class EpubDocument {
+export class EpubBook {
     private vault: Vault;
     private toc: TocAsset;
     private sourcePrefix: string; // the ZIP parent directory path to the e-book
@@ -500,6 +501,10 @@ export class EpubDocument {
         if (metadata) {
             this.bookMeta = new BookMetadata(metadata);
         }
+    }
+
+    getAsset(path: string): ImportableAsset | undefined {
+        return this.assetMap.get(path)
     }
 
     /**
@@ -580,8 +585,8 @@ export class EpubParser {
         this.ctx = ctx;
     }
 
-    async import(file: PickedFile, outputFolder: TFolder): Promise<EpubDocument> {
-        const doc = new EpubDocument(this.vault);
+    async import(file: PickedFile, outputFolder: TFolder): Promise<EpubBook> {
+        const doc = new EpubBook(this.vault);
 
         await readZip(file, async (zip: ZipReader<any>, entries: ZipEntryFile[]): Promise<void> => {
             await doc.addAssets(entries);
