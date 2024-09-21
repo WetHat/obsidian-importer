@@ -411,8 +411,8 @@ class NavLink {
  */
 
 class TocAsset extends ImportableAsset {
-    bookTitle?: string;
-    bookAuthor?: string;
+    bookTitle: string = "Untitled Book";
+    bookAuthor: string = "Unknown Author";
     bookCoverImage?: string;
     bookDescription?: string;
     bookPublisher?: string;
@@ -433,6 +433,8 @@ class TocAsset extends ImportableAsset {
         let content: string[] = [
             "---",
             `author: "${this.bookAuthor}"`,
+            "aliases: ",
+            `  - "${tidyFilename(this.bookTitle)}"`,
             `publisher: "${this.bookPublisher}"`,
             `tags: [${this.tags.join(",")}]`,
             "---",
@@ -470,8 +472,8 @@ class TocAsset extends ImportableAsset {
             docAuthor = doc.querySelector('ncx > docAuthor > text'),
             navMap = doc.querySelector('ncx > navMap');
 
-        this.bookTitle = docTitle?.textContent ?? meta.asString("title");
-        this.bookAuthor = docAuthor?.textContent ?? meta.asString("creator");
+        this.bookTitle = docTitle?.textContent ?? (meta.asString("title") ?? this.bookTitle);
+        this.bookAuthor = docAuthor?.textContent ?? (meta.asString("creator") ?? this.bookAuthor);
         this.bookPublisher = meta.asString("publisher");
         this.bookCoverImage = meta.asString("cover");
         this.bookDescription = meta.asString("description");
