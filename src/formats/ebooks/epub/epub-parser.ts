@@ -312,6 +312,17 @@ class PageAsset extends ImportableAsset {
         }
     }
 
+    /**
+     * Reconnect all links on this page pointing to other assets.
+     *
+     * Searches for all hyperlinks, extracts link target ids,
+     * computes the correct link in the book output folder and
+     * updated the each hyperlink.
+     */
+    reconnectLinks() {
+       // TODO const links
+
+    }
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
         if (!this.page) {
             throw new Error('Book page not available for import');
