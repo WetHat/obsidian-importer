@@ -196,17 +196,46 @@ abstract class ImportableAsset {
 class PageAsset extends ImportableAsset {
     page?: Document;
     pageTitle?: string;
-    linkTargetIDs = new Map<string, string>();
+    linkTargetMap = new Map<string, string>(); // id => relative link
 
     constructor(source: ZipEntryFile, href: string, mimetype: string) {
         super(source, href, mimetype);
     }
 
-    registerLinkTarget(targetID: string): string {
-        const sanitized = targetID.replace(/[_]+/g, "-");
-        this.linkTargetIDs.set(targetID, sanitized);
-        return sanitized;
+    /**
+     * Ge a link to a page element or page in the book output folder,
+     *
+     * @param targetID Optional id to an elment in the page identidied by that id.
+     * @returns link to a page element (if a `targetIS` was provided) or the
+     *          page (if no `targetID` eas provided).
+     */
+    getOutputPageLink(targetID?: string): string {
+        const path = this.outputAssetPath;
+        if (!targetID || !this.page) {
+            return path;
+        }
+
+        // make og get a ling for that target id
+        let link = this.linkTargetMap.get(targetID);
+        if (!link) {
+            // build a link for that id
+            const sanitizedID = targetID.replace(/[_]+/g, "-");
+
+            link = path + "#^" + sanitizedID; // the Obsidian link format
+            this.linkTargetMap.set(targetID,link);
+
+            // inject the sanitized link target into the page
+            const e = this.page.querySelector("#" + targetID);
+
+            if (e) {
+                const marker = this.page.createElement("code");
+                marker.setText(`{{^${sanitizedID}}}`);
+                e.parentNode?.insertBefore(marker, e);
     }
+        }
+        return link;
+    }
+
 
     get outputAssetPath(): string {
         const basename = tidyFilename(this.pageTitle ?? this.source.basename);
@@ -288,16 +317,6 @@ class PageAsset extends ImportableAsset {
             throw new Error('Book page not available for import');
         }
 
-        // mark all link targets
-        for (const [id, sanitizedID] of this.linkTargetIDs) {
-            const e = this.page.querySelector("#" + id);
-            if (e) {
-                const marker = this.page.createElement("code");
-                marker.setText(`{{^${sanitizedID}}}`);
-                e.parentNode?.insertBefore(marker, e);
-            }
-        }
-
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
             markdown = htmlToMarkdown(this.page.body)
@@ -335,7 +354,6 @@ class MediaAsset extends ImportableAsset {
 
 class NavLink {
     assetLink: string;
-    targetID: string;
     level: number;
     linkText: string;
 
@@ -352,20 +370,19 @@ class NavLink {
                 [srcPath, id] = contentSrc.split('#'),
                 asset = assetMap.get(srcPath);
             if (asset instanceof PageAsset) {
-                this.targetID = asset.registerLinkTarget(id);
+                this.assetLink = asset.getOutputPageLink(id);
                 if (level === 0) {
                     asset.pageTitle = text?.textContent ?? undefined;
                 }
             } else {
-                this.targetID = id;
+                this.assetLink = asset ? asset.outputAssetPath : srcPath;
             }
-            this.assetLink = asset ? asset.outputAssetPath : srcPath;
         }
     }
 
     get markdownListItem(): string {
         const padding = ' '.repeat(this.level * 2);
-        return `${padding}- [[${this.assetLink}#^${this.targetID}|${this.linkText}]]`;
+        return `${padding}- [[${this.assetLink}|${this.linkText}]]`;
     }
 }
 
