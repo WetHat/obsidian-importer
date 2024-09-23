@@ -855,14 +855,16 @@ export class EpubParser {
         this.vault = vault;
         this.ctx = ctx;
     }
+    }
+}
 
-    async import(file: PickedFile, outputFolder: TFolder): Promise<EpubBook> {
-        const doc = new EpubBook(this.vault);
+export async function importEpubBook(vault: Vault, epub: PickedFile, outputFolder: TFolder, ctx: ImportContext): Promise<EpubBook> {
+    const doc = new EpubBook(vault, ctx);
 
-        await readZip(file, async (zip: ZipReader<any>, entries: ZipEntryFile[]): Promise<void> => {
+    await readZip(epub, async (zip: ZipReader<any>, entries: ZipEntryFile[]): Promise<void> => {
             await doc.addAssets(entries);
             await doc.import(outputFolder);
+        ctx.status(`import of ${epub.name} complete`);
         });
         return doc;
-    }
 }
