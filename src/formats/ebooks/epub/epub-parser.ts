@@ -843,17 +843,12 @@ export class EpubBook {
         // import all recognized assets of the book (as determined by the book manifest)
         for (const asset of this.assetMap.values()) {
             await asset.import(bookFolder);
-        }
-    }
-}
-
-export class EpubParser {
-    private vault: Vault;
-    private ctx: ImportContext;
-
-    constructor(vault: Vault, ctx: ImportContext) {
-        this.vault = vault;
-        this.ctx = ctx;
+            if (asset instanceof MediaAsset) {
+                this.ctx.reportAttachmentSuccess(asset.sourceAssetPath);
+            } else {
+                this.ctx.reportNoteSuccess(asset.sourceAssetPath);
+            }
+            this.ctx.reportProgress(++this.processed, this.fileCount);
     }
     }
 }
