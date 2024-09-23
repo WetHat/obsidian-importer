@@ -23,14 +23,17 @@ const FILENAME_CHAR_MAP = [
 
 /**
  * Utility to convert a string into a valid filename.
+ *
+ * Applies the transformation defined in {@link FILENAME_TRANSFORMATIONS} to make
+ * the given filenme compatible with the file system.
  * @param basename - A string, such as a title, to create a filename for.
- * @returns valid filename without file extension.
+ * @returns valid basename.
  */
 function tidyFilename(basename: string): string {
 
     let sanitized = basename;
 
-    for (let [from, to] of FILENAME_CHAR_MAP) {
+    for (let [from, to] of FILENAME_TRANSFORMATIONS) {
         sanitized = sanitized.replace(from as RegExp, to as string);
     }
 
