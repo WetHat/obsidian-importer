@@ -239,8 +239,19 @@ abstract class ImportableAsset {
     }
 }
 
+type MarkerLocation = {
+    blockElement: Element,
+    action: BlockMarkerAction
+}
+
+enum BlockMarkerAction {
+    insertAfter = 1, // insert link target after the block element
+    append, // append link target to the cildren of the block element
+    scanAppend // scan for a child with append action
+}
+
 /**
- * Representation of a page in the book to be imported.
+ * Representation of a page in the epub book.
  */
 class PageAsset extends ImportableAsset {
     /**
@@ -248,17 +259,123 @@ class PageAsset extends ImportableAsset {
      * @type {Document}
      */
     page?: Document;
+
+    /**
+     * The book's title as specified in the content map file `toc.ncx`
+     * of the book.
+     */
     pageTitle?: string;
-    linkTargetMap = new Map<string, string>(); // id => relative link
+
+    linkTargetMap = new Map<string, string>(); // id => sanitized ID
+
+    /**
+     * A map of HTML block elements to an action code which specifies how
+     * the elemnts has to be marked as link target,
+     */
+    private static readonly BLOCK_ACTIONS = new Map<string, BlockMarkerAction>([
+        ["div", BlockMarkerAction.scanAppend],
+        ["p", BlockMarkerAction.append],
+        ["h1", BlockMarkerAction.append],
+        ["h2", BlockMarkerAction.append],
+        ["h3", BlockMarkerAction.append],
+        ["h4", BlockMarkerAction.append],
+        ["h5", BlockMarkerAction.append],
+        ["h6", BlockMarkerAction.append],
+        ["ul", BlockMarkerAction.scanAppend],
+        ["ol", BlockMarkerAction.scanAppend],
+        ["li", BlockMarkerAction.append],
+        ["table", BlockMarkerAction.insertAfter],
+        ["td", BlockMarkerAction.append],
+        ["th", BlockMarkerAction.append],
+        ["dl", BlockMarkerAction.scanAppend],
+        ["dt", BlockMarkerAction.append],
+        ["dd", BlockMarkerAction.append],
+        ["header", BlockMarkerAction.append],
+        ["footer", BlockMarkerAction.append],
+        ["section", BlockMarkerAction.scanAppend],
+        ["article", BlockMarkerAction.scanAppend],
+        ["aside", BlockMarkerAction.scanAppend],
+        ["pre", BlockMarkerAction.insertAfter],
+        ["blockquote", BlockMarkerAction.insertAfter],
+    ]);
+
+
+    getAliasId(markerLocation: MarkerLocation): string | null {
+        let id: string | null = null;
+        const { blockElement, action } = markerLocation;
+        switch (action) {
+            case BlockMarkerAction.insertAfter:
+                // look before this element for a marker
+                id = blockElement.nextElementSibling?.getAttribute("marker") ?? null;
+                break;
+            case BlockMarkerAction.append:
+                id = blockElement.lastElementChild?.getAttribute("marker") ?? null;
+                break;
+        }
+        return id;
+    }
+
+    /**
+     * Find an HTML block element which is suitable for marking with an Obsidian style
+     * link target marker.
+     *
+     * @see {getOutputPageLink}
+     * @param e An HTML element that has an id which is used as link target
+     * @returns A block element that should be used for attaching a target marker.
+     */
+    findBlockElement(e: Element | null): MarkerLocation | undefined {
+        let action: BlockMarkerAction | undefined;
+
+        // find a block element that has any action defined
+        while (e && undefined === (action = PageAsset.BLOCK_ACTIONS.get(e.localName))) {
+            e = e.parentElement;
+        }
+
+        if (action === BlockMarkerAction.scanAppend) {
+            // find a child with an 'append' action.
+            let
+                appendChild: Element | null = e,
+                childAction: BlockMarkerAction | undefined = action;
+
+            // inspect the first cild elements for an 'append' action
+            while (appendChild && childAction !== BlockMarkerAction.append) {
+                appendChild = appendChild?.firstElementChild;
+                if (appendChild) {
+                    childAction = PageAsset.BLOCK_ACTIONS.get(appendChild.localName);
+                }
+            }
+
+            if (appendChild && childAction === BlockMarkerAction.append) {
+                return {
+                    blockElement: appendChild,
+                    action: childAction,
+                }
+            } else {
+                // no luck. change action to 'prepend'
+                action = BlockMarkerAction.insertAfter;
+            }
+        }
+
+        if (action && e) {
+            return {
+                blockElement: e,
+                action: action,
+            }
+        }
+        return undefined;
+    }
 
     constructor(source: ZipEntryFile, href: string, mimetype: string) {
         super(source, href, mimetype);
     }
 
     /**
-     * Ge a link to a page element or page in the book output folder,
+     * Get a link to a page element or page in the book output folder,
      *
-     * @param targetID Optional id to an elment in the page identidied by that id.
+     * This method injects a code block into the location of the elment with the given
+     * id for Markdown postprocessing to pick up.
+     *
+     * @param targetID Optional id to an element in the page identified by that id.
      * @returns link to a page element (if a `targetIS` was provided) or the
      *          page (if no `targetID` eas provided).
      */
@@ -268,25 +385,51 @@ class PageAsset extends ImportableAsset {
             return path;
         }
 
-        // make og get a ling for that target id
-        let link = this.linkTargetMap.get(targetID);
-        if (!link) {
-            // build a link for that id
-            const sanitizedID = targetID.replace(/[_]+/g, "-");
-
-            link = path + "#^" + sanitizedID; // the Obsidian link format
-            this.linkTargetMap.set(targetID,link);
-
-            // inject the sanitized link target into the page
+        // make or get a link for that target id
+        let id = this.linkTargetMap.get(targetID);
+        if (!id) {
+            // that targetID is not known - get the element with this id
             const e = this.page.querySelector("#" + targetID);
+            if (!e) {
+                return path;
+            }
+            // find the block element to attach the marker to
+            const block = this.findBlockElement(e);
+            if (!block) {
+                return path;
+            }
 
-            if (e) {
+            // maybe can re-use an existing id
+            const aliasID = this.getAliasId(block);
+            if (aliasID) {
+                // remember that
+                this.linkTargetMap.set(targetID, aliasID);
+                id = aliasID;
+            } else {
+                id = targetID.replace(/[_\.]+/g, "-"); // sanitize the id and create a marker
+                this.linkTargetMap.set(targetID, id);
+
                 const marker = this.page.createElement("code");
-                marker.setText(`{{^${sanitizedID}}}`);
-                e.parentNode?.insertBefore(marker, e);
+                marker.setAttribute("marker", id);
+                const { blockElement, action } = block;
+                // attach the marker to the correct position
+                switch (action) {
+                    case BlockMarkerAction.append:
+                        marker.setText("{{ ^" + id + "}}");
+                        blockElement.appendChild(marker);
+                        break;
+                    case BlockMarkerAction.insertAfter:
+                        marker.setText("{{newline}}{{^" + id + "}}");
+                        const parent = blockElement.parentElement;
+                        if (!parent){
+                            return path;
+                        }
+                        parent.insertAfter(marker,blockElement);
+                        break;
+                }
             }
         }
-        return link;
+        return path + "#^" + id; // the Obsidian link format;
     }
 
     outputAssetPath(encode: boolean): string {
@@ -294,7 +437,7 @@ class PageAsset extends ImportableAsset {
         return this.makeAssetPath(basename, "md", encode);
     }
 
-    async parse(book : EpubBook): Promise<void> {
+    async parse(book: EpubBook): Promise<void> {
         const html = (await this.source.readText())
             .replace(/&lt;/g, "＜")
             .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
@@ -371,9 +514,29 @@ class PageAsset extends ImportableAsset {
      * computes the correct link in the book output folder and
      * updated the each hyperlink.
      */
-    reconnectLinks() {
-       // TODO const links
-
+    reconnectLinks(book: EpubBook) {
+        this.page?.body.querySelectorAll("a[href]").forEach(a => {
+            const href = a.getAttribute("href");
+            if (href) {
+                const
+                    parts = href.split("#"),
+                    [path, id] = parts,
+                    asset = path ? book.getAsset(path) : this;
+                if (asset instanceof PageAsset) {
+                    const link = asset.getOutputPageLink(true, id);
+                    a.setAttribute("href", link);
+                    // we also need to make sure the link text is compatible with
+                    // markdown links
+                    let txt = a.textContent;
+                    if (txt) {
+                        const sanitized = txt.replace(/([\]\[]+)/g, "\\$1");
+                        if (sanitized.length !== txt.length) {
+                            a.setText(sanitized);
+                        }
+                    }
+                }
+            }
+        })
     }
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
         if (!this.page) {
@@ -383,7 +546,7 @@ class PageAsset extends ImportableAsset {
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
             markdown = htmlToMarkdown(this.page.body)
-                .replace(/[\n\s]*`{{(\^[^\{\}]+)}}`[\s\n]*/g, "\n\n$1\n") // link targets
+                .replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, "$1$3\n\n") // link targets
                 .replace(/{{newline}}/g, "\n");
 
         return bookOutpuFolder.vault.create(outputPath, markdown);
@@ -423,7 +586,7 @@ class NavLink {
     level: number;
     linkText: string;
 
-    constructor(level: number, navpoint: Element, book : EpubBook) {
+    constructor(level: number, navpoint: Element, book: EpubBook) {
         this.level = level;
         const
             text = navpoint.querySelector(':scope > navLabel > text'),
@@ -436,12 +599,12 @@ class NavLink {
                 [srcPath, id] = contentSrc.split('#'),
                 asset = book.getAsset(srcPath);
             if (asset instanceof PageAsset) {
-                this.assetLink = asset.getOutputPageLink(id);
                 if (level === 0) {
                     asset.pageTitle = text?.textContent ?? undefined;
                 }
+                this.assetLink = asset.getOutputPageLink(false, id);
             } else {
-                this.assetLink = asset ? asset.outputAssetPath : srcPath;
+                this.assetLink = asset ? asset.outputAssetPath(false) : srcPath;
             }
         }
     }
@@ -455,9 +618,13 @@ class NavLink {
 /**
  * The book's content map.
  *
- * WHen imported creates the book's title page.
+ * The content map is built from the books `toc.ncx` by parsing
+ * the `<navMap>` element.
+ *
+ * WHen imported creates the book's title page containig:
+ * - Frontmatter with book metadata
+ * - Book content map.
  */
-
 class TocAsset extends ImportableAsset {
     bookTitle: string = "Untitled Book";
     bookAuthor: string = "Unknown Author";
@@ -559,7 +726,7 @@ export class EpubBook {
         this.vault = vault;
     }
 
-    private getSourceHref(source: ZipEntryFile): string {
+    private getSourcePath(source: ZipEntryFile): string {
         return source.filepath.slice(this.sourcePrefix.length);
     }
 
@@ -591,12 +758,23 @@ export class EpubBook {
         }
     }
 
+    /**
+     * Get a facade instance of an asset that was
+     * mentioned in the book's manifest (`content.opf`),
+     *
+     * @param path path to the asset relative to the book.
+     * @returns the facade object associated with the asset or
+     *          `undefined` if no such asset was listed in the manifest.
+     */
     getAsset(path: string): ImportableAsset | undefined {
         return this.assetMap.get(path)
     }
 
     /**
      * Add all book assets from the ZIP archive.
+     *
+     * The assets added are dermined by the book manifest read
+     * from `content.opf.)
      * @param entries ZIP file entries
      */
     async addAssets(entries: ZipEntryFile[]): Promise<void> {
@@ -605,15 +783,16 @@ export class EpubBook {
         if (!manifestSource) {
             return;
         }
+
         await this.parseManifest(manifestSource);
 
         // now check all files from the ZIP against the manifest and create
-        // the appropriate asset facade instances
+        // the appropriate asset facade instances.
         for (const source of entries) {
             // get the type from the manifest
             if (source.filepath.startsWith(this.sourcePrefix)) {
                 const
-                    href = this.getSourceHref(source),
+                    href = this.getSourcePath(source),
                     mimetype = this.mimeMap.get(href) ?? '?';
                 switch (mimetype) {
                     case 'application/xhtml+xml':
@@ -654,8 +833,12 @@ export class EpubBook {
         // prepare the assets for import
         await this.toc.parse(this);
 
-        // mark the link targets in all pages
-
+        // reconnect the link targets in all pages
+        for (const asset of this.assetMap.values()) {
+            if (asset instanceof PageAsset) {
+                asset.reconnectLinks(this);
+            }
+        }
 
         // import all recognized assets of the book (as determined by the book manifest)
         for (const asset of this.assetMap.values()) {
