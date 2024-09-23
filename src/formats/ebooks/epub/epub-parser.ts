@@ -188,8 +188,11 @@ abstract class ImportableAsset {
      * @param encode `true` to url encode the basename;
      * @returns a link relative to the book in the output or source folder.
      */
-    protected makeAssetPath(basename: string, extension: string): string {
-        return [...this.assetFolderPath, basename + '.' + extension].join('/');
+    protected makeAssetPath(basename: string, extension: string, encode: boolean): string {
+        return [
+            ...this.assetFolderPath,
+            (encode ? encodeURIComponent(basename) : basename) + '.' + extension
+        ].join('/');
     }
 
     /**
@@ -197,12 +200,13 @@ abstract class ImportableAsset {
      *
      * @see makeAssetPath
      *
+     * @param encode `true` to url-encode the path
      * @return Relative path of the asset relative to the book in the output folder.
      */
-    abstract get outputAssetPath(): string;
+    abstract outputAssetPath(encode: boolean): string;
 
     get sourceAssetPath(): string {
-        return this.makeAssetPath(this.source.basename, this.source.extension);
+        return this.makeAssetPath(this.source.basename, this.source.extension, false);
     }
     /**
      *
@@ -231,7 +235,7 @@ abstract class ImportableAsset {
                 await vault.createFolder(folderPath);
             }
         }
-        return bookOutputFolder.path + '/' + this.outputAssetPath;
+        return bookOutputFolder.path + '/' + this.outputAssetPath(false);
     }
 }
 
@@ -258,8 +262,8 @@ class PageAsset extends ImportableAsset {
      * @returns link to a page element (if a `targetIS` was provided) or the
      *          page (if no `targetID` eas provided).
      */
-    getOutputPageLink(targetID?: string): string {
-        const path = this.outputAssetPath;
+    getOutputPageLink(encode: boolean, targetID?: string): string {
+        const path = this.outputAssetPath(encode);
         if (!targetID || !this.page) {
             return path;
         }
@@ -285,10 +289,9 @@ class PageAsset extends ImportableAsset {
         return link;
     }
 
-
-    get outputAssetPath(): string {
+    outputAssetPath(encode: boolean): string {
         const basename = tidyFilename(this.pageTitle ?? this.source.basename);
-        return this.makeAssetPath(basename, "md");
+        return this.makeAssetPath(basename, "md", encode);
     }
 
     async parse(book : EpubBook): Promise<void> {
@@ -396,8 +399,8 @@ class MediaAsset extends ImportableAsset {
         this.source = source;
     }
 
-    get outputAssetPath(): string {
-        return this.makeAssetPath(this.source.basename, this.source.extension);
+    outputAssetPath(encode: boolean): string {
+        return this.makeAssetPath(this.source.basename, this.source.extension, encode);
     }
 
     /**
@@ -497,8 +500,8 @@ class TocAsset extends ImportableAsset {
         return bookOutpuFolder.vault.create(path, content.join("\n"));
     }
 
-    get outputAssetPath(): string {
-        return this.makeAssetPath('§ Title Page', 'md');
+    outputAssetPath(encode: boolean): string {
+        return this.makeAssetPath('§ Title Page', 'md', encode);
     }
 
     private parseNavPoint(level: number, navPoint: Element, book: EpubBook): NavLink {
