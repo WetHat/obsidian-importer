@@ -4,7 +4,11 @@ import { ImportContext } from 'main';
 import { htmlToMarkdown, TFile, TFolder, Vault } from 'obsidian';
 import { readZip, ZipEntryFile } from 'zip';
 
-const FILENAME_CHAR_MAP = [
+/**
+ * A list of regular expressions mapping characters which cause issues on the filesystem
+ * to benign Unocode look-alikes.
+ */
+const FILENAME_TRANSFORMATIONS = [
     [/\?/g, "❓"],
     [/\:/g, "꞉"],
     [/"/g, "'"],
