@@ -53,9 +53,30 @@ function tidyTagname(tagname: string) {
         ;
 }
 
+/**
+ * A utility class to parse meta information of the book as specified in the
+ * `opf` file
+ *
+ * THe relevant section in that file has this form
+ *
+ * ~~~xml
+ * <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+ *     <dc:title>C# 8.0 in a Nutshell: The Definitive Reference</dc:title>
+ *     ...
+ * <metadata/>
+ * ~~~
+ *
+ * ❗The namespace of the property names is removed.
+ */
 class BookMetadata {
     private meta = new Map<string, string[]>();
 
+    /**
+     * Build a new instance by parsing the `<metadata>` section of the book's
+     * content file.
+     *
+     * @param metadata The `<metadata>` element.
+     */
     constructor(metadata: Element) {
         if (metadata) {
             const
@@ -98,10 +119,21 @@ class BookMetadata {
         }
     }
 
+    /**
+     * Get a property value as a string.
+     * @param name Property name (without namespace).
+     * @returns property value (as a comma separated list if there is more than one value
+     *          for that property).
+     */
     asString(name: string): string | undefined {
         return this.meta.get(name)?.join(",");
     }
 
+    /**
+     * Get the property value(s) as array.
+     * @param name Property name (without namespace).
+     * @returns Array of property values
+     */
     asArray(name: string): string[] | undefined {
         return this.meta.get(name);
     }
@@ -118,8 +150,8 @@ abstract class ImportableAsset {
     protected source: ZipEntryFile;
 
     /**
-     * The relative folder path to the assert relative to the book.
-     * Will also used as the relative folder path in the output folder
+     * The relative folder path to an asset relative to the book.
+     * Will also used as the relative folder path in the output folder.
      */
     assetFolderPath: string[];
 
@@ -149,7 +181,8 @@ abstract class ImportableAsset {
      *
      * @param basename the asset file's basename either in the book source or in the output folder.
      * @param extension THe asset file's extension
-     * @returns a link realtive to the book in the output or source folder.
+     * @param encode `true` to url encode the basename;
+     * @returns a link relative to the book in the output or source folder.
      */
     protected makeAssetPath(basename: string, extension: string): string {
         return [...this.assetFolderPath, basename + '.' + extension].join('/');
