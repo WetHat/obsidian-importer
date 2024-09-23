@@ -421,10 +421,10 @@ class PageAsset extends ImportableAsset {
                     case BlockMarkerAction.insertAfter:
                         marker.setText("{{newline}}{{^" + id + "}}");
                         const parent = blockElement.parentElement;
-                        if (!parent){
+                        if (!parent) {
                             return path;
                         }
-                        parent.insertAfter(marker,blockElement);
+                        parent.insertAfter(marker, blockElement);
                         break;
                 }
             }
@@ -719,11 +719,18 @@ export class EpubBook {
     readonly parser = new DOMParser(); // the parser instance to use
     bookMeta: BookMetadata; // The books metadata
 
+    // some progress data
+    ctx: ImportContext;
+    fileCount = 0;
+    processed = 0;
+
     get bookTitle(): string {
         return this.bookMeta.asString("title") ?? 'Untitled Book';
     }
-    constructor(vault: Vault) {
+
+    constructor(vault: Vault, ctx: ImportContext) {
         this.vault = vault;
+        this.ctx = ctx;
     }
 
     private getSourcePath(source: ZipEntryFile): string {
@@ -731,9 +738,11 @@ export class EpubBook {
     }
 
     private async parseManifest(source: ZipEntryFile): Promise<void> {
-        const manifest = this.parser.parseFromString(await source.readText(), 'application/xml');
+        const
+            manifest = this.parser.parseFromString(await source.readText(), 'application/xml'),
+            parent = parseFilePath(source.filepath).parent;
 
-        this.sourcePrefix = parseFilePath(source.filepath).parent + '/';
+        this.sourcePrefix = parent ? parent + '/' : parent;
 
         const
             root = manifest.documentElement,
@@ -778,14 +787,15 @@ export class EpubBook {
      * @param entries ZIP file entries
      */
     async addAssets(entries: ZipEntryFile[]): Promise<void> {
+        this.fileCount = entries.length;
+
         // find the books manifest first so that we know what the relevant files are.
         const manifestSource = entries.find((asset, _0, _1) => asset.extension === 'opf');
         if (!manifestSource) {
             return;
         }
-
+        this.ctx.status("Parsing epub file contents");
         await this.parseManifest(manifestSource);
-
         // now check all files from the ZIP against the manifest and create
         // the appropriate asset facade instances.
         for (const source of entries) {
@@ -812,14 +822,21 @@ export class EpubBook {
                     case 'text/css':
                     case '?':
                         // we are going to ignore stylesheets and files not in the manifest
+                        this.ctx.reportProgress(++this.processed, this.fileCount);
                         break;
                     default:
                         if (source.extension) {
-                            // media can me imported without processing
+                            // media can me imported without pre-processing
                             this.assetMap.set(href, new MediaAsset(source, href, mimetype));
+                        } else {
+                            this.ctx.reportSkipped(`File ${source.name} has unsupported mimetype ${mimetype}`);
+                            this.ctx.reportProgress(++this.processed, this.fileCount);
                         }
                         break;
                 }
+            } else {
+                this.ctx.reportSkipped(`File ${source.name} is not part of the book`);
+                this.ctx.reportProgress(++this.processed, this.fileCount);
             }
         }
     }
@@ -828,7 +845,7 @@ export class EpubBook {
         const
             bookFolderPath = outputFolder.path + '/' + tidyFilename(this.bookTitle),
             bookFolder = await this.vault.createFolder(bookFolderPath);
-        console.log(`Saving Ebook to ${bookFolder.path}`);
+        this.ctx.status(`Saving Ebook to ${bookFolder.path}`);
 
         // prepare the assets for import
         await this.toc.parse(this);
@@ -849,7 +866,7 @@ export class EpubBook {
                 this.ctx.reportNoteSuccess(asset.sourceAssetPath);
             }
             this.ctx.reportProgress(++this.processed, this.fileCount);
-    }
+        }
     }
 }
 
@@ -857,9 +874,9 @@ export async function importEpubBook(vault: Vault, epub: PickedFile, outputFolde
     const doc = new EpubBook(vault, ctx);
 
     await readZip(epub, async (zip: ZipReader<any>, entries: ZipEntryFile[]): Promise<void> => {
-            await doc.addAssets(entries);
-            await doc.import(outputFolder);
+        await doc.addAssets(entries);
+        await doc.import(outputFolder);
         ctx.status(`import of ${epub.name} complete`);
-        });
-        return doc;
+    });
+    return doc;
 }
