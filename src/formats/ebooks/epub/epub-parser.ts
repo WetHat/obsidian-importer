@@ -569,7 +569,6 @@ class PageAsset extends ImportableAsset {
 class MediaAsset extends ImportableAsset {
     constructor(source: ZipEntryFile, href: string, mimetype: string) {
         super(source, href, mimetype);
-        this.source = source;
     }
 
     outputAssetPath(encode: boolean): string {
