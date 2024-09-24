@@ -2,103 +2,7 @@
 import { htmlToMarkdown, TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
-import { hoistTableCaptions, injectCodeBlock, titleToBasename, tidyTagname } from '../ebook-transformers';
-
-/**
- * A utility class to parse meta information of the book as specified in the
- * `opf` file
- *
- * THe relevant section in that file has this form
- *
- * ~~~xml
- * <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
- *     <dc:title>C# 8.0 in a Nutshell: The Definitive Reference</dc:title>
- *     ...
- * </metadata>
- * ~~~
- *
- * ❗The namespace of the property names is removed.
- */
-export class BookMetadata {
-    private meta = new Map<string, string[]>();
-
-    /**
-     * Build a new instance by parsing the `<metadata>` section of the book's
-     * content file.
-     *
-     * @param pkg The `<package>` element (root of the content file).
-     */
-    constructor(pkg: Element) {
-        const metadata = pkg.querySelector('package > metadata');
-        if (metadata) {
-            const
-                c = metadata.children,
-                cCount = c.length;
-            for (let i = 0; i < cCount; i++) {
-                // extract the metadata
-                const
-                    node = c[i],
-                    nodeName = node.nodeName;
-                let
-                    key: string | null,
-                    value: string | null;
-
-                if (nodeName === "meta") {
-                    key = node.getAttribute("name");
-                    value = node.getAttribute("content");
-                } else {
-                    key = nodeName;
-                    value = node.textContent;
-                    if (key) {
-                        const colonIndex = key.indexOf(':');
-                        key = colonIndex >= 0 ? key.slice(colonIndex + 1) : key;
-                    }
-                }
-
-                if (key && value) {
-                    this.setProperty(key, value); // capture the metadata
-                }
-            }
-        }
-        // make sure we have the cover page
-        if (!this.meta.has("coverPage")) {
-            // get the cover image gtom the cover page then
-            const coverPage = pkg.querySelector('package > guide > reference[type="cover"]');
-            if (coverPage) {
-                const href = coverPage.getAttribute("href");
-                this.meta.set("coverPage", href ? [href] : []);
-            }
-        }
-    }
-
-    private setProperty(name: string, value: string) {
-        const entry = this.meta.get(name);
-        if (entry) {
-            entry.push(value);
-        } else {
-            this.meta.set(name, [value]);
-        }
-    }
-
-    /**
-     * Get a property value as a string.
-     * @param name Property name (without namespace).
-     * @returns property value (as a comma separated list if there is more than one value
-     *          for that property).
-     */
-    asString(name: string): string | undefined {
-        return this.meta.get(name)?.join(",");
-    }
-
-    /**
-     * Get the property value(s) as array.
-     * @param name Property name (without namespace).
-     * @returns Array of property values
-     */
-    asArray(name: string): string[] | undefined {
-        return this.meta.get(name);
-    }
-}
+import { hoistTableCaptions, injectCodeBlock, titleToBasename, frontmatterTagname } from '../ebook-transformers';
 
 /**
  * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
@@ -543,8 +447,8 @@ class NavLink {
  * - Book content map.
  */
 export class TocAsset extends ImportableAsset {
-    bookTitle: string = "Untitled Book";
-    bookAuthor: string = "Unknown Author";
+    bookTitle?: string;
+    bookAuthor?: string;
     bookCoverImage?: string;
     bookDescription?: string;
     bookPublisher?: string;
@@ -564,9 +468,10 @@ export class TocAsset extends ImportableAsset {
                 .map(l => "> " + l);
         let content: string[] = [
             "---",
+            `book: "${this.bookTitle}"`,
             `author: "${this.bookAuthor}"`,
             "aliases: ",
-            `  - "${titleToBasename(this.bookTitle)}"`,
+            `  - "${titleToBasename(this.bookTitle ?? bookOutpuFolder.name)}"`,
             `publisher: "${this.bookPublisher}"`,
             `tags: [${this.tags.join(",")}]`,
             "---",
@@ -599,35 +504,16 @@ export class TocAsset extends ImportableAsset {
     async parse(book: EpubBook): Promise<void> {
         const
             doc = book.parser.parseFromString(await this.source.readText(), 'application/xml'),
-            meta = book.bookMeta,
             docTitle = doc.querySelector('ncx > docTitle > text'),
             docAuthor = doc.querySelector('ncx > docAuthor > text'),
             navMap = doc.querySelector('ncx > navMap');
 
-        this.bookTitle = docTitle?.textContent ?? (meta.asString("title") ?? this.bookTitle);
-        this.bookAuthor = docAuthor?.textContent ?? (meta.asString("creator") ?? this.bookAuthor);
-        this.bookPublisher = meta.asString("publisher");
-        this.bookDescription = meta.asString("description");
-        this.tags = meta.asArray("subject") ?? ["e-book"];
-        this.tags = this.tags.map(t => tidyTagname(t));
-        this.bookCoverImage = meta.asString("cover");
-        if (!this.bookCoverImage) {
-            // get it from the cover page then
-            const coverPage = meta.asString("coverPage");
-            if (coverPage) {
-                const asset = book.getAsset(coverPage);
-                // find the image in the content
-                if (asset instanceof PageAsset && asset.page) {
-                    const images = asset.page.body.getElementsByTagName("img");
-                    if (images.length > 0) {
-                        const src = images[0].getAttribute("src");
-                        if (src) {
-                            this.bookCoverImage = src.replace(/\.\.\//g, ""); // make relative to top
-                        }
-                    }
-                }
-            }
-        }
+        this.bookTitle = docTitle?.textContent ?? book.title;
+        this.bookAuthor = docAuthor?.textContent ?? book.author;
+        this.bookPublisher = book.publisher;
+        this.bookDescription = book.description;
+        this.tags = book.tags;
+        this.bookCoverImage = book.coverImage;;
 
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
