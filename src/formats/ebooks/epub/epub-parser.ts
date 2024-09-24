@@ -113,6 +113,15 @@ class BookMetadata {
                 }
             }
         }
+        // make sure we have the cover page
+        if (!this.meta.has("coverPage")) {
+            // get the cover image gtom the cover page then
+            const coverPage = pkg.querySelector('package > guide > reference[type="cover"]');
+            if (coverPage) {
+                const href = coverPage.getAttribute("href");
+                this.meta.set("coverPage",href ? [href] : []);
+            }
+        }
     }
 
     private setProperty(name: string, value: string) {
