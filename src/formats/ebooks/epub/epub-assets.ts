@@ -126,7 +126,7 @@ export class PageAsset extends ImportableAsset {
      * of the book.
      */
     pageTitle?: string;
-
+    toc?: TocAsset;
     linkTargetMap = new Map<string, string>(); // id => sanitized ID
 
     /**
@@ -313,6 +313,7 @@ export class PageAsset extends ImportableAsset {
     }
 
     async parse(book: EpubBook): Promise<void> {
+        this.toc = book.toc;
         const html = (await this.source.readText())
             .replace(/&lt;/g, "＜")
             .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
@@ -364,11 +365,18 @@ export class PageAsset extends ImportableAsset {
 
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
-            markdown = htmlToMarkdown(this.page.body)
-                .replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, "$1$3\n\n") // link targets
-                .replace(/{{newline}}/g, "\n");
+            markdown = [
+                "---",
+                `book: "[[${this.toc?.outputAssetPath(false)}|${this.toc?.bookTitle}]]"`,
+                `tags: ${this.toc?.tags}`,
+                "---",
+                "",
+                htmlToMarkdown(this.page.body)
+                    .replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, "$1$3\n\n") // link targets
+                    .replace(/{{newline}}/g, "\n")
+            ];
 
-        return bookOutpuFolder.vault.create(outputPath, markdown);
+        return bookOutpuFolder.vault.create(outputPath, markdown.join("\n"));
     }
 }
 
