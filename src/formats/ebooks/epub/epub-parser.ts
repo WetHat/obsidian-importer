@@ -399,7 +399,16 @@ class PageAsset extends ImportableAsset {
         let id = this.linkTargetMap.get(targetID);
         if (!id) {
             // that targetID is not known - get the element with this id
-            const e = this.page.querySelector("#" + targetID);
+            let e: Element | null;
+
+            try {
+                // try the canonical selector
+                e = this.page.querySelector("#" + targetID);
+            } catch (ex:any) {
+                // fallback if targtID is malformed
+                e = this.page.querySelector(`[id="${targetID}"]`);
+            }
+
             if (!e) {
                 return path;
             }
@@ -416,7 +425,12 @@ class PageAsset extends ImportableAsset {
                 this.linkTargetMap.set(targetID, aliasID);
                 id = aliasID;
             } else {
-                id = targetID.replace(/[_\.]+/g, "-"); // sanitize the id and create a marker
+                id = targetID.replace(/[_\.:]+/g, "-"); // make an attempt to sanitize the id
+                if (/^[a-zA-Z][\w\-.]*$/.test(id)) {
+                    // make up a legal value
+                    id = "Z" + (Math.random() * 1000000000000000000).toString(24)
+                }
+
                 this.linkTargetMap.set(targetID, id);
 
                 const marker = this.page.createElement("code");
