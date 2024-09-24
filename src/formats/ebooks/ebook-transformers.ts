@@ -99,7 +99,7 @@ export function hoistTableCaptions(element: HTMLElement) {
         }
 
         if (firstChild && firstChild.nodeName !== "code") {
-            const code = this.page.createElement("code");
+            const code = element.doc.createElement("code");
             code.setAttribute("class", "language-undefined");
             let child;
             while (firstChild) {
