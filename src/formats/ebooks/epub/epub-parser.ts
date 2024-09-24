@@ -893,6 +893,9 @@ export class EpubBook {
 
         // reconnect the link targets in all pages
         for (const asset of this.assetMap.values()) {
+            if (this.ctx.cancelled) {
+                return;
+            }
             if (asset instanceof PageAsset) {
                 asset.reconnectLinks(this);
             }
@@ -900,6 +903,9 @@ export class EpubBook {
 
         // import all recognized assets of the book (as determined by the book manifest)
         for (const asset of this.assetMap.values()) {
+            if (this.ctx.cancelled) {
+                return;
+            }
             await asset.import(bookFolder);
             if (asset instanceof MediaAsset) {
                 this.ctx.reportAttachmentSuccess(asset.sourceAssetPath);
