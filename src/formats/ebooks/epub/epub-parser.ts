@@ -608,8 +608,11 @@ class NavLink {
                 [srcPath, id] = contentSrc.split('#'),
                 asset = book.getAsset(srcPath);
             if (asset instanceof PageAsset) {
-                if (level === 0) {
-                    asset.pageTitle = text?.textContent ?? undefined;
+                if (!asset.pageTitle) {
+                    const navtext = text?.textContent;
+                    if (navtext) {
+                        asset.pageTitle = navtext ;
+                    }
                 }
                 this.assetLink = asset.getOutputPageLink(false, id);
             } else {
