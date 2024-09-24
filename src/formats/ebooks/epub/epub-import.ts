@@ -140,9 +140,12 @@ export class EpubBook {
     }
 
     async import(outputFolder: TFolder): Promise<void> {
-        const
-            bookFolderPath = outputFolder.path + '/' + titleToBasename(this.bookTitle),
-            bookFolder = await this.vault.createFolder(bookFolderPath);
+        const bookFolderPath = outputFolder.path + '/' + titleToBasename(this.title);
+        if (await this.vault.adapter.exists(bookFolderPath)) {
+            this.ctx.reportFailed(`import of '${this.title}' failed`, "The output folder already exists");
+            return;
+        }
+        const bookFolder = await this.vault.createFolder(bookFolderPath);
         this.ctx.status(`Saving Ebook to ${bookFolder.path}`);
 
         // prepare the assets for import
