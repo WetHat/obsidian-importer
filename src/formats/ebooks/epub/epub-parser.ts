@@ -79,9 +79,10 @@ class BookMetadata {
      * Build a new instance by parsing the `<metadata>` section of the book's
      * content file.
      *
-     * @param metadata The `<metadata>` element.
+     * @param pkg The `<package>` element (root of the content file).
      */
-    constructor(metadata: Element) {
+    constructor(pkg: Element) {
+        const metadata = pkg.querySelector('package > metadata');
         if (metadata) {
             const
                 c = metadata.children,
@@ -690,10 +691,28 @@ class TocAsset extends ImportableAsset {
         this.bookTitle = docTitle?.textContent ?? (meta.asString("title") ?? this.bookTitle);
         this.bookAuthor = docAuthor?.textContent ?? (meta.asString("creator") ?? this.bookAuthor);
         this.bookPublisher = meta.asString("publisher");
-        this.bookCoverImage = meta.asString("cover");
         this.bookDescription = meta.asString("description");
         this.tags = meta.asArray("subject") ?? ["e-book"];
         this.tags = this.tags.map(t => tidyTagname(t));
+        this.bookCoverImage = meta.asString("cover");
+        if (!this.bookCoverImage) {
+            // get it from the cover page then
+            const coverPage = meta.asString("coverPage");
+            if (coverPage) {
+                const asset = book.getAsset(coverPage);
+                // find the image in the content
+                if (asset instanceof PageAsset && asset.page) {
+                    const images = asset.page.body.getElementsByTagName("img");
+                    if (images.length > 0) {
+                        const src = images[0].getAttribute("src");
+                        if (src) {
+                            this.bookCoverImage = src.replace(/\.\.\//g,""); // make relative to top
+                        }
+                    }
+                }
+            }
+        }
+
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
         if (navPoints) {
@@ -761,10 +780,7 @@ export class EpubBook {
         }
 
         // extract the book meta information;
-        const metadata = root.querySelector('metadata');
-        if (metadata) {
-            this.bookMeta = new BookMetadata(metadata);
-        }
+        this.bookMeta = new BookMetadata(root);
     }
 
     /**
