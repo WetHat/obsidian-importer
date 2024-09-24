@@ -109,13 +109,13 @@ class BookMetadata {
  */
 export class EpubBook {
     private vault: Vault;
-    private toc: TocAsset;
     private sourcePrefix: string; // the ZIP parent directory path to the e-book
     private mimeMap = new Map<string, string>(); // asset source path => mimetype
     private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
     readonly parser = new DOMParser(); // the parser instance to use
-
     private meta: BookMetadata; // The books metadata
+
+    toc: TocAsset;
 
     coverImage?: string;
     tags: string[] = [];
