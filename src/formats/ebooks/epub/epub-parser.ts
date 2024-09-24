@@ -845,13 +845,13 @@ export class EpubBook {
                             // media can me imported without pre-processing
                             this.assetMap.set(href, new MediaAsset(source, href, mimetype));
                         } else {
-                            this.ctx.reportSkipped(`File ${source.name} has unsupported mimetype ${mimetype}`);
+                            this.ctx.reportSkipped(`"${source.name}" has unsupported mimetype: ${mimetype}`);
                             this.ctx.reportProgress(++this.processed, this.fileCount);
                         }
                         break;
                 }
             } else {
-                this.ctx.reportSkipped(`File ${source.name} is not part of the book`);
+                this.ctx.reportSkipped(`"${source.name}" is not part of the book`);
                 this.ctx.reportProgress(++this.processed, this.fileCount);
             }
         }
