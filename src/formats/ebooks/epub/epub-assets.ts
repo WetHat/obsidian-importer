@@ -373,7 +373,7 @@ export class PageAsset extends ImportableAsset {
                 id = aliasID;
             } else {
                 id = targetID.replace(/[_\.:]+/g, "-"); // make an attempt to sanitize the id
-                if (/^[a-zA-Z][\w\-.]*$/.test(id)) {
+                if (!/^[a-zA-Z][\w\-.]*$/.test(id)) {
                     // make up a legal value
                     id = "Z" + (Math.random() * 1000000000000000000).toString(24)
                 }
