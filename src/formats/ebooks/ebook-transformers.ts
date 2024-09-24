@@ -42,7 +42,7 @@ export function titleToBasename(title: string): string {
     return sanitized.trim();
 }
 
-export function tidyTagname(tagname: string) {
+export function frontmatterTagname(tagname: string) {
     return tagname.trim()
         .replace(/^#/, "") // get rid of the leading #
         .replace(/#/g, "＃") // transform internal hashes
