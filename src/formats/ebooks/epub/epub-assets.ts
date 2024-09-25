@@ -2,7 +2,7 @@
 import { htmlToMarkdown, TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
-import { hoistTableCaptions, injectCodeBlock, titleToBasename, frontmatterTagname } from '../ebook-transformers';
+import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, titleToBasename, toFrontmatterTagname } from '../ebook-transformers';
 
 /**
  * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
@@ -100,17 +100,6 @@ export abstract class ImportableAsset {
     }
 }
 
-type MarkerLocation = {
-    blockElement: Element,
-    action: BlockMarkerAction
-}
-
-enum BlockMarkerAction {
-    insertAfter = 1, // insert link target after the block element
-    append, // append link target to the cildren of the block element
-    scanAppend // scan for a child with append action
-}
-
 /**
  * Representation of a page in the epub book.
  */
@@ -126,105 +115,8 @@ export class PageAsset extends ImportableAsset {
      * of the book.
      */
     pageTitle?: string;
-    toc?: TocAsset;
+    private book?: EpubBook;
     linkTargetMap = new Map<string, string>(); // id => sanitized ID
-
-    /**
-     * A map of HTML block elements to an action code which specifies how
-     * the elemnts has to be marked as link target,
-     */
-    private static readonly BLOCK_ACTIONS = new Map<string, BlockMarkerAction>([
-        ["div", BlockMarkerAction.scanAppend],
-        ["p", BlockMarkerAction.append],
-        ["h1", BlockMarkerAction.append],
-        ["h2", BlockMarkerAction.append],
-        ["h3", BlockMarkerAction.append],
-        ["h4", BlockMarkerAction.append],
-        ["h5", BlockMarkerAction.append],
-        ["h6", BlockMarkerAction.append],
-        ["ul", BlockMarkerAction.scanAppend],
-        ["ol", BlockMarkerAction.scanAppend],
-        ["li", BlockMarkerAction.append],
-        ["table", BlockMarkerAction.insertAfter],
-        ["td", BlockMarkerAction.append],
-        ["th", BlockMarkerAction.append],
-        ["dl", BlockMarkerAction.scanAppend],
-        ["dt", BlockMarkerAction.append],
-        ["dd", BlockMarkerAction.append],
-        ["header", BlockMarkerAction.append],
-        ["footer", BlockMarkerAction.append],
-        ["section", BlockMarkerAction.scanAppend],
-        ["article", BlockMarkerAction.scanAppend],
-        ["aside", BlockMarkerAction.scanAppend],
-        ["pre", BlockMarkerAction.insertAfter],
-        ["blockquote", BlockMarkerAction.insertAfter],
-    ]);
-
-
-    getAliasId(markerLocation: MarkerLocation): string | null {
-        let id: string | null = null;
-        const { blockElement, action } = markerLocation;
-        switch (action) {
-            case BlockMarkerAction.insertAfter:
-                // look before this element for a marker
-                id = blockElement.nextElementSibling?.getAttribute("marker") ?? null;
-                break;
-            case BlockMarkerAction.append:
-                id = blockElement.lastElementChild?.getAttribute("marker") ?? null;
-                break;
-        }
-        return id;
-    }
-
-    /**
-     * Find an HTML block element which is suitable for marking with an Obsidian style
-     * link target marker.
-     *
-     * @see {getOutputPageLink}
-     * @param e An HTML element that has an id which is used as link target
-     * @returns A block element that should be used for attaching a target marker.
-     */
-    findBlockElement(e: Element | null): MarkerLocation | undefined {
-        let action: BlockMarkerAction | undefined;
-
-        // find a block element that has any action defined
-        while (e && undefined === (action = PageAsset.BLOCK_ACTIONS.get(e.localName))) {
-            e = e.parentElement;
-        }
-
-        if (action === BlockMarkerAction.scanAppend) {
-            // find a child with an 'append' action.
-            let
-                appendChild: Element | null = e,
-                childAction: BlockMarkerAction | undefined = action;
-
-            // inspect the first cild elements for an 'append' action
-            while (appendChild && childAction !== BlockMarkerAction.append) {
-                appendChild = appendChild?.firstElementChild;
-                if (appendChild) {
-                    childAction = PageAsset.BLOCK_ACTIONS.get(appendChild.localName);
-                }
-            }
-
-            if (appendChild && childAction === BlockMarkerAction.append) {
-                return {
-                    blockElement: appendChild,
-                    action: childAction,
-                }
-            } else {
-                // no luck. change action to 'prepend'
-                action = BlockMarkerAction.insertAfter;
-            }
-        }
-
-        if (action && e) {
-            return {
-                blockElement: e,
-                action: action,
-            }
-        }
-        return undefined;
-    }
 
     constructor(source: ZipEntryFile, href: string, mimetype: string) {
         super(source, href, mimetype);
@@ -241,17 +133,17 @@ export class PageAsset extends ImportableAsset {
      *          page (if no `targetID` eas provided).
      */
     getOutputPageLink(encode: boolean, targetID?: string): string {
-        const path = this.outputAssetPath(encode);
+        const path = this.outputAssetPath(encode); // relative path to this node in the output folder
         if (!targetID || !this.page) {
             return path;
         }
 
-        // make or get a link for that target id
+        // check if we already have a merker for this id
         let id = this.linkTargetMap.get(targetID);
         if (!id) {
             // that targetID is not known - get the element with this id
+            // and create a marker
             let e: Element | null;
-
             try {
                 // try the canonical selector
                 e = this.page.querySelector("#" + targetID);
@@ -261,48 +153,14 @@ export class PageAsset extends ImportableAsset {
             }
 
             if (!e) {
-                return path;
-            }
-            // find the block element to attach the marker to
-            const block = this.findBlockElement(e);
-            if (!block) {
-                return path;
+                return path; // no such element just link to the page
             }
 
-            // maybe can re-use an existing id
-            const aliasID = this.getAliasId(block);
-            if (aliasID) {
-                // remember that
-                this.linkTargetMap.set(targetID, aliasID);
-                id = aliasID;
-            } else {
-                id = targetID.replace(/[_\.:]+/g, "-"); // make an attempt to sanitize the id
-                if (!/^[a-zA-Z][\w\-.]*$/.test(id)) {
-                    // make up a legal value
-                    id = "Z" + (Math.random() * 1000000000000000000).toString(24)
-                }
-
-                this.linkTargetMap.set(targetID, id);
-
-                const marker = this.page.createElement("code");
-                marker.setAttribute("marker", id);
-                const { blockElement, action } = block;
-                // attach the marker to the correct position
-                switch (action) {
-                    case BlockMarkerAction.append:
-                        marker.setText("{{ ^" + id + "}}");
-                        blockElement.appendChild(marker);
-                        break;
-                    case BlockMarkerAction.insertAfter:
-                        marker.setText("{{newline}}{{^" + id + "}}");
-                        const parent = blockElement.parentElement;
-                        if (!parent) {
-                            return path;
-                        }
-                        parent.insertAfter(marker, blockElement);
-                        break;
-                }
+            id = markElementAsLinkTarget(e);
+            if (!id) {
+                return path; // hust link to the page
             }
+            this.linkTargetMap.set(targetID, id); // remember that
         }
         return path + "#^" + id; // the Obsidian link format;
     }
@@ -313,7 +171,7 @@ export class PageAsset extends ImportableAsset {
     }
 
     async parse(book: EpubBook): Promise<void> {
-        this.toc = book.toc;
+        this.book = book;
         const html = (await this.source.readText())
             .replace(/&lt;/g, "＜")
             .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
@@ -365,15 +223,14 @@ export class PageAsset extends ImportableAsset {
 
         const
             outputPath = await this.getVaultOutputPath(bookOutpuFolder),
+            toc = this.book?.toc,
             markdown = [
                 "---",
-                `book: "[[${this.toc?.outputAssetPath(false)}|${this.toc?.bookTitle}]]"`,
-                `tags: ${this.toc?.tags}`,
+                `book: "[[${toc?.outputAssetPath(false)}|${toc?.bookTitle}]]"`,
+                `tags: ${toc?.tags}`,
                 "---",
                 "",
-                htmlToMarkdown(this.page.body)
-                    .replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, "$1$3\n\n") // link targets
-                    .replace(/{{newline}}/g, "\n")
+                convertToMarkdown(this.page)
             ];
 
         return bookOutpuFolder.vault.create(outputPath, markdown.join("\n"));
