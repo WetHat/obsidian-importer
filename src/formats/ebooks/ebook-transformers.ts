@@ -42,15 +42,14 @@ export function titleToBasename(title: string): string {
     return sanitized.trim();
 }
 
-export function frontmatterTagname(tagname: string) {
-    return tagname.trim()
+
+export function toFrontmatterTagname(tagname: string) {
+    return tagname
         .replace(/^#/, "") // get rid of the leading #
         .replace(/#/g, "＃") // transform internal hashes
-        .replace(/\./g, "〭")
-        .replace(/[&/\[\(\{]/g, ",")
-        .replace(/:/g, "꞉")
-        .replace(/[;/\)\]\}]/g, "")
-        .replace(/\s+|[\\;]/g, "-");
+        .replace(/\s*[&+.\\:;/\[\(\{]\s*/g, ",") // generate multiple tags
+        .replace(/s*[\)\]\}]\s*/g, "")
+        .replace(/\s+/g, "-");
 }
 
 /**
