@@ -4,7 +4,7 @@ import { ImportContext } from "main";
 import { Vault, TFolder } from "obsidian";
 import { readZip, ZipEntryFile } from "zip";
 import { ImportableAsset, MediaAsset, PageAsset, TocAsset } from "./epub-assets";
-import { frontmatterTagname, titleToBasename } from "../ebook-transformers";
+import { toFrontmatterTagname, titleToBasename } from "../ebook-transformers";
 
 /**
  * A utility class to parse meta information of the book as specified in the
