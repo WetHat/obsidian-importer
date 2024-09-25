@@ -258,25 +258,28 @@ export class EpubBook {
             }
         }
         // now, that we have all relevant assets, we can augment the metadata
-        this.coverImage = this.meta.asString("cover");
-        if (!this.coverImage) {
-            // get it from the cover page then
-            const coverPage = this.meta.asString("coverPage");
-            if (coverPage) {
-                const asset = this.getAsset(coverPage);
-                // find the image in the content
-                if (asset instanceof PageAsset && asset.page) {
-                    const images = asset.page.body.getElementsByTagName("img");
+        const coverPage = this.meta.asString("coverPage");
+        if (coverPage) {
+            const asset = this.getAsset(coverPage);
+            // find the image in the content
+            if (asset instanceof PageAsset && asset.page) {
+                const imgs = asset.page.body.getElementsByTagName("img");
+                if (imgs.length > 0) {
+                    const src = imgs[0].getAttribute("src");
+                    if (src) {
+                        this.coverImage = src.replace(/\.\.\//g, ""); // make relative to top
+                    }
+                } else {
+                    const images = asset.page.body.getElementsByTagName("image");
                     if (images.length > 0) {
-                        const src = images[0].getAttribute("src");
-                        if (src) {
-                            this.coverImage = src.replace(/\.\.\//g, ""); // make relative to top
+                        const href = images[0].getAttribute("xlink:href") || images[0].getAttribute("href");
+                        if (href) {
+                            this.coverImage = href.replace(/\.\.\//g, ""); // make relative to top
                         }
                     }
                 }
             }
         }
-
         // ... and complete initialization to the content map
         await this.toc.parse(this);
     }
