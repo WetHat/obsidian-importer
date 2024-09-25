@@ -176,7 +176,8 @@ export class EpubBook {
         // extract the book meta information;
         this.meta = new BookMetadata(root);
         this.tags = this.meta.asArray("subject") ?? ["e-book"];
-        this.tags = this.tags.map(t => frontmatterTagname(t));
+        this.tags = this.tags.map(t => toFrontmatterTagname(t)).join(",").split(",");
+        this.tags = Array.from(new Set<string>(this.tags)).sort();
     }
 
     /**
