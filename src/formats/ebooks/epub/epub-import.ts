@@ -337,14 +337,14 @@ export class EpubBook {
                 if (imgs.length > 0) {
                     const src = imgs[0].getAttribute("src");
                     if (src) {
-                        coverImage = asset.toBookRelativePath(src); // make relative to top
+                        coverImage = asset.pathFromBook(src); // make relative to top
                     }
                 } else {
                     const images = asset.page.body.getElementsByTagName("image");
                     if (images.length > 0) {
                         const href = images[0].getAttribute("xlink:href") || images[0].getAttribute("href");
                         if (href) {
-                            coverImage = asset.toBookRelativePath(href);
+                            coverImage = asset.pathFromBook(href);
                         }
                     }
                 }
