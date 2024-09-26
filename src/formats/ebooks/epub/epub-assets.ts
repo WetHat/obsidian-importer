@@ -312,12 +312,7 @@ class NavLink {
  * - Book content map.
  */
 export class TocAsset extends ImportableAsset {
-    bookTitle?: string;
-    bookAuthor?: string;
-    bookCoverImage?: string;
-    bookDescription?: string;
-    bookPublisher?: string;
-    tags: string[] = [];
+    private book?: EpubBook;
     // a flat version of the content map
     navList: NavLink[] = [];
 
@@ -328,25 +323,16 @@ export class TocAsset extends ImportableAsset {
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
         const
             path = await this.getVaultOutputPath(bookOutpuFolder),
-            description = htmlToMarkdown(this.bookDescription as string ?? "-")
+            description = htmlToMarkdown(this.book?.description ?? "-")
                 .split("\n")
                 .map(l => "> " + l);
-        let content: string[] = [
-            "---",
-            `book: "${this.bookTitle}"`,
-            `author: "${this.bookAuthor}"`,
-            "aliases: ",
-            `  - "${titleToBasename(this.bookTitle ?? bookOutpuFolder.name)}"`,
-            `publisher: "${this.bookPublisher}"`,
-            `tags: [${this.tags.join(",")}]`,
-            "---",
+        let content: string[] = this.book ? [
+            ...this.book.frontmatter,
             "",
-            `> [!abstract] ${this.bookTitle}`,
-            `> <span style="float:Right;">![[${this.bookCoverImage}|300]]</span>`,
-            ...description,
+           ...this.book.abstract,
             "",
-            "# " + this.bookTitle,
-        ];
+            "# " + this.book.title,
+        ] : [];
         content.push("# Book Content Map");
         for (const navlink of this.navList) {
             content.push(navlink.markdownListItem);
@@ -367,18 +353,10 @@ export class TocAsset extends ImportableAsset {
     }
 
     async parse(book: EpubBook): Promise<void> {
+        this.book = book;
         const
             doc = book.parser.parseFromString(await this.source.readText(), 'application/xml'),
-            docTitle = doc.querySelector('ncx > docTitle > text'),
-            docAuthor = doc.querySelector('ncx > docAuthor > text'),
             navMap = doc.querySelector('ncx > navMap');
-
-        this.bookTitle = docTitle?.textContent ?? book.title;
-        this.bookAuthor = docAuthor?.textContent ?? book.author;
-        this.bookPublisher = book.publisher;
-        this.bookDescription = book.description;
-        this.tags = book.tags;
-        this.bookCoverImage = book.coverImage;;
 
         // now build the content map. Top level navigation links denote chapters
         const navPoints = navMap?.children;
