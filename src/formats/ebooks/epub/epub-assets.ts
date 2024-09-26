@@ -1,5 +1,5 @@
 
-import { htmlToMarkdown, TFile, TFolder } from 'obsidian';
+import { htmlToMarkdown, normalizePath, TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
 import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, titleToBasename, toFrontmatterTagname } from '../ebook-transformers';
@@ -54,6 +54,20 @@ export abstract class ImportableAsset {
             ...this.assetFolderPath,
             (encode ? encodeURIComponent(basename) : basename) + '.' + extension
         ].join('/');
+    }
+
+    /**
+     * Convert an asset relative link to a book relative link
+     *
+     * @param link Asset relative link
+     * @returns Book relative link
+     */
+    ToBookRelative(link: string) : string {
+        return normalizePath([
+                ...this.assetFolderPath,
+                "/",
+                link
+            ].join(""));
     }
 
     /**
@@ -360,7 +374,7 @@ export class TocAsset extends ImportableAsset {
         let content: string[] = this.book ? [
             ...this.book.frontmatter,
             "",
-           ...this.book.abstract,
+            ...this.book.abstract,
             "",
             "# " + this.book.title,
         ] : [];

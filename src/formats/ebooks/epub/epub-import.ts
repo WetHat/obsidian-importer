@@ -58,7 +58,7 @@ class BookMetadata {
                 }
 
                 if (key && value) {
-                    this.setProperty(key, value); // capture the metadata
+                    this.addProperty(key, value); // capture the metadata
                 }
             }
         }
@@ -81,7 +81,7 @@ class BookMetadata {
         }
     }
 
-    setProperty(name: string, value: string) {
+    addProperty(name: string, value: string) {
         const entry = this.meta.get(name);
         if (entry) {
             entry.push(value);
@@ -90,6 +90,9 @@ class BookMetadata {
         }
     }
 
+    setProperty(name: string, value: string) {
+        const entry = this.meta.set(name,[value]);
+    }
     /**
      * Get a property value as a string.
      * @param name Property name (without namespace).
@@ -132,21 +135,21 @@ export class EpubBook {
     fileCount = 0;
     processed = 0;
 
-    get frontmatter() : string[] {
-        return  [
-        "---",
-        `book: "${this.title}"`,
-        `author: "${this.author}"`,
-        "aliases: ",
-        `  - "${this.title}"`,
-        `publisher: "${this.publisher}"`,
-        `tags: [${this.tags.join(",")}]`,
-        "---"
+    get frontmatter(): string[] {
+        return [
+            "---",
+            `book: "${this.title}"`,
+            `author: "${this.author}"`,
+            "aliases: ",
+            `  - "${this.title}"`,
+            `publisher: "${this.publisher}"`,
+            `tags: [${this.tags.join(",")}]`,
+            "---"
         ];
     }
 
-    get abstract() : string[] {
-       const description = htmlToMarkdown(this.description ?? "-")
+    get abstract(): string[] {
+        const description = htmlToMarkdown(this.description ?? "-")
             .split("\n")
             .map(l => "> " + l);
         return [
@@ -159,19 +162,19 @@ export class EpubBook {
     /**
      * @type
      */
-    get tags() : string[] {
+    get tags(): string[] {
         return this._tags;
     }
 
-    get published() : string | undefined{
+    get published(): string | undefined {
         return this.meta.asString("date");
     }
-    get language() : string {
+    get language(): string {
         return this.meta.asString("language") ?? "Unspecified";
     }
 
-    get coverImage() : string | undefined{
-        return  this.meta.asString("cover-image");
+    get coverImage(): string | undefined {
+        return this.meta.asString("cover-image");
     }
     get title(): string {
         return this.meta.asString("title") ?? 'Untitled book';
@@ -284,7 +287,7 @@ export class EpubBook {
                         // available when the TOC is parsed. Also this might
                         // be the toc (epub 3).
                         const isToc = toc === href
-                        await page.parse(this,isToc);
+                        await page.parse(this, isToc);
                         if (isToc) {
                             this.toc = page;
                         }
@@ -334,22 +337,26 @@ export class EpubBook {
                 if (imgs.length > 0) {
                     const src = imgs[0].getAttribute("src");
                     if (src) {
-                        coverImage = src.replace(/\.\.\//g, ""); // make relative to top
+                        coverImage = asset.ToBookRelative(src); // make relative to top
                     }
                 } else {
                     const images = asset.page.body.getElementsByTagName("image");
                     if (images.length > 0) {
                         const href = images[0].getAttribute("xlink:href") || images[0].getAttribute("href");
                         if (href) {
-                            coverImage = href;
+                            coverImage = asset.ToBookRelative(href);
                         }
                     }
                 }
             }
         }
+        if (coverImage) {
+            this.meta.setProperty("cover-image", coverImage);
+        }
+
         // ... and complete initialization to the content map
         if (this.toc instanceof TocAsset) {
-        await this.toc.parse(this);
+            await this.toc.parse(this);
         }
     }
 
