@@ -62,12 +62,14 @@ export abstract class ImportableAsset {
      * @param relPath a path relative to this asset
      * @returns Book relative path
      */
-    pathFromBook(relPath: string) : string {
-        return normalizePath([
+    pathFromBook(relPath: string): string {
+        if (this.assetFolderPath.length > 0) {
+            return [
                 ...this.assetFolderPath,
-                "/",
                 relPath
-            ].join(""));
+            ].join("/");
+        }
+        return relPath;
     }
 
     /**
