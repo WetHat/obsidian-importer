@@ -62,7 +62,7 @@ export abstract class ImportableAsset {
      * @param relPath a path relative to this asset
      * @returns Book relative path
      */
-    toBookRelativePath(relPath: string) : string {
+    pathFromBook(relPath: string) : string {
         return normalizePath([
                 ...this.assetFolderPath,
                 "/",
@@ -264,7 +264,7 @@ export class PageAsset extends ImportableAsset {
                 const
                     parts = href.split("#"),
                     [path, id] = parts,
-                    targetAsset = path ? book.getAsset(this.toBookRelativePath(path)) : this;
+                    targetAsset = path ? book.getAsset(this.pathFromBook(path)) : this;
                 if (targetAsset instanceof PageAsset) {
                     const link = this.relativePathTo(targetAsset) + targetAsset.fragmentIdentifier(id);
                     a.setAttribute("href", link.replace(/\s/g,"%20"));
