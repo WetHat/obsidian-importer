@@ -1,8 +1,8 @@
 
-import { htmlToMarkdown, normalizePath, TFile, TFolder } from 'obsidian';
+import { htmlToMarkdown, TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
-import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, titleToBasename, toFrontmatterTagname } from '../ebook-transformers';
+import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, titleToBasename } from '../ebook-transformers';
 
 /**
  * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
