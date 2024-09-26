@@ -286,9 +286,9 @@ export class EpubBook {
                         // we need to parse right away so that all pages are
                         // available when the TOC is parsed. Also this might
                         // be the toc (epub 3).
-                        const isToc = toc === href
+                        const isToc = toc === href;
                         await page.parse(this, isToc);
-                        if (isToc) {
+                        if (isToc && !this.toc) {
                             this.toc = page;
                         }
                         this.assetMap.set(href, page);
