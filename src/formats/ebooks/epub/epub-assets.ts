@@ -190,7 +190,7 @@ export class PageAsset extends ImportableAsset {
                 // a navigation page - convert all nav element to sections
                 this.page.body.querySelectorAll("nav").forEach(nav => {
                     const section = nav.doc.createElement("section");
-                    nav.parentElement?.insertBefore(section,nav);
+                    nav.parentElement?.insertBefore(section, nav);
                     while (nav.firstChild) {
                         section.append(nav.firstChild);
                     }
@@ -244,7 +244,7 @@ export class PageAsset extends ImportableAsset {
         }
 
         const outputPath = await this.getVaultOutputPath(bookOutpuFolder)
-        let markdown : string[];
+        let markdown: string[];
         if (this.toc) {
             markdown = [
                 ...this.book.frontmatter,
