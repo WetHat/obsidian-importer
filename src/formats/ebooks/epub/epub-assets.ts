@@ -63,13 +63,10 @@ export abstract class ImportableAsset {
      * @returns Book relative path
      */
     pathFromBook(relPath: string): string {
-        if (this.assetFolderPath.length > 0) {
-            return [
-                ...this.assetFolderPath,
-                relPath
-            ].join("/");
-        }
-        return relPath;
+        return [
+            ...this.assetFolderPath,
+            relPath
+        ].join("/");
     }
 
     /**
