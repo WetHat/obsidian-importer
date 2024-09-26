@@ -25,7 +25,7 @@ export class EbookImporter extends FormatImporter {
 
 		for (const file of files) {
 			switch(file.extension) {
-				case "epub":
+				case 'epub':
 					await importEpubBook(vault, file, outputFolder, ctx);
 					break;
 			}
