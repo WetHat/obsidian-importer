@@ -44,12 +44,11 @@ export function titleToBasename(title: string): string {
     return sanitized.trim();
 }
 
-
 export function toFrontmatterTagname(tagname: string) {
     return tagname
         .replace(/^#/, "") // get rid of the leading #
         .replace(/#/g, "＃") // transform internal hashes
-        .replace(/\s*[&+.\\:;/\[\(\{]\s*/g, ",") // generate multiple tags
+        .replace(/\s*[&+.\\:;\[\(\{]\s*/g, ",") // generate multiple tags
         .replace(/s*[\)\]\}]\s*/g, "")
         .replace(/\s+/g, "-");
 }
