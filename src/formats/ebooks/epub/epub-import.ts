@@ -73,7 +73,7 @@ class BookMetadata {
         }
     }
 
-    private setProperty(name: string, value: string) {
+    setProperty(name: string, value: string) {
         const entry = this.meta.get(name);
         if (entry) {
             entry.push(value);
