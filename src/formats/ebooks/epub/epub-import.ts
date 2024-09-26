@@ -93,7 +93,7 @@ class BookMetadata {
 	}
 
 	setProperty(name: string, value: string) {
-		const entry = this.meta.set(name,[value]);
+		return this.meta.set(name,[value]);
 	}
 	/**
      * Get a property value as a string.

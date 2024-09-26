@@ -101,7 +101,6 @@ export function injectCodeBlock(element: HTMLElement) {
 		if (firstChild && firstChild.nodeName !== 'code') {
 			const code = element.doc.createElement('code');
 			code.setAttribute('class', 'language-undefined');
-			let child;
 			while (firstChild) {
 				code.append(firstChild);
 				firstChild = pre.firstChild;
