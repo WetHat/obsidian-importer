@@ -242,7 +242,7 @@ export class PageAsset extends ImportableAsset {
     reconnectLinks(book: EpubBook) {
         this.page?.body.querySelectorAll("a[href]").forEach(a => {
             const href = a.getAttribute("href");
-            if (href) {
+            if (href && !href.includes("://")) {
                 const
                     parts = href.split("#"),
                     [path, id] = parts,
