@@ -78,7 +78,7 @@ export abstract class ImportableAsset {
      * @param targetAsset The other asset to generate a relative path to.
      * @returns The relative path to the other asset.
      */
-    relativePathTo(targetAsset: ImportableAsset) : string {
+    relativePathTo(targetAsset: ImportableAsset): string {
         let
             thisPath = Array.from(this.assetFolderPath),
             targetPath = Array.from(targetAsset.assetFolderPath);
@@ -108,10 +108,10 @@ export abstract class ImportableAsset {
      *
      * @type {string}
      */
-    abstract get outputFilename() : string ;
+    abstract get outputFilename(): string;
 
     get sourceFilename(): string {
-        return this.source.basename + "." + this.source.extension ;
+        return this.source.basename + "." + this.source.extension;
     }
 
     /**
@@ -214,7 +214,7 @@ export class PageAsset extends ImportableAsset {
         return "#^" + id; // the Obsidian link format;
     }
 
-    get outputFilename() : string {
+    get outputFilename(): string {
         return titleToBasename(this.pageTitle ?? this.source.basename) + ".md";
     }
 
@@ -227,7 +227,7 @@ export class PageAsset extends ImportableAsset {
         // we need to use the `text/html`so that Obsidian produces usable Markdown!
         this.page = book.parser.parseFromString(html, "text/html");
         const ttl = this.page.title;
-        if (ttl !== ""){
+        if (ttl !== "") {
             this.pageTitle = ttl;
         }
 
@@ -269,7 +269,7 @@ export class PageAsset extends ImportableAsset {
                     targetAsset = path ? book.getAsset(this.pathFromBook(path)) : this;
                 if (targetAsset instanceof PageAsset) {
                     const link = this.relativePathTo(targetAsset) + targetAsset.fragmentIdentifier(id);
-                    a.setAttribute("href", link.replace(/\s/g,"%20"));
+                    a.setAttribute("href", link.replace(/\s/g, "%20"));
                     // we also need to make sure the link text is compatible with
                     // markdown links
                     let txt = a.textContent;
@@ -321,7 +321,7 @@ export class MediaAsset extends ImportableAsset {
         super(source, href, mimetype);
     }
 
-    get outputFilename() : string {
+    get outputFilename(): string {
         return this.sourceFilename;
     }
 
@@ -416,7 +416,7 @@ export class TocAsset extends ImportableAsset {
         return bookOutpuFolder.vault.create(path, content.join("\n"));
     }
 
-    get outputFilename() : string {
+    get outputFilename(): string {
         return "§ Title Page.md";
     }
 
