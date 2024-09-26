@@ -296,10 +296,10 @@ export class PageAsset extends ImportableAsset {
                 ""
             ];
         } else {
-            const tocPath = await this.book.toc?.getVaultOutputPath(bookOutpuFolder);
+            const toc = this.book.toc;
             markdown = [
                 "---",
-                tocPath ? `book: "[[${tocPath}|${this.book.title}]]"` : `"${this.book.title}"`,
+                toc ? `book: "[[${this.relativePathTo(toc)}|${this.book.title}]]"` : `"${this.book.title}"`,
                 `tags: ${this.book.tags}`,
                 "---",
                 ""
