@@ -1,24 +1,24 @@
-import { htmlToMarkdown } from "obsidian";
+import { htmlToMarkdown } from 'obsidian';
 
 /**
  * A list of regular expressions mapping characters which cause issues on the filesystem
  * to benign Unocode look-alikes.
  */
 const FILENAME_TRANSFORMATIONS = [
-    [/\?/g, "❓"],
-    [/\:/g, "꞉"],
-    [/"/g, "'"],
-    [/\</g, "＜"],
-    [/\>/g, "＞"],
-    [/\|/g, "∣"],
-    [/\\/g, "/"],
-    [/\//g, "╱"],
-    [/\[/g, "⟦"],
-    [/\]/g, "⟧"],
-    [/\#/g, "＃"],
-    [/\^/g, "⌃"],
-    [/\&/g, "＆"],
-    [/\*/g, "✱"],
+	[/\?/g, '❓'],
+	[/\:/g, '꞉'],
+	[/"/g, '\''],
+	[/\</g, '＜'],
+	[/\>/g, '＞'],
+	[/\|/g, '∣'],
+	[/\\/g, '/'],
+	[/\//g, '╱'],
+	[/\[/g, '⟦'],
+	[/\]/g, '⟧'],
+	[/\#/g, '＃'],
+	[/\^/g, '⌃'],
+	[/\&/g, '＆'],
+	[/\*/g, '✱'],
 ];
 
 /**
@@ -35,22 +35,22 @@ const FILENAME_TRANSFORMATIONS = [
  */
 export function titleToBasename(title: string): string {
 
-    let sanitized = title;
+	let sanitized = title;
 
-    for (let [from, to] of FILENAME_TRANSFORMATIONS) {
-        sanitized = sanitized.replace(from as RegExp, to as string);
-    }
+	for (let [from, to] of FILENAME_TRANSFORMATIONS) {
+		sanitized = sanitized.replace(from as RegExp, to as string);
+	}
 
-    return sanitized.trim();
+	return sanitized.trim();
 }
 
 export function toFrontmatterTagname(tagname: string) {
-    return tagname
-        .replace(/^#/, "") // get rid of the leading #
-        .replace(/#/g, "＃") // transform internal hashes
-        .replace(/\s*[&+.\\:;\[\(\{]\s*/g, ",") // generate multiple tags
-        .replace(/s*[\)\]\}]\s*/g, "")
-        .replace(/\s+/g, "-");
+	return tagname
+		.replace(/^#/, '') // get rid of the leading #
+		.replace(/#/g, '＃') // transform internal hashes
+		.replace(/\s*[&+.\\:;\[\(\{]\s*/g, ',') // generate multiple tags
+		.replace(/s*[\)\]\}]\s*/g, '')
+		.replace(/\s+/g, '-');
 }
 
 /**
@@ -64,21 +64,21 @@ export function toFrontmatterTagname(tagname: string) {
  * @param element an element of an HTML document.
  */
 export function hoistTableCaptions(element: HTMLElement) {
-    element.querySelectorAll("table > caption")
-        .forEach(caption => {
-            const table = caption.parentElement;
-            if (table) {
-                if (table.firstElementChild?.nodeName !== caption.nodeName) {
-                    // hoist to top
-                    table.insertBefore(caption, table.firstElementChild);
-                }
-            }
-            // mark the caption for postprocessing
-            caption.setText(caption?.textContent + "{{newline}}")
-        });
+	element.querySelectorAll('table > caption')
+		.forEach(caption => {
+			const table = caption.parentElement;
+			if (table) {
+				if (table.firstElementChild?.nodeName !== caption.nodeName) {
+					// hoist to top
+					table.insertBefore(caption, table.firstElementChild);
+				}
+			}
+			// mark the caption for postprocessing
+			caption.setText(caption?.textContent + '{{newline}}');
+		});
 }
 
- /**
+/**
   * An HTML transformation looking for `<pre>` tags which are **not** immediately followed by a `<code>` block
   * and inject one.
   *
@@ -86,50 +86,50 @@ export function hoistTableCaptions(element: HTMLElement) {
   *
   * @param element an element of an HTML document.
   */
- export function injectCodeBlock(element: HTMLElement) {
-    const pres = element.getElementsByTagName("pre");
-    for (let i = 0; i < pres.length; i++) {
-        const pre = pres[i];
-        let firstChild = pre.firstChild;
+export function injectCodeBlock(element: HTMLElement) {
+	const pres = element.getElementsByTagName('pre');
+	for (let i = 0; i < pres.length; i++) {
+		const pre = pres[i];
+		let firstChild = pre.firstChild;
 
-        // remove emptylines
-        while (firstChild?.nodeType === Node.TEXT_NODE && firstChild.textContent?.trim().length === 0) {
-            firstChild.remove();
-            firstChild = pre.firstChild;
-        }
+		// remove emptylines
+		while (firstChild?.nodeType === Node.TEXT_NODE && firstChild.textContent?.trim().length === 0) {
+			firstChild.remove();
+			firstChild = pre.firstChild;
+		}
 
-        if (firstChild && firstChild.nodeName !== "code") {
-            const code = element.doc.createElement("code");
-            code.setAttribute("class", "language-undefined");
-            let child;
-            while (firstChild) {
-                code.append(firstChild);
-                firstChild = pre.firstChild;
-            }
-            pre.append(code);
-        }
-    }
+		if (firstChild && firstChild.nodeName !== 'code') {
+			const code = element.doc.createElement('code');
+			code.setAttribute('class', 'language-undefined');
+			let child;
+			while (firstChild) {
+				code.append(firstChild);
+				firstChild = pre.firstChild;
+			}
+			pre.append(code);
+		}
+	}
 }
 
 /**
  * Strategies for attaching link target markers to HTML elements,
  */
 const enum BlockMarkerStrategy {
-    /**
+	/**
      * Insert an Obsidian link target marker after the HTMK block element.
      */
-    InsertAfter = 1,
-    /**
+	InsertAfter = 1,
+	/**
      * Append an Obsidian link target marker to the child elements of
      * an HTML block element.
      */
-    Append,
+	Append,
 
-    /**
+	/**
      * Descend into the sub-structure of an HTML block element to find
      * an HTML element to mark with an Obsidian link target.
      */
-    Descend
+	Descend
 }
 
 /**
@@ -137,30 +137,30 @@ const enum BlockMarkerStrategy {
  * strategy how to add Obsidian link target markers to HTML elements.
  */
 const MARK_STRATEGIES = new Map<string, BlockMarkerStrategy>([
-    ["div", BlockMarkerStrategy.Descend],
-    ["p", BlockMarkerStrategy.Append],
-    ["h1", BlockMarkerStrategy.Append],
-    ["h2", BlockMarkerStrategy.Append],
-    ["h3", BlockMarkerStrategy.Append],
-    ["h4", BlockMarkerStrategy.Append],
-    ["h5", BlockMarkerStrategy.Append],
-    ["h6", BlockMarkerStrategy.Append],
-    ["ul", BlockMarkerStrategy.Descend],
-    ["ol", BlockMarkerStrategy.Descend],
-    ["li", BlockMarkerStrategy.Append],
-    ["table", BlockMarkerStrategy.InsertAfter],
-    ["td", BlockMarkerStrategy.Append],
-    ["th", BlockMarkerStrategy.Append],
-    ["dl", BlockMarkerStrategy.Descend],
-    ["dt", BlockMarkerStrategy.Append],
-    ["dd", BlockMarkerStrategy.Append],
-    ["header", BlockMarkerStrategy.Append],
-    ["footer", BlockMarkerStrategy.Append],
-    ["section", BlockMarkerStrategy.Descend],
-    ["article", BlockMarkerStrategy.Descend],
-    ["aside", BlockMarkerStrategy.Descend],
-    ["pre", BlockMarkerStrategy.InsertAfter],
-    ["blockquote", BlockMarkerStrategy.InsertAfter],
+	['div', BlockMarkerStrategy.Descend],
+	['p', BlockMarkerStrategy.Append],
+	['h1', BlockMarkerStrategy.Append],
+	['h2', BlockMarkerStrategy.Append],
+	['h3', BlockMarkerStrategy.Append],
+	['h4', BlockMarkerStrategy.Append],
+	['h5', BlockMarkerStrategy.Append],
+	['h6', BlockMarkerStrategy.Append],
+	['ul', BlockMarkerStrategy.Descend],
+	['ol', BlockMarkerStrategy.Descend],
+	['li', BlockMarkerStrategy.Append],
+	['table', BlockMarkerStrategy.InsertAfter],
+	['td', BlockMarkerStrategy.Append],
+	['th', BlockMarkerStrategy.Append],
+	['dl', BlockMarkerStrategy.Descend],
+	['dt', BlockMarkerStrategy.Append],
+	['dd', BlockMarkerStrategy.Append],
+	['header', BlockMarkerStrategy.Append],
+	['footer', BlockMarkerStrategy.Append],
+	['section', BlockMarkerStrategy.Descend],
+	['article', BlockMarkerStrategy.Descend],
+	['aside', BlockMarkerStrategy.Descend],
+	['pre', BlockMarkerStrategy.InsertAfter],
+	['blockquote', BlockMarkerStrategy.InsertAfter],
 ]);
 
 /**
@@ -177,87 +177,88 @@ const MARK_STRATEGIES = new Map<string, BlockMarkerStrategy>([
  * @returns The obsidian compatible link target id (not necessarily the given the element's id).
  */
 export function markElementAsLinkTarget(element: Element): string|undefined {
-    // Now, that we have an id, find the best element and attachment strategy
-    let
-        strategy: BlockMarkerStrategy | undefined,
-        targetElement: Element | null = element;
+	// Now, that we have an id, find the best element and attachment strategy
+	let
+		strategy: BlockMarkerStrategy | undefined,
+		targetElement: Element | null = element;
 
-    // find a block element that has any action defined (in case the given element is not recognized)
-    while (targetElement && undefined === (strategy = MARK_STRATEGIES.get(targetElement.localName))) {
-        targetElement = targetElement.parentElement;
-    }
-    if (!targetElement) {
-        return undefined; // nothing found to attach marker to
-    }
+	// find a block element that has any action defined (in case the given element is not recognized)
+	while (targetElement && undefined === (strategy = MARK_STRATEGIES.get(targetElement.localName))) {
+		targetElement = targetElement.parentElement;
+	}
+	if (!targetElement) {
+		return undefined; // nothing found to attach marker to
+	}
 
-    if (strategy === BlockMarkerStrategy.Descend) {
-        // descend into the targetElement's structure to find a child element with
-        // an 'append' or `insertAfter` strategy
-        let
-            markerElement: Element | null = targetElement,
-            markerStrategy: BlockMarkerStrategy | undefined = strategy;
+	if (strategy === BlockMarkerStrategy.Descend) {
+		// descend into the targetElement's structure to find a child element with
+		// an 'append' or `insertAfter` strategy
+		let
+			markerElement: Element | null = targetElement,
+			markerStrategy: BlockMarkerStrategy | undefined = strategy;
 
-        // inspect the first child element chain for an 'append' or `insertAfter` action
-        do {
-            markerElement = markerElement.firstElementChild;
-            markerStrategy = MARK_STRATEGIES.get(markerElement?.localName ?? "");
-        } while (markerElement && markerStrategy === BlockMarkerStrategy.Descend)
+		// inspect the first child element chain for an 'append' or `insertAfter` action
+		do {
+			markerElement = markerElement.firstElementChild;
+			markerStrategy = MARK_STRATEGIES.get(markerElement?.localName ?? '');
+		} while (markerElement && markerStrategy === BlockMarkerStrategy.Descend);
 
-        if (markerElement && markerStrategy !== BlockMarkerStrategy.Descend) {
-            // An elment to attach the marker to has been found
-            targetElement = markerElement;
-            strategy = markerStrategy;
-        } else {
-            // no luck. Use  default strategy
-            strategy = BlockMarkerStrategy.InsertAfter;
-        }
-    }
+		if (markerElement && markerStrategy !== BlockMarkerStrategy.Descend) {
+			// An elment to attach the marker to has been found
+			targetElement = markerElement;
+			strategy = markerStrategy;
+		}
+		else {
+			// no luck. Use  default strategy
+			strategy = BlockMarkerStrategy.InsertAfter;
+		}
+	}
 
-    // Now that we have an element to work with, check if it already has a marker we can use.
-    // we do that to avoid proliveration of multiple markers on the same element.
-    let aliasID : string | undefined;
-    switch (strategy) {
-        case BlockMarkerStrategy.InsertAfter:
-            // look before this element for a marker
-            aliasID = targetElement.nextElementSibling?.getAttribute("marker") ?? undefined;
-            break;
-        case BlockMarkerStrategy.Append:
-            aliasID = targetElement.lastElementChild?.getAttribute("marker") ?? undefined;
-            break;
-    }
-    if (aliasID) {
-        // reuse the already existing marker
-        return aliasID;
-    }
+	// Now that we have an element to work with, check if it already has a marker we can use.
+	// we do that to avoid proliveration of multiple markers on the same element.
+	let aliasID : string | undefined;
+	switch (strategy) {
+		case BlockMarkerStrategy.InsertAfter:
+			// look before this element for a marker
+			aliasID = targetElement.nextElementSibling?.getAttribute('marker') ?? undefined;
+			break;
+		case BlockMarkerStrategy.Append:
+			aliasID = targetElement.lastElementChild?.getAttribute('marker') ?? undefined;
+			break;
+	}
+	if (aliasID) {
+		// reuse the already existing marker
+		return aliasID;
+	}
 
-    // attach a marker to the targetElement
+	// attach a marker to the targetElement
 
-    // determine the id to use. try a sanitized version of the element's id first
-    let id:string | undefined = element.getAttribute("id")?.replace(/[_\.:]+/g, "-");
-    if (!id || !/^[a-zA-Z][\w\-.]*$/.test(id)) {
-        // make up an Obsidian compatible id
-        id = (Math.random() * 1000000000000000000).toString(24)
-    }
+	// determine the id to use. try a sanitized version of the element's id first
+	let id:string | undefined = element.getAttribute('id')?.replace(/[_\.:]+/g, '-');
+	if (!id || !/^[a-zA-Z][\w\-.]*$/.test(id)) {
+		// make up an Obsidian compatible id
+		id = (Math.random() * 1000000000000000000).toString(24);
+	}
 
-    const marker = element.doc.createElement("code");
-    marker.setAttribute("marker", id);
-    // attach the marker to the correct position
-    switch (strategy) {
-        case BlockMarkerStrategy.Append:
-            marker.setText("{{ ^" + id + "}}");
-            targetElement.appendChild(marker);
-            break;
-        case BlockMarkerStrategy.InsertAfter:
-            marker.setText("{{newline}}{{^" + id + "}}");
-            const parent = targetElement.parentElement;
-            if (!parent) {
-                return undefined;
-            }
-            parent.insertAfter(marker, targetElement);
-            break;
-    }
+	const marker = element.doc.createElement('code');
+	marker.setAttribute('marker', id);
+	// attach the marker to the correct position
+	switch (strategy) {
+		case BlockMarkerStrategy.Append:
+			marker.setText('{{ ^' + id + '}}');
+			targetElement.appendChild(marker);
+			break;
+		case BlockMarkerStrategy.InsertAfter:
+			marker.setText('{{newline}}{{^' + id + '}}');
+			const parent = targetElement.parentElement;
+			if (!parent) {
+				return undefined;
+			}
+			parent.insertAfter(marker, targetElement);
+			break;
+	}
 
-    return id;
+	return id;
 }
 
 /**
@@ -270,7 +271,7 @@ export function markElementAsLinkTarget(element: Element): string|undefined {
  * @returns Post-processed Markdown
  */
 export function convertToMarkdown (html: Document) : string {
-    return htmlToMarkdown(html.body)
-        .replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, "$1$3\n\n") // link targets
-        .replace(/{{newline}}/g, "\n")
+	return htmlToMarkdown(html.body)
+		.replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, '$1$3\n\n') // link targets
+		.replace(/{{newline}}/g, '\n');
 }
