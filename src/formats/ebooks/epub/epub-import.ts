@@ -1,7 +1,7 @@
 import { ZipReader } from "@zip.js/zip.js";
 import { parseFilePath, PickedFile } from "filesystem";
 import { ImportContext } from "main";
-import { Vault, TFolder } from "obsidian";
+import { Vault, TFolder, htmlToMarkdown } from "obsidian";
 import { readZip, ZipEntryFile } from "zip";
 import { ImportableAsset, MediaAsset, PageAsset, TocAsset } from "./epub-assets";
 import { toFrontmatterTagname, titleToBasename } from "../ebook-transformers";
@@ -123,16 +123,56 @@ export class EpubBook {
     readonly parser = new DOMParser(); // the parser instance to use
     private meta: BookMetadata; // The books metadata
 
-    toc: TocAsset;
+    toc?: TocAsset | PageAsset;
 
-    coverImage?: string;
-    tags: string[] = [];
+    private _tags: string[] = [];
 
     // some progress data
     ctx: ImportContext;
     fileCount = 0;
     processed = 0;
 
+    get frontmatter() : string[] {
+        return  [
+        "---",
+        `book: "${this.title}"`,
+        `author: "${this.author}"`,
+        "aliases: ",
+        `  - "${this.title}"`,
+        `publisher: "${this.publisher}"`,
+        `tags: [${this.tags.join(",")}]`,
+        "---"
+        ];
+    }
+
+    get abstract() : string[] {
+       const description = htmlToMarkdown(this.description ?? "-")
+            .split("\n")
+            .map(l => "> " + l);
+        return [
+            `> [!abstract] ${this.title}`,
+            `> <span style="float:Right;">![[${this.coverImage}|300]]</span>`,
+            ...description,
+        ];
+    }
+
+    /**
+     * @type
+     */
+    get tags() : string[] {
+        return this._tags;
+    }
+
+    get published() : string | undefined{
+        return this.meta.asString("date");
+    }
+    get language() : string {
+        return this.meta.asString("language") ?? "Unspecified";
+    }
+
+    get coverImage() : string | undefined{
+        return  this.meta.asString("cover-image");
+    }
     get title(): string {
         return this.meta.asString("title") ?? 'Untitled book';
     }
