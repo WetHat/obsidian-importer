@@ -170,18 +170,35 @@ export class PageAsset extends ImportableAsset {
         return this.makeAssetPath(basename, "md", encode);
     }
 
-    async parse(book: EpubBook): Promise<void> {
+    async parse(book: EpubBook, toc: boolean): Promise<void> {
         this.book = book;
+        this.toc = toc;
         const html = (await this.source.readText())
             .replace(/&lt;/g, "＜")
             .replace(/&gt;/g, "＞"); // replace Obsidian unfriendly html entities.
         // we need to use the `text/html`so that Obsidian produces usable Markdown!
         this.page = book.parser.parseFromString(html, "text/html");
+
         if (this.page) {
-            const body = this.page.body;
-            // Apply document transformations to make the html Obsidian friendly
-            injectCodeBlock(body);
-            hoistTableCaptions(body);
+            if (toc) {
+                this.pageTitle = "§ Title Page";
+                // a navigation page - convert all nav element to sections
+                this.page.body.querySelectorAll("nav").forEach(nav => {
+                    const section = nav.doc.createElement("section");
+                    nav.parentElement?.insertBefore(section,nav);
+                    while (nav.firstChild) {
+                        section.append(nav.firstChild);
+                    }
+                    nav.remove();
+                });
+            } else {
+                this.pageTitle = this.page.title;
+                // a content page
+                const body = this.page.body;
+                // Apply document transformations to make the html Obsidian friendly
+                injectCodeBlock(body);
+                hoistTableCaptions(body);
+            }
         }
     }
 
@@ -217,22 +234,31 @@ export class PageAsset extends ImportableAsset {
         })
     }
     async import(bookOutpuFolder: TFolder): Promise<TFile> {
-        if (!this.page) {
+        if (!this.page || !this.book) {
             throw new Error('Book page not available for import');
         }
 
-        const
-            outputPath = await this.getVaultOutputPath(bookOutpuFolder),
-            toc = this.book?.toc,
+        const outputPath = await this.getVaultOutputPath(bookOutpuFolder)
+        let markdown : string[];
+        if (this.toc) {
+            markdown = [
+                ...this.book.frontmatter,
+                "",
+                ...this.book.abstract,
+                ""
+            ];
+        } else {
+            const outputPath = this.book.toc?.outputAssetPath(false);
             markdown = [
                 "---",
-                `book: "[[${toc?.outputAssetPath(false)}|${toc?.bookTitle}]]"`,
-                `tags: ${toc?.tags}`,
+                outputPath ? `book: "[[${outputPath}|${this.book.title}]]"` : `"${this.book.title}"`,
+                `tags: ${this.book.tags}`,
                 "---",
-                "",
-                convertToMarkdown(this.page)
-            ];
+                ""
+            ]
+        }
 
+        markdown.push(convertToMarkdown(this.page));
         return bookOutpuFolder.vault.create(outputPath, markdown.join("\n"));
     }
 }
