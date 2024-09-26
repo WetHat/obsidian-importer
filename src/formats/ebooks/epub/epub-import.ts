@@ -62,13 +62,21 @@ class BookMetadata {
                 }
             }
         }
-        // make sure we have the cover page
-        if (!this.meta.has("coverPage")) {
-            // get the cover image gtom the cover page then
-            const coverPage = pkg.querySelector('package > guide > reference[type="cover"]');
-            if (coverPage) {
-                const href = coverPage.getAttribute("href");
-                this.meta.set("coverPage", href ? [href] : []);
+        // get the cover page if available
+        const cover = pkg.querySelector('package > guide > reference[type="cover"]');
+        if (cover) {
+            const href = cover.getAttribute("href");
+            if (href) {
+                this.setProperty("cover", href);
+            }
+        }
+
+        // get the toc
+        const toc = pkg.querySelector('package > guide > reference[type="toc"]');
+        if (toc) {
+            const href = toc.getAttribute("href");
+            if (href) {
+                this.setProperty("toc", href);
             }
         }
     }
