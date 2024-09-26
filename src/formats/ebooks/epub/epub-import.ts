@@ -384,7 +384,7 @@ export class EpubBook {
             if (this.ctx.cancelled) {
                 return;
             }
-            console.log(`Importing ${asset.sourceFilename} - ${asset.outputPath(false)}`);
+            console.log(`Importing ${asset.sourceFilename} - ${asset.outputPath}`);
             await asset.import(bookFolder);
             if (asset instanceof MediaAsset) {
                 this.ctx.reportAttachmentSuccess(asset.sourceFilename);

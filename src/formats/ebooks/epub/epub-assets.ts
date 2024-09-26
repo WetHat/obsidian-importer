@@ -45,13 +45,12 @@ export abstract class ImportableAsset {
      * Works for both source and output paths as they share a common, relative folder path.
      *
      * @param filename Name
-     * @param encode `true` to url encode the filename;
      * @returns a link relative to the book or source folder.
      */
-    protected makeAssetPath(filename: string, encode: boolean): string {
+    protected makeAssetPath(filename: string): string {
         return [
             ...this.assetFolderPath,
-            (encode ? encodeURIComponent(filename) : filename)
+            filename,
         ].join('/');
     }
 
@@ -97,8 +96,8 @@ export abstract class ImportableAsset {
      * @param encode `true` to url-encode the path
      * @return Path relative to the book in the output folder.
      */
-    outputPath(encode: boolean): string {
-        return this.makeAssetPath(this.outputFilename,encode);
+    get outputPath(): string {
+        return this.makeAssetPath(this.outputFilename);
     }
 
     /**
@@ -140,7 +139,7 @@ export abstract class ImportableAsset {
                 await vault.createFolder(folderPath);
             }
         }
-        return bookOutputFolder.path + '/' + this.outputPath(false);
+        return bookOutputFolder.path + '/' + this.outputPath;
     }
 }
 
@@ -268,7 +267,7 @@ export class PageAsset extends ImportableAsset {
                     targetAsset = path ? book.getAsset(this.toBookRelativePath(path)) : this;
                 if (targetAsset instanceof PageAsset) {
                     const link = this.relativePathTo(targetAsset) + targetAsset.fragmentIdentifier(id);
-                    a.setAttribute("href", link);
+                    a.setAttribute("href", link.replace(/\s/g,"%20"));
                     // we also need to make sure the link text is compatible with
                     // markdown links
                     let txt = a.textContent;
@@ -363,9 +362,9 @@ class NavLink {
                         asset.pageTitle = navtext;
                     }
                 }
-                this.assetLink = asset.outputPath(false) + asset.fragmentIdentifier(id);
+                this.assetLink = asset.outputPath + asset.fragmentIdentifier(id);
             } else {
-                this.assetLink = asset ? asset.outputPath(false) : srcPath;
+                this.assetLink = asset ? asset.outputPath : srcPath;
             }
         }
     }
