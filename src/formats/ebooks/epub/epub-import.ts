@@ -205,27 +205,37 @@ export class EpubBook {
 
         this.sourcePrefix = parent ? parent + '/' : parent;
 
+        const root = manifest.documentElement;
+        // extract the book meta information;
+        this.meta = new BookMetadata(root);
+        this._tags = this.meta.asArray("subject") ?? ["e-book"];
+        this._tags = this._tags.map(t => toFrontmatterTagname(t)).join(",").split(",");
+        this._tags = Array.from(new Set<string>(this._tags)).sort();
+        // Build the mimetype map
         const
-            root = manifest.documentElement,
             items = root.getElementsByTagName('item'),
             itemCount = items.length;
-
-        // Build the mimetype map
         for (let i = 0; i < itemCount; i++) {
             const
                 item = items[i],
                 mimetype = item.getAttribute('media-type'),
-                href = item.getAttribute('href');
+                href = item.getAttribute('href'),
+                properties = item.getAttribute("properties");
+
             if (mimetype && href) {
                 this.mimeMap.set(href, mimetype);
+                // remember special assets
+                switch (properties) {
+                    case "cover-image":
+                        this.meta.setProperty(properties, href);
+                        break;
+                    case "nav":
+                        // a navigation page, probably in lieu of an ncx file
+                        this.meta.setProperty("toc", href);
+                        break;
+                }
             }
         }
-
-        // extract the book meta information;
-        this.meta = new BookMetadata(root);
-        this.tags = this.meta.asArray("subject") ?? ["e-book"];
-        this.tags = this.tags.map(t => toFrontmatterTagname(t)).join(",").split(",");
-        this.tags = Array.from(new Set<string>(this.tags)).sort();
     }
 
     /**
