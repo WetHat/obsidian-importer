@@ -398,11 +398,7 @@ export class TocAsset extends ImportableAsset {
 	}
 
 	async import(bookOutpuFolder: TFolder): Promise<TFile> {
-		const
-			path = await this.getVaultOutputPath(bookOutpuFolder),
-			description = htmlToMarkdown(this.book?.description ?? '-')
-				.split('\n')
-				.map(l => '> ' + l);
+		const path = await this.getVaultOutputPath(bookOutpuFolder);
 		let content: string[] = this.book ? [
 			...this.book.frontmatter,
 			'',
