@@ -267,6 +267,7 @@ export class EpubBook {
         }
         this.ctx.status("Parsing epub file contents");
         await this.parseManifest(manifestSource);
+        const toc = this.meta.asString("toc");
         // now check all files from the ZIP against the manifest and create
         // the appropriate asset facade instances.
         for (const source of entries) {
@@ -280,8 +281,13 @@ export class EpubBook {
                         // a book page
                         const page = new PageAsset(source, href, mimetype);
                         // we need to parse right away so that all pages are
-                        // available when the TOC is parsed.
-                        await page.parse(this);
+                        // available when the TOC is parsed. Also this might
+                        // be the toc (epub 3).
+                        const isToc = toc === href
+                        await page.parse(this,isToc);
+                        if (isToc) {
+                            this.toc = page;
+                        }
                         this.assetMap.set(href, page);
                         break;
                     case 'application/x-dtbncx+xml':
@@ -315,31 +321,36 @@ export class EpubBook {
                 this.ctx.reportProgress(++this.processed, this.fileCount);
             }
         }
-        // now, that we have all relevant assets, we can augment the metadata
-        const coverPage = this.meta.asString("coverPage");
-        if (coverPage) {
-            const asset = this.getAsset(coverPage);
+        // now, that we have all relevant assets, we can provide missing metadata
+        let coverImage = this.meta.asString("cover-image");
+        if (!coverImage) {
+            // attempt extractopn of the cover image from the cover page
+            const
+                cover = this.meta.asString("cover"),
+                asset = cover ? this.getAsset(cover) : undefined;
             // find the image in the content
             if (asset instanceof PageAsset && asset.page) {
                 const imgs = asset.page.body.getElementsByTagName("img");
                 if (imgs.length > 0) {
                     const src = imgs[0].getAttribute("src");
                     if (src) {
-                        this.coverImage = src.replace(/\.\.\//g, ""); // make relative to top
+                        coverImage = src.replace(/\.\.\//g, ""); // make relative to top
                     }
                 } else {
                     const images = asset.page.body.getElementsByTagName("image");
                     if (images.length > 0) {
                         const href = images[0].getAttribute("xlink:href") || images[0].getAttribute("href");
                         if (href) {
-                            this.coverImage = href.replace(/\.\.\//g, ""); // make relative to top
+                            coverImage = href;
                         }
                     }
                 }
             }
         }
         // ... and complete initialization to the content map
+        if (this.toc instanceof TocAsset) {
         await this.toc.parse(this);
+        }
     }
 
     async import(outputFolder: TFolder): Promise<void> {
