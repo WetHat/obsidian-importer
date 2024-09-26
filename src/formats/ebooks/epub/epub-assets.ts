@@ -1,5 +1,5 @@
 
-import { htmlToMarkdown, TFile, TFolder } from 'obsidian';
+import { TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
 import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, titleToBasename } from '../ebook-transformers';
