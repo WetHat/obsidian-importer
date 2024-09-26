@@ -337,14 +337,14 @@ export class EpubBook {
                 if (imgs.length > 0) {
                     const src = imgs[0].getAttribute("src");
                     if (src) {
-                        coverImage = asset.ToBookRelative(src); // make relative to top
+                        coverImage = asset.toBookRelativePath(src); // make relative to top
                     }
                 } else {
                     const images = asset.page.body.getElementsByTagName("image");
                     if (images.length > 0) {
                         const href = images[0].getAttribute("xlink:href") || images[0].getAttribute("href");
                         if (href) {
-                            coverImage = asset.ToBookRelative(href);
+                            coverImage = asset.toBookRelativePath(href);
                         }
                     }
                 }
@@ -386,9 +386,9 @@ export class EpubBook {
             }
             await asset.import(bookFolder);
             if (asset instanceof MediaAsset) {
-                this.ctx.reportAttachmentSuccess(asset.sourceAssetPath);
+                this.ctx.reportAttachmentSuccess(asset.sourcePath);
             } else {
-                this.ctx.reportNoteSuccess(asset.sourceAssetPath);
+                this.ctx.reportNoteSuccess(asset.sourcePath);
             }
             this.ctx.reportProgress(++this.processed, this.fileCount);
         }
