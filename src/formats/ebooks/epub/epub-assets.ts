@@ -57,30 +57,42 @@ export abstract class ImportableAsset {
     }
 
     /**
-     * Convert an asset relative link to a book relative link
+     * Convert a path which is relative to this asset to a book relative path.
      *
-     * @param link Asset relative link
-     * @returns Book relative link
+     * The link is typically taken from the content of this asset.
+     *
+     * @param relPath a path relative to this asset
+     * @returns Book relative path
      */
-    ToBookRelative(link: string) : string {
+    toBookRelativePath(relPath: string) : string {
         return normalizePath([
                 ...this.assetFolderPath,
                 "/",
-                link
+                relPath
             ].join(""));
     }
 
+    /**
+     * Get a relative path from this asset to another asset.
+     *
+     * @param targetAsset The other asset to generate a relative path to.
+     * @returns The relative path to the other asset.
+     */
+    relativePathTo(targetAsset: ImportableAsset) : string {
+        // lazy approach
+        return normalizePath("../".repeat(this.assetFolderPath.length) + targetAsset.outputPath);
+    }
     /**
      * This property is computed by derived classes.
      *
      * @see makeAssetPath
      *
      * @param encode `true` to url-encode the path
-     * @return Relative path of the asset relative to the book in the output folder.
+     * @return Path of the asset relative to the book in the output folder.
      */
-    abstract outputAssetPath(encode: boolean): string;
+    abstract outputPath(encode: boolean): string;
 
-    get sourceAssetPath(): string {
+    get sourcePath(): string {
         return this.makeAssetPath(this.source.basename, this.source.extension, false);
     }
     /**
@@ -110,7 +122,7 @@ export abstract class ImportableAsset {
                 await vault.createFolder(folderPath);
             }
         }
-        return bookOutputFolder.path + '/' + this.outputAssetPath(false);
+        return bookOutputFolder.path + '/' + this.outputPath(false);
     }
 }
 
@@ -142,19 +154,18 @@ export class PageAsset extends ImportableAsset {
     }
 
     /**
-     * Get a link to a page element or page in the book output folder,
+     * Get the fragment identifier (anchor) of page element,
      *
      * This method injects a code block into the location of the elment with the given
      * id for Markdown postprocessing to pick up.
      *
-     * @param targetID Optional id to an element in the page identified by that id.
-     * @returns link to a page element (if a `targetIS` was provided) or the
-     *          page (if no `targetID` eas provided).
+     * @param targetID Id of an element in the page document.
+     * @returns The fragment identifier to a page element in Obsidian format (`#^...`)
+     *          or an empty string if no elemnt with the given targetD could be cound
      */
-    getOutputPageLink(encode: boolean, targetID?: string): string {
-        const path = this.outputAssetPath(encode); // relative path to this node in the output folder
-        if (!targetID || !this.page) {
-            return path;
+    fragmentIdentifier(encode: boolean, targetID: string): string {
+        if (!this.page) {
+            return "";
         }
 
         // check if we already have a merker for this id
@@ -172,19 +183,19 @@ export class PageAsset extends ImportableAsset {
             }
 
             if (!e) {
-                return path; // no such element just link to the page
+                return ""; // no such element just link to the page
             }
 
             id = markElementAsLinkTarget(e);
             if (!id) {
-                return path; // hust link to the page
+                return ""; // hust link to the page
             }
             this.linkTargetMap.set(targetID, id); // remember that
         }
-        return path + "#^" + id; // the Obsidian link format;
+        return "#^" + id; // the Obsidian link format;
     }
 
-    outputAssetPath(encode: boolean): string {
+    outputPath(encode: boolean): string {
         const basename = titleToBasename(this.pageTitle ?? this.source.basename);
         return this.makeAssetPath(basename, "md", encode);
     }
@@ -235,9 +246,9 @@ export class PageAsset extends ImportableAsset {
                 const
                     parts = href.split("#"),
                     [path, id] = parts,
-                    asset = path ? book.getAsset(path) : this;
-                if (asset instanceof PageAsset) {
-                    const link = asset.getOutputPageLink(true, id);
+                    targetAsset = path ? book.getAsset(this.toBookRelativePath(path)) : this;
+                if (targetAsset instanceof PageAsset) {
+                    const link = this.relativePathTo(targetAsset) + targetAsset.fragmentIdentifier(true, id);
                     a.setAttribute("href", link);
                     // we also need to make sure the link text is compatible with
                     // markdown links
@@ -267,7 +278,7 @@ export class PageAsset extends ImportableAsset {
                 ""
             ];
         } else {
-            const outputPath = this.book.toc?.outputAssetPath(false);
+            const outputPath = this.book.toc?.outputPath(false);
             markdown = [
                 "---",
                 outputPath ? `book: "[[${outputPath}|${this.book.title}]]"` : `"${this.book.title}"`,
@@ -290,7 +301,7 @@ export class MediaAsset extends ImportableAsset {
         super(source, href, mimetype);
     }
 
-    outputAssetPath(encode: boolean): string {
+    outputPath(encode: boolean): string {
         return this.makeAssetPath(this.source.basename, this.source.extension, encode);
     }
 
@@ -333,9 +344,9 @@ class NavLink {
                         asset.pageTitle = navtext;
                     }
                 }
-                this.assetLink = asset.getOutputPageLink(false, id);
+                this.assetLink = asset.outputPath(false) + asset.fragmentIdentifier(false, id);
             } else {
-                this.assetLink = asset ? asset.outputAssetPath(false) : srcPath;
+                this.assetLink = asset ? asset.outputPath(false) : srcPath;
             }
         }
     }
@@ -385,7 +396,7 @@ export class TocAsset extends ImportableAsset {
         return bookOutpuFolder.vault.create(path, content.join("\n"));
     }
 
-    outputAssetPath(encode: boolean): string {
+    outputPath(encode: boolean): string {
         return this.makeAssetPath('§ Title Page', 'md', encode);
     }
 
