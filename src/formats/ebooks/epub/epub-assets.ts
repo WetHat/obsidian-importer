@@ -192,7 +192,7 @@ export class PageAsset extends ImportableAsset {
 			const basename = titleToBasename(value);
 			let
 				ndx = 0,
-				filename = basename + ".md";
+				filename = basename + '.md';
 			while (!this.book.registerFilename(filename)) {
 				filename = `${basename} (${++ndx}).md`;
 			}

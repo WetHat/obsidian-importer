@@ -301,7 +301,7 @@ export class EpubBook {
 					epubPath = this.getSourcePath(source),
 					mimetype = this.mimeMap.get(epubPath) ?? '?';
 				switch (mimetype) {
-					case "text/html":
+					case 'text/html':
 					case 'application/xhtml+xml':
 						// a book page
 						const page = new PageAsset(source, epubPath, mimetype);
