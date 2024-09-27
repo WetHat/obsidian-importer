@@ -123,7 +123,7 @@ class BookMetadata {
  */
 export class EpubBook {
 	private vault: Vault;
-	private sourcePrefix: string; // the ZIP parent directory path to the e-book
+	private sourcePrefix: string; // the ZIP directory path to the e-book
 	private mimeMap = new Map<string, string>(); // asset source path => mimetype
 	private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
 	readonly parser = new DOMParser(); // the parser instance to use
@@ -135,9 +135,9 @@ export class EpubBook {
 	private _tags: string[] = [];
 
 	// some progress data
-	ctx: ImportContext;
-	fileCount = 0;
-	processed = 0;
+	private ctx: ImportContext;
+	private fileCount = 0;
+	private processed = 0;
 
 	get frontmatter(): string[] {
 		return [
@@ -249,10 +249,10 @@ export class EpubBook {
 	/**
 	 * Register a filename for an asset.
 	 *
-	 * Registration is needed to assure filenames are unique.
+	 * Registration is needed to make filenames are unique.
 	 *
 	 * @param filename The filename to register
-	 * @returns `true` if the filename was registered; `false` if the filename is already in use.
+	 * @returns `true` if the filename is unique and was registered successfully; `false` if the filename is already in use.
 	 */
 	registerFilename(filename: string) : boolean {
 		if (this.filenameRegistry.has(filename)) {
