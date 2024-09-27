@@ -28,14 +28,14 @@ export abstract class ImportableAsset {
 	/**
      * Create anew instance of an importable asset.
      *
-     * @param source The ZIP file source of the asset.
-     * @param href The book relative hyperlink of the asset
+     * @param source The epub ZIP archive source of the asset.
+     * @param sourcePath The path relative to the book's folder in the epub ZIP archive.
      * @param mimetype Asset mimetype
      */
-	protected constructor(source: ZipEntryFile, href: string, mimetype: string) {
+	protected constructor(source: ZipEntryFile, sourcePath: string, mimetype: string) {
 		this.mimetype = mimetype;
 		this.source = source;
-		const parts = href.split('/');
+		const parts = sourcePath.split('/');
 		this.assetFolderPath = parts.slice(0, parts.length - 1); // strip the filename
 	}
 
@@ -172,8 +172,8 @@ export class PageAsset extends ImportableAsset {
 	private book?: EpubBook;
 	linkTargetMap = new Map<string, string>(); // id => sanitized ID
 
-	constructor(source: ZipEntryFile, href: string, mimetype: string) {
-		super(source, href, mimetype);
+	constructor(source: ZipEntryFile, sourcePath: string, mimetype: string) {
+		super(source, sourcePath, mimetype);
 	}
 
 	/**
@@ -324,8 +324,8 @@ export class PageAsset extends ImportableAsset {
  * Media asset used on pages of the e-book.
  */
 export class MediaAsset extends ImportableAsset {
-	constructor(source: ZipEntryFile, href: string, mimetype: string) {
-		super(source, href, mimetype);
+	constructor(source: ZipEntryFile, sourcePath: string, mimetype: string) {
+		super(source, sourcePath, mimetype);
 	}
 
 	get outputFilename(): string {
@@ -400,8 +400,8 @@ export class TocAsset extends ImportableAsset {
 	// a flat version of the content map
 	navList: NavLink[] = [];
 
-	constructor(source: ZipEntryFile, href: string, mimetype: string) {
-		super(source, href, mimetype);
+	constructor(source: ZipEntryFile, sourcePath: string, mimetype: string) {
+		super(source, sourcePath, mimetype);
 	}
 
 	async import(bookOutpuFolder: TFolder): Promise<TFile> {
