@@ -127,6 +127,7 @@ export class EpubBook {
 	private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
 	readonly parser = new DOMParser(); // the parser instance to use
 	private meta: BookMetadata; // The books metadata
+	private filenameRegistry = new Set<string>;
 
 	toc?: TocAsset | PageAsset;
 
@@ -241,6 +242,23 @@ export class EpubBook {
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Register a filename for an asset.
+	 *
+	 * Registration is needed to assure filenames are unique.
+	 *
+	 * @param filename The filename to register
+	 * @returns `true` if the filename was registered; `false` if the filename is already in use.
+	 */
+	registerFilename(filename: string) : boolean {
+		if (this.filenameRegistry.has(filename)) {
+			return false;
+		}
+		this.filenameRegistry.add(filename);
+		return true;
 	}
 
 	/**
