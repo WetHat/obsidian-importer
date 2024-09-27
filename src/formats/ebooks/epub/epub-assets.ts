@@ -9,29 +9,29 @@ import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLi
  */
 export abstract class ImportableAsset {
 	/**
-     * asset source in the ZIP archive.
-     * Needed for delazd loading of the asset contents
-     */
+	 * asset source in the ZIP archive.
+	 * Needed for delazd loading of the asset contents
+	 */
 	protected source: ZipEntryFile;
 
 	/**
-     * The relative folder path to an asset relative to the book.
-     * Will also used as the relative folder path in the output folder.
-     */
+	 * The relative folder path to an asset relative to the book.
+	 * Will also used as the relative folder path in the output folder.
+	 */
 	assetFolderPath: string[];
 
 	/**
-     * The mimetype of the asset as defined in the book's manifest.
-     */
+	 * The mimetype of the asset as defined in the book's manifest.
+	 */
 	mimetype: string;
 
 	/**
-     * Create anew instance of an importable asset.
-     *
-     * @param source The epub ZIP archive source of the asset.
-     * @param sourcePath The path relative to the book's folder in the epub ZIP archive.
-     * @param mimetype Asset mimetype
-     */
+	 * Create anew instance of an importable asset.
+	 *
+	 * @param source The epub ZIP archive source of the asset.
+	 * @param sourcePath The path relative to the book's folder in the epub ZIP archive.
+	 * @param mimetype Asset mimetype
+	 */
 	protected constructor(source: ZipEntryFile, sourcePath: string, mimetype: string) {
 		this.mimetype = mimetype;
 		this.source = source;
@@ -40,13 +40,13 @@ export abstract class ImportableAsset {
 	}
 
 	/**
-     * A utility function to build a relative path to an asset.
-     *
-     * Works for both source and output paths as they share a common, relative folder path.
-     *
-     * @param filename Name
-     * @returns a link relative to the book or source folder.
-     */
+	 * A utility function to build a relative path to an asset.
+	 *
+	 * Works for both source and output paths as they share a common, relative folder path.
+	 *
+	 * @param filename Name
+	 * @returns a link relative to the book or source folder.
+	 */
 	protected makeAssetPath(filename: string): string {
 		return [
 			...this.assetFolderPath,
@@ -55,18 +55,18 @@ export abstract class ImportableAsset {
 	}
 
 	/**
-     * Convert a path which is relative to this asset to a book relative path.
-     *
-     * The link is typically taken from the content of this asset.
-     *
-     * @param relPath a path relative to this asset
-     * @returns Book relative path
-     */
+	 * Convert a path which is relative to this asset to a book relative path.
+	 *
+	 * The link is typically taken from the content of this asset.
+	 *
+	 * @param relPath a path relative to this asset
+	 * @returns Book relative path
+	 */
 	pathFromBook(relPath: string): string {
 		const
 			thisPath = Array.from(this.assetFolderPath),
 			targetPath = relPath.split('/');
-		while (targetPath.length > 0 && targetPath[0] === '..' ) {
+		while (targetPath.length > 0 && targetPath[0] === '..') {
 			thisPath.pop();
 			targetPath.unshift();
 		}
@@ -77,11 +77,11 @@ export abstract class ImportableAsset {
 	}
 
 	/**
-     * Get a relative path from this asset to another asset.
-     *
-     * @param targetAsset The other asset to generate a relative path to.
-     * @returns The relative path to the other asset.
-     */
+	 * Get a relative path from this asset to another asset.
+	 *
+	 * @param targetAsset The other asset to generate a relative path to.
+	 * @returns The relative path to the other asset.
+	 */
 	relativePathTo(targetAsset: ImportableAsset): string {
 		let
 			thisPath = Array.from(this.assetFolderPath),
@@ -95,57 +95,57 @@ export abstract class ImportableAsset {
 		return '../'.repeat(thisPath.length) + targetPath.join('/');
 	}
 	/**
-     * Get the path to the asset relatice the book output folder.
-     *
-     * @see makeAssetPath
-     *
-     * @param encode `true` to url-encode the path
-     * @return Path relative to the book in the output folder.
-     */
+	 * Get the path to the asset relatice the book output folder.
+	 *
+	 * @see makeAssetPath
+	 *
+	 * @param encode `true` to url-encode the path
+	 * @return Path relative to the book in the output folder.
+	 */
 	get outputPath(): string {
 		return this.makeAssetPath(this.outputFilename);
 	}
 
 	/**
-     * This property is implemented by derived classes and contains the
-     * the desired filena, of the asset in the book output folder (including file extension).
-     *
-     * @type {string}
-     */
+	 * This property is implemented by derived classes and contains the
+	 * the desired filena, of the asset in the book output folder (including file extension).
+	 *
+	 * @type {string}
+	 */
 	abstract get outputFilename(): string;
 
 	get sourceFilename(): string {
-    	return this.source.basename + '.' + this.source.extension;
+		return this.source.basename + '.' + this.source.extension;
 	}
 
 	/**
-     *
-     * @param bookOutpuFolder Import the asset to the book's output folder.
-     * @returns The imported file.
-     */
+	 *
+	 * @param bookOutpuFolder Import the asset to the book's output folder.
+	 * @returns The imported file.
+	 */
 	abstract import(bookOutpuFolder: TFolder): Promise<TFile>;
 
 	/**
-     * Get the fully qualified path to the output location of this asset.
-     *
-     * Missing folders in the output path are created if they do not exist-
-     *
-     * @param bookOutputFolder The out put folder
-     * @returns full vault path.
-     */
+	 * Get the fully qualified path to the output location of this asset.
+	 *
+	 * Missing folders in the output path are created if they do not exist-
+	 *
+	 * @param bookOutputFolder The out put folder
+	 * @returns full vault path.
+	 */
 	async getVaultOutputPath(bookOutputFolder: TFolder): Promise<string> {
-    	const
-    		vault = bookOutputFolder.vault,
-    		fs = vault.adapter,
-    		folderCount = this.assetFolderPath.length;
-    	let folderPath = bookOutputFolder.path;
-    	for (let i = 0; i < folderCount; i++) {
-    		folderPath += '/' + this.assetFolderPath[i];
-    		if (!await fs.exists(folderPath)) {
-    			await vault.createFolder(folderPath);
-    		}
-    	}
-    	return bookOutputFolder.path + '/' + this.outputPath;
+		const
+			vault = bookOutputFolder.vault,
+			fs = vault.adapter,
+			folderCount = this.assetFolderPath.length;
+		let folderPath = bookOutputFolder.path;
+		for (let i = 0; i < folderCount; i++) {
+			folderPath += '/' + this.assetFolderPath[i];
+			if (!await fs.exists(folderPath)) {
+				await vault.createFolder(folderPath);
+			}
+		}
+		return bookOutputFolder.path + '/' + this.outputPath;
 	}
 }
 
@@ -153,23 +153,23 @@ export abstract class ImportableAsset {
  * Representation of a page in the epub book.
  */
 export class PageAsset extends ImportableAsset {
+	private book?: EpubBook;
 	/**
-     * Flag to indicate if this page is in table of contents format (nav).
-     *
-     * @type boolean
-     */
+	 * Flag to indicate if this page is in table of contents format (nav).
+	 *
+	 * @type boolean
+	 */
 	toc: boolean = false;
 	/**
-     * The html document generated by {@link PageAsset.parse}.
-     * @type {Document}
-     */
+	 * The html document generated by {@link PageAsset.parse}.
+	 * @type {Document}
+	 */
 	page?: Document;
-	/**
-     * The book's title as specified in the content map file `toc.ncx`
-     * of the book.
-     */
-	pageTitle?: string;
-	private book?: EpubBook;
+
+	private _pageTitle?: string;
+
+	private _filename?: string;
+
 	linkTargetMap = new Map<string, string>(); // id => sanitized ID
 
 	constructor(source: ZipEntryFile, sourcePath: string, mimetype: string) {
@@ -177,15 +177,39 @@ export class PageAsset extends ImportableAsset {
 	}
 
 	/**
-     * Get the fragment identifier (anchor) of page element,
-     *
-     * This method injects a code block into the location of the elment with the given
-     * id for Markdown postprocessing to pick up.
-     *
-     * @param targetID Id of an element in the page document.
-     * @returns The fragment identifier to a page element in Obsidian format (`#^...`)
-     *          or an empty string if no elemnt with the given targetD could be cound
-     */
+	 * The book's title as specified in the pages <title> tag or in the content map `ncx` file
+	 * of the book.
+	 */
+	get pageTitle(): string | undefined {
+		return this._pageTitle;
+	}
+
+	set pageTitle(value: string) {
+		this._pageTitle = value;
+		if (this.book) {
+			// the page title is also used for the filename.
+			// hence we generate a unique filename right away,
+			const basename = titleToBasename(value);
+			let
+				ndx = 0,
+				filename = basename + ".md";
+			while (!this.book.registerFilename(filename)) {
+				filename = `${basename} (${++ndx}).md`;
+			}
+			this._filename = filename;
+		}
+	}
+
+	/**
+	 * Get the fragment identifier (anchor) of page element,
+	 *
+	 * This method injects a code block into the location of the elment with the given
+	 * id for Markdown postprocessing to pick up.
+	 *
+	 * @param targetID Id of an element in the page document.
+	 * @returns The fragment identifier to a page element in Obsidian format (`#^...`)
+	 *          or an empty string if no elemnt with the given targetD could be cound
+	 */
 	fragmentIdentifier(targetID: string): string {
 		if (!this.page) {
 			return '';
@@ -220,7 +244,7 @@ export class PageAsset extends ImportableAsset {
 	}
 
 	get outputFilename(): string {
-		return titleToBasename(this.pageTitle ?? this.source.basename) + '.md';
+		return this._filename ?? (this.source.basename + '.md');
 	}
 
 	async parse(book: EpubBook, toc: boolean): Promise<void> {
@@ -259,12 +283,12 @@ export class PageAsset extends ImportableAsset {
 	}
 
 	/**
-     * Reconnect all links on this page pointing to other assets.
-     *
-     * Searches for all hyperlinks, extracts link target ids,
-     * computes the correct link in the book output folder and
-     * updated the each hyperlink.
-     */
+	 * Reconnect all links on this page pointing to other assets.
+	 *
+	 * Searches for all hyperlinks, extracts link target ids,
+	 * computes the correct link in the book output folder and
+	 * updated the each hyperlink.
+	 */
 	reconnectLinks(book: EpubBook) {
 		this.page?.body.querySelectorAll('a[href]').forEach(a => {
 			const href = a.getAttribute('href');
@@ -333,11 +357,11 @@ export class MediaAsset extends ImportableAsset {
 	}
 
 	/**
-     * Import the asset into the corrent location of the book's output folder.
-     *
-     * @param bookOutputFolder The book's output folder.
-     * @returns THe Obsidian file
-     */
+	 * Import the asset into the corrent location of the book's output folder.
+	 *
+	 * @param bookOutputFolder The book's output folder.
+	 * @returns THe Obsidian file
+	 */
 	async import(bookOutputFolder: TFolder): Promise<TFile> {
 		const outputPath = await this.getVaultOutputPath(bookOutputFolder);
 		return bookOutputFolder.vault.createBinary(outputPath, await this.source.read());
