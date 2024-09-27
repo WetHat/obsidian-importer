@@ -282,6 +282,7 @@ export class EpubBook {
 					href = this.getSourcePath(source),
 					mimetype = this.mimeMap.get(href) ?? '?';
 				switch (mimetype) {
+					case "text/html":
 					case 'application/xhtml+xml':
 						// a book page
 						const page = new PageAsset(source, href, mimetype);
@@ -392,14 +393,14 @@ export class EpubBook {
 			try {
 				await asset.import(bookFolder);
 				if (asset instanceof MediaAsset) {
-					this.ctx.reportAttachmentSuccess(asset.sourceFilename);
+					this.ctx.reportAttachmentSuccess(asset.outputFilename);
 				}
 				else {
-					this.ctx.reportNoteSuccess(asset.sourceFilename);
+					this.ctx.reportNoteSuccess(asset.outputFilename);
 				}
 			}
 			catch (ex:any) {
-				this.ctx.reportFailed(asset.sourceFilename,ex.message);
+				this.ctx.reportFailed(asset.outputFilename,ex.message);
 			}
 
 			this.ctx.reportProgress(++this.processed, this.fileCount);
