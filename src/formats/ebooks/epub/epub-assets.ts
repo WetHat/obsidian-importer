@@ -63,9 +63,16 @@ export abstract class ImportableAsset {
      * @returns Book relative path
      */
 	pathFromBook(relPath: string): string {
+		const
+			thisPath = Array.from(this.assetFolderPath),
+			targetPath = relPath.split('/');
+		while (targetPath.length > 0 && targetPath[0] === '..' ) {
+			thisPath.pop();
+			targetPath.unshift();
+		}
 		return [
-			...this.assetFolderPath,
-			relPath
+			...thisPath,
+			...targetPath
 		].join('/');
 	}
 
