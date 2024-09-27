@@ -98,7 +98,9 @@ export function injectCodeBlock(element: HTMLElement) {
 			firstChild = pre.firstChild;
 		}
 
-		if (firstChild && firstChild.nodeName !== 'code') {
+		let firstChildelement = pre.firstElementChild;
+
+		if (firstChildelement && firstChildelement.localName !== 'code') {
 			const code = element.doc.createElement('code');
 			code.setAttribute('class', 'language-undefined');
 			while (firstChild) {
