@@ -116,7 +116,8 @@ class BookMetadata {
 }
 
 /**
- * Representation of an e-pub book prepared for imported to Obsidian.
+ * A builder class to facilitate the import of epub books to Obsidian.
+ *
  *
  * This class also defines and executes the necessary import workflow.
  */
@@ -290,35 +291,35 @@ export class EpubBook {
 		}
 		this.ctx.status('Parsing epub file contents');
 		await this.parseManifest(manifestSource);
-		const toc = this.meta.asString('toc');
+		const tocPath = this.meta.asString('toc');
 		// now check all files from the ZIP against the manifest and create
 		// the appropriate asset facade instances.
 		for (const source of entries) {
 			// get the type from the manifest
 			if (source.filepath.startsWith(this.sourcePrefix)) {
 				const
-					href = this.getSourcePath(source),
-					mimetype = this.mimeMap.get(href) ?? '?';
+					epubPath = this.getSourcePath(source),
+					mimetype = this.mimeMap.get(epubPath) ?? '?';
 				switch (mimetype) {
 					case "text/html":
 					case 'application/xhtml+xml':
 						// a book page
-						const page = new PageAsset(source, href, mimetype);
+						const page = new PageAsset(source, epubPath, mimetype);
 						// we need to parse right away so that all pages are
 						// available when the TOC is parsed. Also this might
 						// be the toc (epub 3).
-						const isToc = toc === href;
+						const isToc = tocPath === epubPath;
 						await page.parse(this, isToc);
 						if (isToc && !this.toc) {
 							this.toc = page;
 						}
-						this.assetMap.set(href, page);
+						this.assetMap.set(epubPath, page);
 						break;
 					case 'application/x-dtbncx+xml':
 						// the content map of the book
-						this.toc = new TocAsset(source, href, mimetype);
+						this.toc = new TocAsset(source, epubPath, mimetype);
 						// defer parsing until all pages are available
-						this.assetMap.set(href, this.toc);
+						this.assetMap.set(epubPath, this.toc);
 						break;
 					case 'text/css':
 						// we are going to ignore stylesheets and files not in the manifest
@@ -333,7 +334,7 @@ export class EpubBook {
 					default:
 						if (source.extension) {
 							// media can me imported without pre-processing
-							this.assetMap.set(href, new MediaAsset(source, href, mimetype));
+							this.assetMap.set(epubPath, new MediaAsset(source, epubPath, mimetype));
 						}
 						else {
 							this.ctx.reportSkipped(`'${source.name}' has unsupported mimetype: ${mimetype}`);
@@ -427,12 +428,13 @@ export class EpubBook {
 }
 
 /**
- * The ePub book importer.
- * @param vault
- * @param epub
- * @param outputFolder
- * @param ctx
- * @returns
+ * Import ePub format e-books.
+ *
+ * @param vault THe Obsidian vault to import to.
+ * @param epub THe ePub file selected for import.
+ * @param outputFolder A folder in the Obsidian vault where to import te book to.
+ * @param ctx Import progress reporting object-
+ * @returns THe ePpub book object
  */
 export async function importEpubBook(vault: Vault, epub: PickedFile, outputFolder: TFolder, ctx: ImportContext): Promise<EpubBook> {
 	const doc = new EpubBook(vault, ctx);
