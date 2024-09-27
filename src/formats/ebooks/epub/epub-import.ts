@@ -162,7 +162,7 @@ export class EpubBook {
 	}
 
 	/**
-     * @type
+     * @type {string[]}
      */
 	get tags(): string[] {
 		return this._tags;
@@ -389,14 +389,19 @@ export class EpubBook {
 			if (this.ctx.cancelled) {
 				return;
 			}
-			console.log(`Importing ${asset.sourceFilename} - ${asset.outputPath}`);
-			await asset.import(bookFolder);
-			if (asset instanceof MediaAsset) {
-				this.ctx.reportAttachmentSuccess(asset.sourceFilename);
+			try {
+				await asset.import(bookFolder);
+				if (asset instanceof MediaAsset) {
+					this.ctx.reportAttachmentSuccess(asset.sourceFilename);
+				}
+				else {
+					this.ctx.reportNoteSuccess(asset.sourceFilename);
+				}
 			}
-			else {
-				this.ctx.reportNoteSuccess(asset.sourceFilename);
+			catch (ex:any) {
+				this.ctx.reportFailed(asset.sourceFilename,ex.message);
 			}
+
 			this.ctx.reportProgress(++this.processed, this.fileCount);
 		}
 	}
