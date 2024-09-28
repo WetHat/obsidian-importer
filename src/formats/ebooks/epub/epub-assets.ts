@@ -2,7 +2,7 @@
 import { TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
-import { convertToMarkdown, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, mermaidToCodeBlock, titleToBasename } from '../ebook-transformers';
+import { convertToMarkdown, entityTransformer, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, mermaidToCodeBlock, titleToBasename, transformText } from '../ebook-transformers';
 
 /**
  * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
@@ -250,9 +250,8 @@ export class PageAsset extends ImportableAsset {
 	async parse(book: EpubBook, toc: boolean): Promise<void> {
 		this.book = book;
 		this.toc = toc;
+
 		const html = (await this.source.readText());
-		//	.replace(/&lt;/g, '＜')
-		//	.replace(/&gt;/g, '＞'); // replace Obsidian unfriendly html entities.
 		// we need to use the `text/html`so that Obsidian produces usable Markdown!
 		this.page = book.parser.parseFromString(html, 'text/html');
 		const ttl = this.page.title;
@@ -279,6 +278,9 @@ export class PageAsset extends ImportableAsset {
 				mermaidToCodeBlock(body);
 				injectCodeBlock(body);
 				hoistTableCaptions(body);
+				transformText(body,(node:Node) => {
+					entityTransformer(node);
+				});
 			}
 		}
 	}
