@@ -250,9 +250,9 @@ export class PageAsset extends ImportableAsset {
 	async parse(book: EpubBook, toc: boolean): Promise<void> {
 		this.book = book;
 		this.toc = toc;
-		const html = (await this.source.readText())
-			.replace(/&lt;/g, '＜')
-			.replace(/&gt;/g, '＞'); // replace Obsidian unfriendly html entities.
+		const html = (await this.source.readText());
+		//	.replace(/&lt;/g, '＜')
+		//	.replace(/&gt;/g, '＞'); // replace Obsidian unfriendly html entities.
 		// we need to use the `text/html`so that Obsidian produces usable Markdown!
 		this.page = book.parser.parseFromString(html, 'text/html');
 		const ttl = this.page.title;
