@@ -53,6 +53,31 @@ export function toFrontmatterTagname(tagname: string) {
 		.replace(/\s+/g, '-');
 }
 
+type TTExtTransformer = (textNode: Node) => void;
+
+export function entityTransformer(textNode: Node) {
+	const text = textNode.textContent;
+	if (text && textNode.parentElement?.localName !== "code") {
+		 // replace Obsidian unfriendly html entities.
+		const transformed = text
+			.replace(/&gt;/g, '＞')
+			.replace(/&gt;/g, '＞');
+		if (transformed !== text) {
+			textNode.textContent = transformed;
+		}
+	}
+}
+
+export function transformText(node: Node, transformer: TTExtTransformer) {
+	node.childNodes.forEach( n => {
+		if (n.nodeType === Node.TEXT_NODE) {
+			transformer(n);
+		} else {
+			transformText(n,transformer);
+		}
+	});
+}
+
 /**
  * Put mermaid diagrams into a code block so that Obsidian can pick them up.
  *
