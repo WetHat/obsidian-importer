@@ -49,7 +49,8 @@ export function toFrontmatterTagname(tagname: string) {
 		.replace(/^#/, '') // get rid of the leading #
 		.replace(/#/g, '＃') // transform internal hashes
 		.replace(/"'/g, "ʼ")
-		.replace(/\s*[&+.\\:;\[\(\{]\s*/g, ',') // generate multiple tags
+		.replace(/\s*[\\/:.]\s*/g, "/")
+		.replace(/\s*[&+;\[\(\{]\s*/g, ',') // generate multiple tags
 		.replace(/s*[\)\]\}]\s*/g, '')
 		.replace(/\s+/g, '-');
 }
