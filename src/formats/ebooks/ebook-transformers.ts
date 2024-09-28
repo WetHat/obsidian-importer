@@ -54,6 +54,56 @@ export function toFrontmatterTagname(tagname: string) {
 }
 
 /**
+ * Put mermaid diagrams into a code block so that Obsidian can pick them up.
+ *
+ * @param element the HTML element to scan for mermaid diagrams
+ */
+export function mermaidToCodeBlock(element: Element) {
+	const
+		mermaids = element.getElementsByClassName("mermaid"),
+		mermaidCount = mermaids.length;
+
+	for (let i = 0; i < mermaidCount; i++) {
+		const mermaid = mermaids[i];
+
+		switch (mermaid.localName) {
+			case "code":
+				mermaid.classList.add("language-mermaid");
+				const mermaidParent = mermaid.parentElement;
+				if (mermaidParent && mermaidParent.localName !== "pre"){
+					const pre = mermaid.doc.createElement("pre");
+					mermaidParent.insertBefore(pre,mermaid);
+					pre.append(mermaid);
+				}
+				break;
+
+			case "pre":
+				if (mermaid.firstElementChild?.localName !== "code") {
+					const code = mermaid.doc.createElement("code");
+					code.className = "language-mermaid";
+					while (mermaid.firstChild) {
+						code.append(mermaid.firstChild);
+					}
+					mermaid.append(code);
+				}
+				break;
+
+			default:
+				const
+					pre = mermaid.doc.createElement("pre"),
+					code = mermaid.doc.createElement("code");
+				code.className = "language-mermaid";
+				pre.append(code);
+				while (mermaid.firstChild) {
+					code.append(mermaid.firstChild);
+				}
+				mermaid.append(pre);
+				break;
+		}
+	}
+}
+
+/**
  * An HTML transformation to hoist '<caption>' elements inside a `<table>` to the first positions
  * for Obsidian to process them correctly.
  *
