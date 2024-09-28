@@ -45,7 +45,7 @@ export function titleToBasename(title: string): string {
 }
 
 export function toFrontmatterTagname(tagname: string) {
-	return tagname
+	return tagname.trim()
 		.replace(/^#/, '') // get rid of the leading #
 		.replace(/#/g, '＃') // transform internal hashes
 		.replace(/\s*[&+.\\:;\[\(\{]\s*/g, ',') // generate multiple tags
@@ -95,9 +95,9 @@ export function mermaidToCodeBlock(element: Element) {
 			case "code":
 				mermaid.classList.add("language-mermaid");
 				const mermaidParent = mermaid.parentElement;
-				if (mermaidParent && mermaidParent.localName !== "pre"){
+				if (mermaidParent && mermaidParent.localName !== "pre") {
 					const pre = mermaid.doc.createElement("pre");
-					mermaidParent.insertBefore(pre,mermaid);
+					mermaidParent.insertBefore(pre, mermaid);
 					pre.append(mermaid);
 				}
 				break;
@@ -192,19 +192,19 @@ export function injectCodeBlock(element: HTMLElement) {
  */
 const enum BlockMarkerStrategy {
 	/**
-     * Insert an Obsidian link target marker after the HTMK block element.
-     */
+	 * Insert an Obsidian link target marker after the HTMK block element.
+	 */
 	InsertAfter = 1,
 	/**
-     * Append an Obsidian link target marker to the child elements of
-     * an HTML block element.
-     */
+	 * Append an Obsidian link target marker to the child elements of
+	 * an HTML block element.
+	 */
 	Append,
 
 	/**
-     * Descend into the sub-structure of an HTML block element to find
-     * an HTML element to mark with an Obsidian link target.
-     */
+	 * Descend into the sub-structure of an HTML block element to find
+	 * an HTML element to mark with an Obsidian link target.
+	 */
 	Descend
 }
 
@@ -252,7 +252,7 @@ const MARK_STRATEGIES = new Map<string, BlockMarkerStrategy>([
  * @param element An element of a HTML document to mark as Obsidian link target.
  * @returns The obsidian compatible link target id (not necessarily the given the element's id).
  */
-export function markElementAsLinkTarget(element: Element): string|undefined {
+export function markElementAsLinkTarget(element: Element): string | undefined {
 	// Now, that we have an id, find the best element and attachment strategy
 	let
 		strategy: BlockMarkerStrategy | undefined,
@@ -292,7 +292,7 @@ export function markElementAsLinkTarget(element: Element): string|undefined {
 
 	// Now that we have an element to work with, check if it already has a marker we can use.
 	// we do that to avoid proliveration of multiple markers on the same element.
-	let aliasID : string | undefined;
+	let aliasID: string | undefined;
 	switch (strategy) {
 		case BlockMarkerStrategy.InsertAfter:
 			// look before this element for a marker
@@ -310,7 +310,7 @@ export function markElementAsLinkTarget(element: Element): string|undefined {
 	// attach a marker to the targetElement
 
 	// determine the id to use. try a sanitized version of the element's id first
-	let id:string | undefined = element.getAttribute('id')?.replace(/[_\.:]+/g, '-');
+	let id: string | undefined = element.getAttribute('id')?.replace(/[_\.:]+/g, '-');
 	if (!id || !/^[a-zA-Z][\w\-.]*$/.test(id)) {
 		// make up an Obsidian compatible id
 		id = (Math.random() * 1000000000000000000).toString(24);
@@ -346,8 +346,8 @@ export function markElementAsLinkTarget(element: Element): string|undefined {
  * @param html The HTML document to convert and post-process.
  * @returns Post-processed Markdown
  */
-export function convertToMarkdown (html: Document) : string {
-	return htmlToMarkdown(html.body)
+export function convertToMarkdown(html: Document): string {
+	return htmlToMarkdown(html.body.doc)
 		.replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, '$1$3\n\n') // link targets
 		.replace(/{{newline}}/g, '\n');
 }
