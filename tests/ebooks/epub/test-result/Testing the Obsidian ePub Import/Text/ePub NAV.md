@@ -11,8 +11,6 @@ tags: [e-book]
 > <span style="float:Right;">![[undefined|300]]</span>
 > This book contains regression test for the Obsidian epub importer. The pages in this book are partially handcrafted but also ectracted from other books to verify that the importer is fully operational. The import result is indended to be copied to the `test-result` folder snd checked-in, so that a git diff can be used to detect differences
 
-  
-
 # Table of Contents
 
 1. [Regression Testing Code Syntax Highlighting Import](Code%20Syntax%20highlighting.md)
@@ -30,22 +28,22 @@ tags: [e-book]
     2. [LaTeX Math](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^latex-math)
     3. [Code Syntax Highlighting](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^code-syntax-highlighting)
     4. [Svgbob Plain Text Diagrams](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^svgbob-plain-text-diagrams)
-5. [Regression Testing unmarked code blocks and html entities (< & >)](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md)
-6. [Chapter 24. Span<T> and Memory<T>](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-17)
-    1. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-3)
-    2. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-4)
-    3. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-5)
-7. [Spans and Slicing](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-6)
-    1. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-7)
-    2. [CopyTo and TryCopyTo](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-8)
-    3. [Working with Text](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-9)
-        1. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-10)
-8. [Memory<T>](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-11)
-    1. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-12)
-    2. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-13)
-9. [Forward-Only Enumerators](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-14)
-10. [Working with Stack-Allocated and Unmanaged Memory](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-15)
-    1. [Note](Regression%20Testing%20unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-16)
+5. [Unmarked code blocks and html entities (< & >)](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md)
+    1. [Chapter 24. Span<T> and Memory<T>](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-17)
+        1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-3)
+        2. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-4)
+        3. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-5)
+    2. [Spans and Slicing](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-6)
+        1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-7)
+    3. [CopyTo and TryCopyTo](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-8)
+    4. [Working with Text](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-9)
+        1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-10)
+    5. [Memory<T>](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-11)
+        1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-12)
+        2. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-13)
+    6. [Forward-Only Enumerators](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-14)
+    7. [Working with Stack-Allocated and Unmanaged Memory](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-15)
+        1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-16)
 
 # Landmarks
 

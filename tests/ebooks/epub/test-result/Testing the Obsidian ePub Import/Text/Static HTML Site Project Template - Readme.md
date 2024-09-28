@@ -3,8 +3,6 @@ book: "[[../§ Title Page.md|Testing the Obsidian ePub Import]]"
 tags: e-book
 ---
 
-  
-
 # Static HTML Site Project Template - Readme
 
 _If you are reading this `README` file as Markdown source, consider building the project first by running the build script `Build.ps1` and then open `README.html` in the browser._
