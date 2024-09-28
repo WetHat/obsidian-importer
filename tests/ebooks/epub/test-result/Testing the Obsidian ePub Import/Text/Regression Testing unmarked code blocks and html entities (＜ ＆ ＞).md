@@ -5,7 +5,14 @@ tags: e-book
 
     
 
-# Chapter 24. Span<T> and Memory<T>
+# Regression Testing unmarked code blocks and html entities (＜ & ＞)
+
+A page taken from the book _C＃ 8.0 in a Nutshell꞉ The Definitive Reference_ to test:
+
+- handling of Obsidian unfriendly entitys like ＜ and ＞
+- detection of unmarked code blocks (＜pre＞ without a ＜code＞ child element).
+
+# Chapter 24. Span＜T＞ and Memory＜T＞ ^sigil-toc-id-17
 
 The `Span<T>` and `Memory<T>` structs act as low-level façades over an array, string, or any contiguous block of managed or unmanaged memory. Their main purpose is to help with certain kinds of micro-optimization—in particular, writing _low-allocation_ code that minimizes managed memory allocations (thereby reducing the load on the garbage collector), without having to duplicate your code for different kinds of input. They also enable _slicing_—working with a portion of an array, string, or memory block without creating a copy.
 
@@ -15,7 +22,7 @@ The `Span<T>` and `Memory<T>` structs act as low-level façades over an array, s
 
 Should you come across these types in an API and not need or care for their potential performance advantages:
 
-- Pass in an array when calling a method that expects a `Span<T>`, `ReadOnlySpan<T>`, `Memory<T>` or `ReadOnly​Memory<T>` instead; that is, `T[]`. (This works thanks to implicit conversion operators.)
+- Pass in an array when calling a method that expects a `Span<T>`, `ReadOnlySpan<T>`, `Memory<T>` or `ReadOnly​Memory＜T＞` instead; that is, `T[]`. (This works thanks to implicit conversion operators.)
     
 - Call the `ToArray` method to convert from a span/memory _to_ an array. And if `T` is `char`, `ToString` will convert the span/memory into a string.
     
@@ -33,7 +40,7 @@ Specifically, `Span<T>` does two things:
 
 Because `Span<T>` can wrap stack-allocated memory, there are restrictions on how you can store or pass around instances (imposed, in part, by `Span<T>` being a _ref struct_). `Memory<T>` acts as a span without those restrictions, but it cannot wrap stack-allocated memory. `Memory<T>` still provides the benefit of slicing.
 
-Each struct comes with a read-only counterpart (`ReadOnlySpan<T>` and `ReadOnly​Memory<T>`). As well as preventing unintentional change, the read-only counterparts further improve performance by allowing the compiler and runtime additional freedom for optimization.
+Each struct comes with a read-only counterpart (`ReadOnlySpan<T>` and `ReadOnly​Memory＜T＞`). As well as preventing unintentional change, the read-only counterparts further improve performance by allowing the compiler and runtime additional freedom for optimization.
 
 .NET Core itself (and ASP.NET Core) uses these types to improve efficiency with I/O, networking, string handling, and JSON parsing.
 
@@ -64,7 +71,7 @@ The first option is inefficient; the second option adds clutter and complexity (
 Spans solve this nicely. All you need to do is to change the parameter type from `int[]` to `ReadOnlySpan<int>` (everything else stays the same):
 
 ```undefined
-int Sum (ReadOnlySpan<int> numbers)
+int Sum (ReadOnlySpan＜int＞ numbers)
 {
   int total = 0;
   foreach (int i in numbers) total += i;
@@ -121,14 +128,14 @@ Although `Span<T>` doesn’t implement `IEnumerable<T>` (it can’t implement in
 
 The `CopyTo` method copies elements from one span (or `Memory<T>`) to another. In the following example, we copy all of the elements from span `x` into span `y`:
 
-Span<int> x = new[] { 1, 2, 3, 4 };
-Span<int> y = new int[4];
+Span＜int＞ x = new[] { 1, 2, 3, 4 };
+Span＜int＞ y = new int[4];
 x.CopyTo (y);
 
 Slicing makes this method much more useful. In the next example, we copy the first half of span `x` into the second half of span `y`:
 
-Span<int> x = new[] { 1,  2,  3,  4  };
-Span<int> y = new[] { 10, 20, 30, 40 };
+Span＜int＞ x = new[] { 1,  2,  3,  4  };
+Span＜int＞ y = new[] { 10, 20, 30, 40 };
 x[..2].CopyTo (y[2..]);                 // y is now { 10, 20, 1, 2 }
 
 If there’s not enough space in the destination to complete the copy, `CopyTo` throws an exception, whereas `TryCopyTo` returns `false` (without copying any elements).
@@ -140,7 +147,7 @@ The span structs also expose methods to `Clear` and `Fill` the span as well as a
 Spans are designed to work well with strings, which are treated as `ReadOnlySpan<char>`. The following method counts whitespace characters:
 
 ```undefined
-int CountWhitespace (ReadOnlySpan<char> s)
+int CountWhitespace (ReadOnlySpan＜char＞ s)
 {
   int count = 0;
   foreach (char c in s)
@@ -193,12 +200,12 @@ The `System.Buffers.Text` namespace contains additional types to help you work w
 
 Fundamental CLR methods such as `int.Parse` have also been overloaded to accept `ReadOnlySpan<char>`.
 
-# Memory<T> ^sigil-toc-id-11
+# Memory＜T＞ ^sigil-toc-id-11
 
 `Span<T>` and `ReadOnlySpan<T>` are defined as _ref structs_ to maximize their optimization potential as well as allowing them to work safely with stack-allocated memory (as you’ll see in the next section). However, it also imposes limitations. In addition to being array-unfriendly, you cannot use them as fields in a class (this would put them on the heap). This, in turn, prevents them from appearing in lambda expressions—and as parameters in asynchronous methods, iterators, and asynchronous streams:
 
 ```undefined
-async void Foo (Span<int> notAllowed)   // Compile-time error!
+async void Foo (Span＜int＞ notAllowed)   // Compile-time error!
 ```
 
 (Remember that the compiler processes asynchronous methods and iterators by writing a private _state machine_, which means that any parameters and local variables end up as fields. The same applies to lambda expressions that close over variables: these also end up as fields in a _closure_.)
@@ -212,12 +219,12 @@ Memory<int> mem1 = new int[] { 1, 2, 3 };
 var mem2 = new int[] { 1, 2, 3 }.AsMemory();
 ```
 
-You can easily _convert_ a `Memory<T>` or `ReadOnlyMemory<T>` into a `Span<T>` or `Read​OnlySpan<T>` via its `Span` property so that you can interact with it as though it were a span. The conversion is efficient in that it doesn’t perform any copying:
+You can easily _convert_ a `Memory<T>` or `ReadOnlyMemory<T>` into a `Span<T>` or `Read​OnlySpan＜T＞` via its `Span` property so that you can interact with it as though it were a span. The conversion is efficient in that it doesn’t perform any copying:
 
 ```undefined
-async void Foo (Memory<int> memory)
+async void Foo (Memory＜int＞ memory)
 {
-  Span<int> span = memory.Span;
+  Span＜int＞ span = memory.Span;
   ...
 }
 ```
@@ -232,7 +239,7 @@ We said in the previous section that you cannot write the direct equivalent of `
 
 ```undefined
 // Split a string into words:
-IEnumerable<ReadOnlyMemory<char>> Split (ReadOnlyMemory<char> input)
+IEnumerable<ReadOnlyMemory＜char＞> Split (ReadOnlyMemory＜char＞ input)
 {
   int wordStart = 0;
   for (int i = 0; i <= input.Length; i++)
@@ -249,7 +256,7 @@ This is more efficient than string’s `Split` method: instead of creating new s
 ```undefined
 foreach (var slice in Split ("The quick brown fox jumps over the lazy dog"))
 {
-  // slice is a ReadOnlyMemory<char>
+  // slice is a ReadOnlyMemory＜char＞
 }
 ```
 
@@ -266,7 +273,7 @@ In the preceding section, we employed `ReadOnlyMemory<char>` as a solution to im
 One possible option would be to write our `Split` method so that it returns _ranges_:
 
 ```undefined
-Range[] Split (ReadOnlySpan<char> input)
+Range[] Split (ReadOnlySpan＜char＞ input)
 {
   int pos = 0;
   var list = new List<Range>();
@@ -283,7 +290,7 @@ Range[] Split (ReadOnlySpan<char> input)
 The caller could then use those ranges to slice the original span:
 
 ```undefined
-ReadOnlySpan<char> source = "The quick brown fox";
+ReadOnlySpan＜char＞ source = "The quick brown fox";
 foreach (Range range in Split (source))
 {
   ReadOnlySpan<char> wordSpan = source [range];
@@ -345,7 +352,7 @@ Here’s how you would call it:
 var span = "the quick brown fox".AsSpan();
 foreach (var word in span.Split())
 {
-  // word is a ReadOnlySpan<char>
+  // word is a ReadOnlySpan＜char＞
 }
 
 By defining a `Current` property and a `MoveNext` method, our enumerator can work with C#’s `foreach` statement (see [“Enumeration”](ch04.xhtml#enumeration) in [Chapter 4](ch04.xhtml#advanced_chash)). We don’t have to implement the `IEnumerable<T>`/`IEnumerator<T>` interfaces (in fact, we can’t; ref structs can’t implement interfaces). We’re sacrificing abstraction for micro-optimization.
@@ -373,16 +380,16 @@ int total = Sum (numbers, 1000);
 Spans solve this problem: you can construct a `Span<T>` or `ReadOnlySpan<T>` directly from a pointer:
 
 int* numbers = stackalloc int [1000];
-var span = new Span<int> (numbers, 1000);
+var span = new Span＜int＞ (numbers, 1000);
 
 Or in one step:
 
-Span<int> numbers = stackalloc int [1000];
+Span＜int＞ numbers = stackalloc int [1000];
 
 (Note that this doesn’t require the use of `unsafe`.) Recall the `Sum` method that we wrote previously:
 
 ```undefined
-int Sum (ReadOnlySpan<int> numbers)
+int Sum (ReadOnlySpan＜int＞ numbers)
 {
   int total = 0;
   int len = numbers.Length;
@@ -412,7 +419,7 @@ var source = "The quick brown fox".AsSpan();
 var ptr = Marshal.AllocHGlobal (source.Length * sizeof (char));
 try
 {
-  var unmanaged = new Span<char> ((char*)ptr, source.Length);
+  var unmanaged = new Span＜char＞ ((char*)ptr, source.Length);
   source.CopyTo (unmanaged);
   foreach (var word in unmanaged.Split())
     Console.WriteLine (word.ToString());
