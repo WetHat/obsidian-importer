@@ -162,7 +162,7 @@ export function hoistTableCaptions(element: HTMLElement) {
   * @param element an element of an HTML document.
   */
 export function injectCodeBlock(element: HTMLElement) {
-	const pres = element.getElementsByTagName('pre');
+	const pres = Array.from(element.getElementsByTagName('pre'));
 	for (let i = 0; i < pres.length; i++) {
 		const pre = pres[i];
 		let firstChild = pre.firstChild;
@@ -173,11 +173,11 @@ export function injectCodeBlock(element: HTMLElement) {
 			firstChild = pre.firstChild;
 		}
 
-		let firstChildelement = pre.firstElementChild;
+		const firstChildelement = pre.firstElementChild;
 
-		if (firstChildelement && firstChildelement.localName !== 'code') {
+		if (!firstChildelement || firstChildelement.localName !== 'code') {
 			const code = element.doc.createElement('code');
-			code.setAttribute('class', 'language-undefined');
+			code.className = 'language-undefined';
 			while (firstChild) {
 				code.append(firstChild);
 				firstChild = pre.firstChild;
@@ -349,5 +349,5 @@ export function markElementAsLinkTarget(element: Element): string | undefined {
 export function convertToMarkdown(html: Document): string {
 	return htmlToMarkdown(html.body.doc)
 		.replace(/[\n\s]*`(({{newline}})*){{(\s*\^[^\}]+)}}`[\n\s]*/g, '$1$3\n\n') // link targets
-		.replace(/{{newline}}/g, '\n');
+		.replace(/{{newline}}/g, '\n').trim();
 }
