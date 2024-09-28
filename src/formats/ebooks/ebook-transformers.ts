@@ -163,7 +163,7 @@ export function hoistTableCaptions(element: HTMLElement) {
   * @param element an element of an HTML document.
   */
 export function injectCodeBlock(element: HTMLElement) {
-	const pres = Array.from(element.getElementsByTagName('pre'));
+	const pres = element.getElementsByTagName('pre');
 	for (let i = 0; i < pres.length; i++) {
 		const pre = pres[i];
 		let firstChild = pre.firstChild;
