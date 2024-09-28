@@ -58,10 +58,10 @@ type TTExtTransformer = (textNode: Node) => void;
 export function entityTransformer(textNode: Node) {
 	const text = textNode.textContent;
 	if (text && textNode.parentElement?.localName !== "code") {
-		 // replace Obsidian unfriendly html entities.
+		 // replace Obsidian unfriendly html entities and characters.
 		const transformed = text
-			.replace(/&gt;/g, '＞')
-			.replace(/&gt;/g, '＞');
+			.replace(/>/g, '＞')
+			.replace(/</g, '＜');
 		if (transformed !== text) {
 			textNode.textContent = transformed;
 		}
