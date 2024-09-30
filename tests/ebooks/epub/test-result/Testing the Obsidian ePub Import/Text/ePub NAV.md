@@ -1,10 +1,10 @@
 ---
 book: "Testing the Obsidian ePub Import"
-author: "Unkown author"
+author: "@WetHat"
 aliases: 
   - "Testing the Obsidian ePub Import"
-publisher: "Unknown publisher"
-tags: [e-book]
+publisher: "WetHat Lab"
+tags: [Obsidian/Plugin,RegressionTest]
 ---
 
 > [!abstract] Testing the Obsidian ePub Import
@@ -21,14 +21,7 @@ tags: [e-book]
     2. [An indented Mermaid diagram](Mermaid%20Diagrams.md#^sigil-toc-id-2)
     3. [Mermaid diagram in a 'pre'](Mermaid%20Diagrams.md#^sigil-toc-id-1)
     4. [Mermaid diagram in a codeblock](Mermaid%20Diagrams.md#^sigil-toc-id-1)
-3. [Static HTML Site Project Template - Readme](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md)
-    1. [What Next?](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^what-next)
-4. [Feature Showcase](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^feature-showcase)
-    1. [Mermaid Diagrams](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^mermaid-diagrams)
-    2. [LaTeX Math](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^latex-math)
-    3. [Code Syntax Highlighting](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^code-syntax-highlighting)
-    4. [Svgbob Plain Text Diagrams](Static%20HTML%20Site%20Project%20Template%20-%20Readme.md#^svgbob-plain-text-diagrams)
-5. [Unmarked code blocks and html entities (< & >)](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md)
+3. [Unmarked code blocks and html entities (< & >)](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md)
     1. [Chapter 24. Span<T> and Memory<T>](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-17)
         1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-3)
         2. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-4)
@@ -44,6 +37,9 @@ tags: [e-book]
     6. [Forward-Only Enumerators](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-14)
     7. [Working with Stack-Allocated and Unmanaged Memory](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-15)
         1. [Note](Unmarked%20code%20blocks%20and%20html%20entities%20(＜%20＆%20＞).md#^sigil-toc-id-16)
+4. [Regression Testing LaTex Math Import](LaTeX%20Math.md)
+    1. [Inline Math](LaTeX%20Math.md#^sigil-toc-id-1)
+    2. [Math Block](LaTeX%20Math.md#^sigil-toc-id-2)
 
 # Landmarks
 
