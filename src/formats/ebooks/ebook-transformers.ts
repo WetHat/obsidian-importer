@@ -78,7 +78,7 @@ export function entityTransformer(textNode: Node) {
 		parent = textNode.parentElement;
 
 	if (text && parent && parent.localName !== "code" && !parent.classList.contains("math")) {
-		 // replace Obsidian unfriendly html entities and characters.
+		// replace Obsidian unfriendly html entities and characters.
 		const transformed = text
 			.replace(/>/g, '＞')
 			.replace(/</g, '＜')
@@ -92,11 +92,11 @@ export function entityTransformer(textNode: Node) {
 }
 
 export function transformText(node: Node, transformer: TTExtTransformer) {
-	node.childNodes.forEach( n => {
+	node.childNodes.forEach(n => {
 		if (n.nodeType === Node.TEXT_NODE) {
 			transformer(n);
 		} else {
-			transformText(n,transformer);
+			transformText(n, transformer);
 		}
 	});
 }
