@@ -57,6 +57,21 @@ export function toFrontmatterTagname(tagname: string) {
 
 type TTExtTransformer = (textNode: Node) => void;
 
+export function mathTransformer(textNode: Node) {
+	const text = textNode.textContent;
+	if (text) {
+		const transformed = text
+			.replace(/^\s*\\\[|\\\]\s*$/g, "$$$$")
+			.replace(/^\\\(|\\\)$/g, "$");
+		if (textNode.textContent !== transformed) {
+			textNode.textContent = transformed;
+			if (textNode.parentElement) {
+				textNode.parentElement.className = "math";
+			}
+		}
+	}
+}
+
 export function entityTransformer(textNode: Node) {
 	const text = textNode.textContent;
 	if (text && textNode.parentElement?.localName !== "code") {
