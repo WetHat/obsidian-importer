@@ -1,10 +1,10 @@
 ---
 book: "Testing the Obsidian ePub Import"
-author: "Unkown author"
+author: "@WetHat"
 aliases: 
   - "Testing the Obsidian ePub Import"
-publisher: "Unknown publisher"
-tags: [e-book]
+publisher: "WetHat Lab"
+tags: [Obsidian/Plugin,RegressionTest]
 ---
 
 > [!abstract] Testing the Obsidian ePub Import
@@ -21,13 +21,6 @@ tags: [e-book]
   - [[Text/Mermaid Diagrams.md#^sigil-toc-id-2|An indented Mermaid diagram]]
   - [[Text/Mermaid Diagrams.md#^sigil-toc-id-1|Mermaid diagram in a 'pre']]
   - [[Text/Mermaid Diagrams.md#^sigil-toc-id-1|Mermaid diagram in a codeblock]]
-- [[Text/Static HTML Site Project Template - Readme.md|Static HTML Site Project Template - Readme]]
-  - [[Text/Static HTML Site Project Template - Readme.md#^what-next|What Next?]]
-- [[Text/Static HTML Site Project Template - Readme.md#^feature-showcase|Feature Showcase]]
-  - [[Text/Static HTML Site Project Template - Readme.md#^mermaid-diagrams|Mermaid Diagrams]]
-  - [[Text/Static HTML Site Project Template - Readme.md#^latex-math|LaTeX Math]]
-  - [[Text/Static HTML Site Project Template - Readme.md#^code-syntax-highlighting|Code Syntax Highlighting]]
-  - [[Text/Static HTML Site Project Template - Readme.md#^svgbob-plain-text-diagrams|Svgbob Plain Text Diagrams]]
 - [[Text/Unmarked code blocks and html entities (＜ ＆ ＞).md|Unmarked code blocks and html entities (< & >)]]
   - [[Text/Unmarked code blocks and html entities (＜ ＆ ＞).md#^sigil-toc-id-17|Chapter 24. Span<T> and Memory<T>]]
     - [[Text/Unmarked code blocks and html entities (＜ ＆ ＞).md#^sigil-toc-id-3|Note]]
@@ -44,3 +37,6 @@ tags: [e-book]
   - [[Text/Unmarked code blocks and html entities (＜ ＆ ＞).md#^sigil-toc-id-14|Forward-Only Enumerators]]
   - [[Text/Unmarked code blocks and html entities (＜ ＆ ＞).md#^sigil-toc-id-15|Working with Stack-Allocated and Unmanaged Memory]]
     - [[Text/Unmarked code blocks and html entities (＜ ＆ ＞).md#^sigil-toc-id-16|Note]]
+- [[Text/LaTeX Math.md|Regression Testing LaTex Math Import]]
+  - [[Text/LaTeX Math.md#^sigil-toc-id-1|Inline Math]]
+  - [[Text/LaTeX Math.md#^sigil-toc-id-2|Math Block]]
