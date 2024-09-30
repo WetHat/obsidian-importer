@@ -1,6 +1,6 @@
 ---
 book: "[[../§ Title Page.md|Testing the Obsidian ePub Import]]"
-tags: e-book
+tags: Obsidian/Plugin,RegressionTest
 ---
 
 # Unmarked code blocks and html entities (＜ & ＞)
@@ -72,7 +72,7 @@ The first option is inefficient; the second option adds clutter and complexity (
 Spans solve this nicely. All you need to do is to change the parameter type from `int[]` to `ReadOnlySpan<int>` (everything else stays the same):
 
 ```undefined
-int Sum (ReadOnlySpan＜int＞ numbers)
+int Sum (ReadOnlySpan<int> numbers)
 {
   int total = 0;
   foreach (int i in numbers) total += i;
@@ -152,7 +152,7 @@ The span structs also expose methods to `Clear` and `Fill` the span as well as a
 Spans are designed to work well with strings, which are treated as `ReadOnlySpan<char>`. The following method counts whitespace characters:
 
 ```undefined
-int CountWhitespace (ReadOnlySpan＜char＞ s)
+int CountWhitespace (ReadOnlySpan<char> s)
 {
   int count = 0;
   foreach (char c in s)
@@ -212,7 +212,7 @@ Fundamental CLR methods such as `int.Parse` have also been overloaded to accept 
 `Span<T>` and `ReadOnlySpan<T>` are defined as _ref structs_ to maximize their optimization potential as well as allowing them to work safely with stack-allocated memory (as you’ll see in the next section). However, it also imposes limitations. In addition to being array-unfriendly, you cannot use them as fields in a class (this would put them on the heap). This, in turn, prevents them from appearing in lambda expressions—and as parameters in asynchronous methods, iterators, and asynchronous streams:
 
 ```undefined
-async void Foo (Span＜int＞ notAllowed)   // Compile-time error!
+async void Foo (Span<int> notAllowed)   // Compile-time error!
 ```
 
 (Remember that the compiler processes asynchronous methods and iterators by writing a private _state machine_, which means that any parameters and local variables end up as fields. The same applies to lambda expressions that close over variables: these also end up as fields in a _closure_.)
@@ -229,9 +229,9 @@ var mem2 = new int[] { 1, 2, 3 }.AsMemory();
 You can easily _convert_ a `Memory<T>` or `ReadOnlyMemory<T>` into a `Span<T>` or `Read​OnlySpan＜T＞` via its `Span` property so that you can interact with it as though it were a span. The conversion is efficient in that it doesn’t perform any copying:
 
 ```undefined
-async void Foo (Memory＜int＞ memory)
+async void Foo (Memory<int> memory)
 {
-  Span＜int＞ span = memory.Span;
+  Span<int> span = memory.Span;
   ...
 }
 ```
@@ -246,7 +246,7 @@ We said in the previous section that you cannot write the direct equivalent of `
 
 ```undefined
 // Split a string into words:
-IEnumerable<ReadOnlyMemory＜char＞> Split (ReadOnlyMemory＜char＞ input)
+IEnumerable<ReadOnlyMemory<char>> Split (ReadOnlyMemory<char> input)
 {
   int wordStart = 0;
   for (int i = 0; i <= input.Length; i++)
@@ -263,7 +263,7 @@ This is more efficient than string’s `Split` method: instead of creating new s
 ```undefined
 foreach (var slice in Split ("The quick brown fox jumps over the lazy dog"))
 {
-  // slice is a ReadOnlyMemory＜char＞
+  // slice is a ReadOnlyMemory<char>
 }
 ```
 
@@ -280,7 +280,7 @@ In the preceding section, we employed `ReadOnlyMemory<char>` as a solution to im
 One possible option would be to write our `Split` method so that it returns _ranges_:
 
 ```undefined
-Range[] Split (ReadOnlySpan＜char＞ input)
+Range[] Split (ReadOnlySpan<char> input)
 {
   int pos = 0;
   var list = new List<Range>();
@@ -297,7 +297,7 @@ Range[] Split (ReadOnlySpan＜char＞ input)
 The caller could then use those ranges to slice the original span:
 
 ```undefined
-ReadOnlySpan＜char＞ source = "The quick brown fox";
+ReadOnlySpan<char> source = "The quick brown fox";
 foreach (Range range in Split (source))
 {
   ReadOnlySpan<char> wordSpan = source [range];
@@ -404,7 +404,7 @@ Span<int> numbers = stackalloc int [1000];
 (Note that this doesn’t require the use of `unsafe`.) Recall the `Sum` method that we wrote previously:
 
 ```undefined
-int Sum (ReadOnlySpan＜int＞ numbers)
+int Sum (ReadOnlySpan<int> numbers)
 {
   int total = 0;
   int len = numbers.Length;

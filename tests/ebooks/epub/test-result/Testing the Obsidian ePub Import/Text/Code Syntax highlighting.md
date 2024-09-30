@@ -1,6 +1,6 @@
 ---
 book: "[[../§ Title Page.md|Testing the Obsidian ePub Import]]"
-tags: e-book
+tags: Obsidian/Plugin,RegressionTest
 ---
 
 # Regression Testing Code Syntax Highlighting Import
