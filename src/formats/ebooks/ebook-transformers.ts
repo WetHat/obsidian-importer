@@ -201,10 +201,8 @@ export function injectCodeBlock(element: HTMLElement) {
 		if (!firstChildelement || firstChildelement.localName !== 'code') {
 			const code = element.doc.createElement('code');
 			code.className = 'language-undefined';
-			while (firstChild) {
-				code.append(firstChild);
-				firstChild = pre.firstChild;
-			}
+			code.textContent = pre.textContent;
+			pre.innerHTML = "";
 			pre.append(code);
 		}
 	}
