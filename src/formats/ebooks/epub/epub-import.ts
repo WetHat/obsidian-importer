@@ -263,11 +263,11 @@ export class EpubBook {
 	}
 
 	/**
-     * Get a facade instance of an asset that was
+     * Get an conversion adapter instance of an asset that was
      * mentioned in the book's manifest (`content.opf`),
      *
      * @param path path to the asset relative to the book.
-     * @returns the facade object associated with the asset or
+     * @returns the adapter object associated with the asset or
      *          `undefined` if no such asset was listed in the manifest.
      */
 	getAsset(path: string): ImportableAsset | undefined {
@@ -293,7 +293,7 @@ export class EpubBook {
 		await this.parseManifest(manifestSource);
 		const tocPath = this.meta.asString('toc');
 		// now check all files from the ZIP against the manifest and create
-		// the appropriate asset facade instances.
+		// the appropriate asset adapter instances.
 		for (const source of entries) {
 			// get the type from the manifest
 			if (source.filepath.startsWith(this.sourcePrefix)) {
