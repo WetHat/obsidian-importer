@@ -40,6 +40,18 @@ tags: [Obsidian/Plugin,RegressionTest]
 4. [Regression Testing LaTex Math Import](LaTeX%20Math.md)
     1. [Inline Math](LaTeX%20Math.md#^sigil-toc-id-1)
     2. [Math Block](LaTeX%20Math.md#^sigil-toc-id-2)
+5. [In-the-wild Math and code from juliabloggers](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md)
+6. [juliabloggers.com](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^sigil-toc-id-22)
+    1. [A Julia Language Blog Aggregator](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^sigil-toc-id-18)
+7. [Calibrating an Ornstein–Uhlenbeck Process](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^sigil-toc-id-19)
+    1. [The Ornstein-Uhlenbeck Equation](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^the-ornstein-uhlenbeck-equation)
+    2. [OLS Calibration of an OU Process](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^ols-calibration-of-an-ou-process)
+    3. [Does Bootstrapping Help?](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^does-bootstrapping-help)
+    4. [AR(1) Calibration of a OU Process](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^ar1-calibration-of-a-ou-process)
+    5. [Using Multiple Samples for Calibrating an OU Process](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^using-multiple-samples-for-calibrating-an-ou-process)
+    6. [Summary](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^summary)
+        1. [Related](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^sigil-toc-id-20)
+        2. [Recent Posts](Calibrating%20an%20Ornstein–Uhlenbeck%20Process%20∣%20juliabloggers.com.md#^sigil-toc-id-21)
 
 # Landmarks
 
