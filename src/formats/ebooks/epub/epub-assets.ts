@@ -279,7 +279,7 @@ export class PageAsset extends ImportableAsset {
 				injectCodeBlock(body);
 				hoistTableCaptions(body);
 				transformText(body,(node:Node) => {
-					mathTransformer(node);
+					mathTransformer(node); // must come first to avoid entity replacements
 					entityTransformer(node);
 				});
 			}
