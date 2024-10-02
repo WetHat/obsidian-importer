@@ -60,9 +60,10 @@ type TTExtTransformer = (textNode: Node) => void;
 export function mathTransformer(textNode: Node) {
 	const text = textNode.textContent;
 	if (text) {
-		const transformed = text
-			.replace(/^\s*\\\[|\\\]\s*$/g, "$$$$")
-			.replace(/^\\\(|\\\)$/g, "$");
+		const transformed = text // non-greedy matches
+			.replace(/^\\\[\s*(.*?)\s*\\\]$/g, '$$$$ $1 $$$$')
+			.replace(/\\\((.*?)\\\)/g, '$$$1$$');
+
 		if (textNode.textContent !== transformed) {
 			textNode.textContent = transformed;
 			if (textNode.parentElement) {
