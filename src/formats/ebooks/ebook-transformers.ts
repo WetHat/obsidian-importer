@@ -48,8 +48,8 @@ export function toFrontmatterTagname(tagname: string) {
 	return tagname.trim()
 		.replace(/^#/, '') // get rid of the leading #
 		.replace(/#/g, '＃') // transform internal hashes
-		.replace(/"'/g, "ʼ")
-		.replace(/\s*[\\/:.]\s*/g, "/")
+		.replace(/"'/g, 'ʼ')
+		.replace(/\s*[\\/:.]\s*/g, '/')
 		.replace(/\s*[&+;\[\(\{]\s*/g, ',') // generate multiple tags
 		.replace(/s*[\)\]\}]\s*/g, '')
 		.replace(/\s+/g, '-');
@@ -67,7 +67,7 @@ export function mathTransformer(textNode: Node) {
 		if (textNode.textContent !== transformed) {
 			textNode.textContent = transformed;
 			if (textNode.parentElement) {
-				textNode.parentElement.className = "math";
+				textNode.parentElement.className = 'math';
 			}
 		}
 	}
@@ -78,7 +78,7 @@ export function entityTransformer(textNode: Node) {
 		text = textNode.textContent,
 		parent = textNode.parentElement;
 
-	if (text && parent && parent.localName !== "code" && !parent.classList.contains("math")) {
+	if (text && parent && parent.localName !== 'code' && !parent.classList.contains('math')) {
 		// replace Obsidian unfriendly html entities and characters.
 		const transformed = text
 			.replace(/>/g, '＞')
@@ -96,7 +96,8 @@ export function transformText(node: Node, transformer: TTExtTransformer) {
 	node.childNodes.forEach(n => {
 		if (n.nodeType === Node.TEXT_NODE) {
 			transformer(n);
-		} else {
+		}
+		else {
 			transformText(n, transformer);
 		}
 	});
@@ -109,27 +110,27 @@ export function transformText(node: Node, transformer: TTExtTransformer) {
  */
 export function mermaidToCodeBlock(element: Element) {
 	const
-		mermaids = element.getElementsByClassName("mermaid"),
+		mermaids = element.getElementsByClassName('mermaid'),
 		mermaidCount = mermaids.length;
 
 	for (let i = 0; i < mermaidCount; i++) {
 		const mermaid = mermaids[i];
 
 		switch (mermaid.localName) {
-			case "code":
-				mermaid.classList.add("language-mermaid");
+			case 'code':
+				mermaid.classList.add('language-mermaid');
 				const mermaidParent = mermaid.parentElement;
-				if (mermaidParent && mermaidParent.localName !== "pre") {
-					const pre = mermaid.doc.createElement("pre");
+				if (mermaidParent && mermaidParent.localName !== 'pre') {
+					const pre = mermaid.doc.createElement('pre');
 					mermaidParent.insertBefore(pre, mermaid);
 					pre.append(mermaid);
 				}
 				break;
 
-			case "pre":
-				if (mermaid.firstElementChild?.localName !== "code") {
-					const code = mermaid.doc.createElement("code");
-					code.className = "language-mermaid";
+			case 'pre':
+				if (mermaid.firstElementChild?.localName !== 'code') {
+					const code = mermaid.doc.createElement('code');
+					code.className = 'language-mermaid';
 					while (mermaid.firstChild) {
 						code.append(mermaid.firstChild);
 					}
@@ -139,9 +140,9 @@ export function mermaidToCodeBlock(element: Element) {
 
 			default:
 				const
-					pre = mermaid.doc.createElement("pre"),
-					code = mermaid.doc.createElement("code");
-				code.className = "language-mermaid";
+					pre = mermaid.doc.createElement('pre'),
+					code = mermaid.doc.createElement('code');
+				code.className = 'language-mermaid';
 				pre.append(code);
 				while (mermaid.firstChild) {
 					code.append(mermaid.firstChild);
@@ -203,7 +204,7 @@ export function injectCodeBlock(element: HTMLElement) {
 			const code = element.doc.createElement('code');
 			code.className = 'language-undefined';
 			code.textContent = pre.textContent;
-			pre.innerHTML = "";
+			pre.innerHTML = '';
 			pre.append(code);
 		}
 	}
