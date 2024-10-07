@@ -2,7 +2,7 @@
 import { TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
-import { convertToMarkdown, entityTransformer, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, mathTransformer, mermaidToCodeBlock, titleToBasename, transformText } from '../ebook-transformers';
+import { cleanupCodeBlock, convertToMarkdown, entityTransformer, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, mathTransformer, mermaidToCodeBlock, titleToBasename, transformText } from '../ebook-transformers';
 
 /**
  * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
@@ -276,6 +276,7 @@ export class PageAsset extends ImportableAsset {
 				const body = this.page.body;
 				// Apply document transformations to make the html Obsidian friendly
 				mermaidToCodeBlock(body);
+				cleanupCodeBlock(body);
 				injectCodeBlock(body);
 				hoistTableCaptions(body);
 				transformText(body,(node:Node) => {

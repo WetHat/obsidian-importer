@@ -178,6 +178,31 @@ export function hoistTableCaptions(element: HTMLElement) {
 		});
 }
 
+function expandBR(element: HTMLElement): HTMLElement {
+	const brs = element.getElementsByTagName("br");
+	while (brs.length > 0) {
+		const
+			br = brs[0],
+			parent = br.parentElement;
+		if (parent) {
+			br.parentElement?.insertAfter(element.doc.createTextNode("\n"), br);
+		}
+		br.remove();
+	}
+	return element;
+}
+
+export function cleanupCodeBlock(element: HTMLElement) {
+	const
+		codeBlocks = element.getElementsByTagName("code"),
+		blockCount = codeBlocks.length;
+
+	for (let i = 0; i < blockCount; i++) {
+		const code = expandBR(codeBlocks[i]);
+		code.textContent = code.innerText;
+	}
+}
+
 /**
   * An HTML transformation looking for `<pre>` tags which are **not** immediately followed by a `<code>` block
   * and inject one.
@@ -203,7 +228,7 @@ export function injectCodeBlock(element: HTMLElement) {
 		if (!firstChildelement || firstChildelement.localName !== 'code') {
 			const code = element.doc.createElement('code');
 			code.className = 'language-undefined';
-			code.textContent = pre.textContent;
+			code.textContent = expandBR(pre).textContent;
 			pre.innerHTML = '';
 			pre.append(code);
 		}
