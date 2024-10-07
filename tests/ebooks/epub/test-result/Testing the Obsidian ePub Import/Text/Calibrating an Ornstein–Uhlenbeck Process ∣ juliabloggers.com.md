@@ -67,10 +67,10 @@ using Distributions, Plots
 
 function simulate_os(theta, mu, sigma, dt, maxT, initial)
     p = Array{Float64}(undef, length(0:dt:maxT))
-    p［1］ = initial
+    p[1] = initial
     w = sigma * rand(Normal(), length(p)) * sqrt(dt)
     for i in 1:(length(p)-1)
-        p［i+1］ = p［i］ + theta*(mu-p［i］)*dt + w［i］
+        p[i+1] = p[i] + theta*(mu-p[i])*dt + w[i]
     end
     return p
 end
@@ -126,13 +126,13 @@ where $\epsilon$ is the noise. So we just need a DataFrame with the difference b
 ```
 using DataFrames, DataFramesMeta
 momData = DataFrame(y=p1)
-momData = @transform(momData, :diffY = ［NaN; diff(:y)］, :prevY = ［NaN; :y［1:(end-1)］］)
+momData = @transform(momData, :diffY = [NaN; diff(:y)], :prevY = [NaN; :y[1:(end-1)]])
 ```
 
 Then using the standard OLS process from the `GLM` package.
 
 ```
-mdl = lm(@formula(diffY ~ prevY), momData［2:end, :］)
+mdl = lm(@formula(diffY ~ prevY), momData[2:end, :])
 alpha, beta = coef(mdl)
 
 theta = -beta / dt
@@ -145,7 +145,7 @@ for the drift and the reversion parameter has the correct sign.
 Doing the same for the mean reversion data.
 
 ```
-mdl = lm(@formula(diffY ~ prevY), revData［2:end, :］)
+mdl = lm(@formula(diffY ~ prevY), revData[2:end, :])
 alpha, beta = coef(mdl)
 
 theta = -beta / dt
@@ -162,13 +162,13 @@ It could be that we need more data, so we use the bootstrap to randomly sample f
 ```
 res = zeros(1000)
 for i in 1:1000
-    mdl = lm(@formula(diffY ~ prevY + 0), momData［sample(2:nrow(momData), nrow(momData), replace=true), :］)
-    res［i］ = -first(coef(mdl)/dt)
+    mdl = lm(@formula(diffY ~ prevY + 0), momData[sample(2:nrow(momData), nrow(momData), replace=true), :])
+    res[i] = -first(coef(mdl)/dt)
 end
 
 bootMom = histogram(res, label = :none, title = "Momentum", color = "#7570b3")
-bootMom = vline!(bootMom, ［-0.5］, label = "Truth", momentum = 2)
-bootMom = vline!(bootMom, ［0.0］, label = :none, color = "black")
+bootMom = vline!(bootMom, [-0.5], label = "Truth", momentum = 2)
+bootMom = vline!(bootMom, [0.0], label = :none, color = "black")
 ```
 
 We then do the same for the reversion data.
@@ -176,13 +176,13 @@ We then do the same for the reversion data.
 ```
 res = zeros(1000)
 for i in 1:1000
-    mdl = lm(@formula(diffY ~ prevY + 0), revData［sample(2:nrow(revData), nrow(revData), replace=true), :］)
-    res［i］ = first(-coef(mdl)/dt)
+    mdl = lm(@formula(diffY ~ prevY + 0), revData[sample(2:nrow(revData), nrow(revData), replace=true), :])
+    res[i] = first(-coef(mdl)/dt)
 end
 
 bootRev = histogram(res, label = :none, title = "Reversion", color = "#1b9e77")
-bootRev = vline!(bootRev, ［0.5］, label = "Truth", lw = 2)
-bootRev = vline!(bootRev, ［0.0］, label = :none, color = "black")
+bootRev = vline!(bootRev, [0.5], label = "Truth", lw = 2)
+bootRev = vline!(bootRev, [0.0], label = :none, color = "black")
 ```
 
 Then combining both the graphs into one plot.
@@ -218,7 +218,7 @@ This gives us a simple equation to calculate $\theta$ now.
 For the momentum sample:
 
 ```
-phi = sum(p1［2:end］ .* p1［1:(end-1)］) / sum(p1［1:(end-1)］ .^2)
+phi = sum(p1[2:end] .* p1[1:(end-1)]) / sum(p1[1:(end-1)] .^2)
 -log(phi)/dt
 ```
 
@@ -227,7 +227,7 @@ Givens $\theta = -0.50184$, so very close to the true value.
 For the reversion sample
 
 ```
-phi = sum(p2［2:end］ .* p2［1:(end-1)］) / sum(p2［1:(end-1)］ .^2)
+phi = sum(p2[2:end] .* p2[1:(end-1)]) / sum(p2[1:(end-1)] .^2)
 -log(phi)/dt
 ```
 
@@ -236,7 +236,7 @@ Gives $\theta = 1.26$, so correct sign, but quite a way off.
 Finally, for the random walk
 
 ```
-phi = sum(p3［2:end］ .* p3［1:(end-1)］) / sum(p3［1:(end-1)］ .^2)
+phi = sum(p3[2:end] .* p3[1:(end-1)]) / sum(p3[1:(end-1)] .^2)
 -log(phi)/dt
 ```
 
@@ -274,7 +274,7 @@ end
 
 function estimate(ou::OUProcess)
    p = simulate(ou)
-   phi =  sum(p［2:end］ .* p［1:(end-1)］) / sum(p［1:(end-1)］ .^2)
+   phi =  sum(p[2:end] .* p[1:(end-1)]) / sum(p[1:(end-1)] .^2)
    -log(phi)/ou.dt
 end
 
@@ -282,7 +282,7 @@ function estimate(ou::OUProcess, N)
     res = zeros(N)
     for i in 1:N
         p = simulate(ou)
-        res［i］ = estimate(ou)
+        res[i] = estimate(ou)
     end
     res
 end
@@ -295,7 +295,7 @@ array.
 ```
 ou = OUProcess(0.5, 0.0, vol, dt, maxT, initial)
 revPlot = histogram(estimate(ou, 1000), label = :none, title = "Reversion")
-vline!(revPlot, ［0.5］, label = :none);
+vline!(revPlot, [0.5], label = :none);
 ```
 
 And the same for the momentum OU process
@@ -303,7 +303,7 @@ And the same for the momentum OU process
 ```
 ou = OUProcess(-0.5, 0.0, vol, dt, maxT, initial)
 momPlot = histogram(estimate(ou, 1000), label = :none, title = "Momentum")
-vline!(momPlot, ［-0.5］, label = :none);
+vline!(momPlot, [-0.5], label = :none);
 ```
 
 Plotting the distribution of the results gives us a decent  
