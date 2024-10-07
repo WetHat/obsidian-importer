@@ -21,7 +21,7 @@ The `Span<T>` and `Memory<T>` structs act as low-level façades over an array, s
 
 Should you come across these types in an API and not need or care for their potential performance advantages:
 
-- Pass in an array when calling a method that expects a `Span<T>`, `ReadOnlySpan<T>`, `Memory<T>` or `ReadOnly​Memory＜T＞` instead; that is, `T[]`. (This works thanks to implicit conversion operators.)
+- Pass in an array when calling a method that expects a `Span<T>`, `ReadOnlySpan<T>`, `Memory<T>` or `ReadOnly​Memory<T>` instead; that is, `T[]`. (This works thanks to implicit conversion operators.)
     
 - Call the `ToArray` method to convert from a span/memory _to_ an array. And if `T` is `char`, `ToString` will convert the span/memory into a string.
     
@@ -39,7 +39,7 @@ Specifically, `Span<T>` does two things:
 
 Because `Span<T>` can wrap stack-allocated memory, there are restrictions on how you can store or pass around instances (imposed, in part, by `Span<T>` being a _ref struct_). `Memory<T>` acts as a span without those restrictions, but it cannot wrap stack-allocated memory. `Memory<T>` still provides the benefit of slicing.
 
-Each struct comes with a read-only counterpart (`ReadOnlySpan<T>` and `ReadOnly​Memory＜T＞`). As well as preventing unintentional change, the read-only counterparts further improve performance by allowing the compiler and runtime additional freedom for optimization.
+Each struct comes with a read-only counterpart (`ReadOnlySpan<T>` and `ReadOnly​Memory<T>`). As well as preventing unintentional change, the read-only counterparts further improve performance by allowing the compiler and runtime additional freedom for optimization.
 
 .NET Core itself (and ASP.NET Core) uses these types to improve efficiency with I/O, networking, string handling, and JSON parsing.
 
@@ -226,7 +226,7 @@ Memory<int> mem1 = new int[] { 1, 2, 3 };
 var mem2 = new int[] { 1, 2, 3 }.AsMemory();
 ```
 
-You can easily _convert_ a `Memory<T>` or `ReadOnlyMemory<T>` into a `Span<T>` or `Read​OnlySpan＜T＞` via its `Span` property so that you can interact with it as though it were a span. The conversion is efficient in that it doesn’t perform any copying:
+You can easily _convert_ a `Memory<T>` or `ReadOnlyMemory<T>` into a `Span<T>` or `Read​OnlySpan<T>` via its `Span` property so that you can interact with it as though it were a span. The conversion is efficient in that it doesn’t perform any copying:
 
 ```undefined
 async void Foo (Memory<int> memory)
