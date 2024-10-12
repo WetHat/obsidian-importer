@@ -392,7 +392,7 @@ class NavLink {
 		if (contentSrc) {
 			const
 				[srcPath, id] = contentSrc.split('#'),
-				asset = book.getAsset(srcPath);
+				asset = book.getAsset(decodeURIComponent(srcPath));
 			if (asset instanceof PageAsset) {
 				if (!asset.pageTitle) {
 					const navtext = text?.textContent;
