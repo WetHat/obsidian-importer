@@ -7,10 +7,10 @@ import { ImportableAsset, MediaAsset, PageAsset, TocAsset } from './epub-assets'
 import { toFrontmatterTagname, titleToBasename } from '../ebook-transformers';
 
 /**
- * A utility class to parse meta information of the book as specified in the
- * `opf` file
+ *  An adapter class to make the meta information of an epub book, as specified in the
+ * `opf` manifest, available to the import process.
  *
- * THe relevant section in that file has this form
+ * THe relevant section in that file has this form:
  *
  * ~~~xml
  * <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
@@ -19,17 +19,17 @@ import { toFrontmatterTagname, titleToBasename } from '../ebook-transformers';
  * </metadata>
  * ~~~
  *
- * ❗The namespace of the property names is removed.
+ * ❗The namespace of the property names is removed. E.g `dc:title` becomes the `title` property.
  */
 class BookMetadata {
 	private meta = new Map<string, string[]>();
 
 	/**
-     * Build a new instance by parsing the `<metadata>` section of the book's
-     * content file.
-     *
-     * @param pkg The `<package>` element (root of the content file).
-     */
+	 * Build a new adapter instance by parsing the `<metadata>` section of the book's
+	 * manifest file.
+	 *
+	 * @param pkg The `<package>` element (root of the manifest file).
+	 */
 	constructor(pkg: Element) {
 		const metadata = pkg.querySelector('package > metadata');
 		if (metadata) {
@@ -93,64 +93,60 @@ class BookMetadata {
 	}
 
 	setProperty(name: string, value: string) {
-		return this.meta.set(name,[value]);
+		return this.meta.set(name, [value]);
 	}
+
 	/**
-     * Get a property value as a string.
-     * @param name Property name (without namespace).
-     * @returns property value (as a comma separated list if there is more than one value
-     *          for that property).
-     */
+	 * Get a property value as a string.
+	 * @param name Property name (without namespace).
+	 * @returns property value (as a comma separated list if there is more than one value
+	 *          for that property).
+	 */
 	asString(name: string): string | undefined {
 		return this.meta.get(name)?.join(',');
 	}
 
 	/**
-     * Get the property value(s) as array.
-     * @param name Property name (without namespace).
-     * @returns Array of property values
-     */
+	 * Get the property value(s) as array.
+	 * @param name Property name (without namespace).
+	 * @returns Array of property values
+	 */
 	asArray(name: string): string[] | undefined {
 		return this.meta.get(name);
 	}
 }
 
 /**
- * A builder class to facilitate the import of epub books to Obsidian.
+ * A builder class to facilitate the import of epub books to an Obsidian folder.
  *
- *
- * This class also defines and executes the necessary import workflow.
+ * The responsibilities of this class are:
+ * 1. Epub contents analysis : Inspect the contents of an epub ZIP file in {@link EpubBook.addAssets}
+ *    and obtain the book's manifest {@link EpubBook.parseManifest} and meta data {@link BookMetadata}.
+ * 2. Factory setup: create specific factory objects, subclassed from {@link ImportableAsset},
+ *     for the book's assets listed in its manifest.
+ * 3. Perform the import: Create the book's cover page and call {@link ImportableAsset.import} to
+ *    for all book assetes to create the Obsidian representation of the book in the import folder.
+ * 4. Progress reporting.
  */
 export class EpubBook {
 	private vault: Vault;
 	private sourcePrefix: string; // the ZIP directory path to the e-book
 	private mimeMap = new Map<string, string>(); // asset source path => mimetype
 	private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
-	readonly parser = new DOMParser(); // the parser instance to use
 	private meta: BookMetadata; // The books metadata
 	private filenameRegistry = new Set<string>;
+
+	readonly parser = new DOMParser(); // the parser instance to use
 
 	toc?: TocAsset | PageAsset;
 
 	private _tags: string[] = [];
+	private _titlePageFilename?: string;
 
 	// some progress data
 	private ctx: ImportContext;
 	private fileCount = 0;
 	private processed = 0;
-
-	get frontmatter(): string[] {
-		return [
-			'---',
-			`book: "${this.title}"`,
-			`author: "${this.author}"`,
-			'aliases: ',
-			`  - "${this.title}"`,
-			`publisher: "${this.publisher}"`,
-			`tags: [${this.tags.join(',')}]`,
-			'---'
-		];
-	}
 
 	get abstract(): string[] {
 		const description = htmlToMarkdown(this.description ?? '-')
@@ -164,8 +160,8 @@ export class EpubBook {
 	}
 
 	/**
-     * @type {string[]}
-     */
+	 * @type {string[]}
+	 */
 	get tags(): string[] {
 		return this._tags;
 	}
@@ -180,12 +176,20 @@ export class EpubBook {
 	get coverImage(): string | undefined {
 		return this.meta.asString('cover-image');
 	}
+
 	get title(): string {
-		return this.meta.asString('title') ?? 'Untitled book';
+		return this.meta.asString('title') ?? 'Untitled Book';
+	}
+
+	private get titlePageFilename(): string {
+		if (!this._titlePageFilename) {
+			this._titlePageFilename = titleToBasename("§ About: " + this.title) + ".md"
+		}
+		return this._titlePageFilename;
 	}
 
 	get author(): string {
-		return this.meta.asString('creator') ?? 'Unkown author';
+		return this.meta.asString('creator') ?? 'Unknown author';
 	}
 
 	get publisher(): string {
@@ -199,6 +203,11 @@ export class EpubBook {
 	constructor(vault: Vault, ctx: ImportContext) {
 		this.vault = vault;
 		this.ctx = ctx;
+	}
+
+	relativePathToTitlePage(asset: ImportableAsset): string {
+		const relpath = "../".repeat(asset.assetFolderPath.length);
+		return relpath ? (relpath + "/" + this.titlePageFilename) : this.titlePageFilename;
 	}
 
 	private getSourcePath(source: ZipEntryFile): string {
@@ -249,12 +258,12 @@ export class EpubBook {
 	/**
 	 * Register a filename for an asset.
 	 *
-	 * Registration is needed to make filenames are unique.
+	 * Registration is needed to make filenames unique.
 	 *
 	 * @param filename The filename to register
 	 * @returns `true` if the filename is unique and was registered successfully; `false` if the filename is already in use.
 	 */
-	registerFilename(filename: string) : boolean {
+	registerFilename(filename: string): boolean {
 		if (this.filenameRegistry.has(filename)) {
 			return false;
 		}
@@ -263,26 +272,26 @@ export class EpubBook {
 	}
 
 	/**
-     * Get an conversion adapter instance of an asset that was
-     * mentioned in the book's manifest (`content.opf`),
-     *
-     * @param path path to the asset relative to the book.
-     * @returns the adapter object associated with the asset or
-     *          `undefined` if no such asset was listed in the manifest.
-     */
+	 * Get an conversion adapter instance of an asset that was
+	 * mentioned in the book's manifest (`content.opf`),
+	 *
+	 * @param path source path to the asset relative to the book.
+	 * @returns the adapter object associated with the asset or
+	 *          `undefined` if no such asset was listed in the manifest.
+	 */
 	getAsset(path: string): ImportableAsset | undefined {
 		return this.assetMap.get(path);
 	}
 
 	/**
-     * Add all book assets from the ZIP archive.
-     *
-     * The assets added are dermined by the book manifest read
-     * from `content.opf.)
-     * @param entries ZIP file entries
-     */
+	 * Add all book assets from the ZIP archive.
+	 *
+	 * The assets added are dermined by the book manifest read
+	 * from `content.opf.)
+	 * @param entries ZIP file entries
+	 */
 	async addAssets(entries: ZipEntryFile[]): Promise<void> {
-		this.fileCount = entries.length;
+		this.fileCount = entries.length + 1; // one more for the book's _about_ page.
 
 		// find the books manifest first so that we know what the relevant files are.
 		const manifestSource = entries.find((asset, _0, _1) => asset.extension === 'opf');
@@ -361,7 +370,7 @@ export class EpubBook {
 				if (imgs.length > 0) {
 					const src = imgs[0].getAttribute('src');
 					if (src) {
-						coverImage = asset.pathFromBook(src); // make relative to top
+						coverImage = decodeURIComponent(asset.pathFromBook(src)); // make relative to top
 					}
 				}
 				else {
@@ -369,7 +378,7 @@ export class EpubBook {
 					if (images.length > 0) {
 						const href = images[0].getAttribute('xlink:href') || images[0].getAttribute('href');
 						if (href) {
-							coverImage = asset.pathFromBook(href);
+							coverImage = decodeURIComponent(asset.pathFromBook(href));
 						}
 					}
 				}
@@ -383,9 +392,12 @@ export class EpubBook {
 		if (this.toc instanceof TocAsset) {
 			await this.toc.parse(this);
 		}
+
+
 	}
 
 	async import(outputFolder: TFolder): Promise<void> {
+		// creating the book's import folder
 		const bookFolderPath = outputFolder.path + '/' + titleToBasename(this.title);
 		if (await this.vault.adapter.exists(bookFolderPath)) {
 			this.ctx.reportFailed(`import of '${this.title}' failed`, 'The output folder already exists');
@@ -403,6 +415,24 @@ export class EpubBook {
 				asset.reconnectLinks(this);
 			}
 		}
+		// create the books about page
+		const titlePageContent = [
+			'---',
+			`book: "${this.title}"`,
+			`author: "${this.author}"`,
+			'aliases: ',
+			`  - "${this.title}"`,
+			`publisher: "${this.publisher}"`,
+			`tags: [${this.tags.join(',')}]`,
+			'---',
+			"",
+			...this.abstract,
+			"",
+			`![[${this.toc?.outputPath}]]`,
+		];
+		await this.vault.create(bookFolderPath + "/" + this.titlePageFilename, titlePageContent.join("\n"));
+		this.ctx.reportNoteSuccess(this.titlePageFilename);
+		this.ctx.reportProgress(++this.processed, this.fileCount);
 
 		// import all recognized assets of the book (as determined by the book manifest)
 		for (const asset of this.assetMap.values()) {
@@ -418,8 +448,8 @@ export class EpubBook {
 					this.ctx.reportNoteSuccess(asset.outputFilename);
 				}
 			}
-			catch (ex:any) {
-				this.ctx.reportFailed(asset.outputFilename,ex.message);
+			catch (ex: any) {
+				this.ctx.reportFailed(asset.outputFilename, ex.message);
 			}
 
 			this.ctx.reportProgress(++this.processed, this.fileCount);
@@ -428,13 +458,19 @@ export class EpubBook {
 }
 
 /**
- * Import ePub format e-books.
+ * Import an e-pub format e-book.
  *
- * @param vault THe Obsidian vault to import to.
+ * The import process has 3 major phases:
+ * 1. reading the e-pub ZIP contents
+ * 2. passing the ZIP contents to the {@link EpubBook} builder object for
+ *    analysis {@link EpubBook.addAssets}.
+ * 3. Saving the book's assets to the given output folder {@link EpubBook.import}
+ *
+ * @param vault The Obsidian vault to import to.
  * @param epub THe ePub file selected for import.
- * @param outputFolder A folder in the Obsidian vault where to import te book to.
- * @param ctx Import progress reporting object-
- * @returns THe ePpub book object
+ * @param outputFolder Obsidian folder to import the book to.
+ * @param ctx Import progress reporting object.
+ * @returns THe e-pub book factory object which performed the import.
  */
 export async function importEpubBook(vault: Vault, epub: PickedFile, outputFolder: TFolder, ctx: ImportContext): Promise<EpubBook> {
 	const doc = new EpubBook(vault, ctx);
