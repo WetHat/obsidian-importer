@@ -5,7 +5,7 @@ import { EpubBook } from './epub-import';
 import { cleanupCodeBlock, convertToMarkdown, entityTransformer, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, mathTransformer, mermaidToCodeBlock, titleToBasename, transformText } from '../ebook-transformers';
 
 /**
- * Base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
+ * Factory base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
  */
 export abstract class ImportableAsset {
 	/**
@@ -99,7 +99,6 @@ export abstract class ImportableAsset {
 	 *
 	 * @see makeAssetPath
 	 *
-	 * @param encode `true` to url-encode the path
 	 * @return Path relative to the book in the output folder.
 	 */
 	get outputPath(): string {
@@ -177,7 +176,7 @@ export class PageAsset extends ImportableAsset {
 	}
 
 	/**
-	 * The book's title as specified in the pages <title> tag or in the content map `ncx` file
+	 * The page's title as specified in the pages <title> tag or in the content map `ncx` file
 	 * of the book.
 	 */
 	get pageTitle(): string | undefined {
@@ -324,26 +323,12 @@ export class PageAsset extends ImportableAsset {
 		}
 
 		const outputPath = await this.getVaultOutputPath(bookOutpuFolder);
-		let markdown: string[];
-		if (this.toc) {
-			markdown = [
-				...this.book.frontmatter,
-				'',
-				...this.book.abstract,
-				''
-			];
-		}
-		else {
-			const toc = this.book.toc;
-			markdown = [
-				'---',
-				toc ? `book: "[[${this.relativePathTo(toc)}|${this.book.title}]]"` : `"${this.book.title}"`,
-				`tags: ${this.book.tags}`,
-				'---',
-				''
-			];
-		}
-
+		const markdown = [
+			'---',
+			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
+			`tags: ${this.book.tags}`,
+			'---',
+		];
 		markdown.push(convertToMarkdown(this.page));
 		return bookOutpuFolder.vault.create(outputPath, markdown.join('\n'));
 	}
@@ -436,13 +421,13 @@ export class TocAsset extends ImportableAsset {
 	async import(bookOutpuFolder: TFolder): Promise<TFile> {
 		const path = await this.getVaultOutputPath(bookOutpuFolder);
 		let content: string[] = this.book ? [
-			...this.book.frontmatter,
-			'',
-			...this.book.abstract,
-			'',
-			'# ' + this.book.title,
+			'---',
+			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
+			`tags: ${this.book.tags}`,
+			'---',
+			''
 		] : [];
-		content.push('# Book Content Map');
+		content.push('# Content Map');
 		for (const navlink of this.navList) {
 			content.push(navlink.markdownListItem);
 		}
@@ -450,7 +435,7 @@ export class TocAsset extends ImportableAsset {
 	}
 
 	get outputFilename(): string {
-		return '§ Title Page.md';
+		return titleToBasename(`§ Outline: ${this.book?.title ?? "This BooK"}`) + ".md";
 	}
 
 	private parseNavPoint(level: number, navPoint: Element, book: EpubBook): NavLink {
