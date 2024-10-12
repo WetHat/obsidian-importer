@@ -226,7 +226,7 @@ export class EpubBook {
 			const
 				item = items[i],
 				mimetype = item.getAttribute('media-type'),
-				href = item.getAttribute('href'),
+				href = decodeURIComponent(item.getAttribute('href') as string),
 				properties = item.getAttribute('properties');
 
 			if (mimetype && href) {
