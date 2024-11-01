@@ -5,30 +5,31 @@ import { EpubBook } from './epub-import';
 import { cleanupCodeBlock, convertToMarkdown, entityTransformer, hoistTableCaptions, injectCodeBlock, markElementAsLinkTarget, mathTransformer, mermaidToCodeBlock, titleToBasename, transformText } from '../ebook-transformers';
 
 /**
- * Factory base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
+ * Adapter base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
+ *
  */
 export abstract class ImportableAsset {
 	/**
-	 * asset source in the ZIP archive.
+	 * Handle of an asset in the ZIP archive.
 	 * Needed for delazd loading of the asset contents
 	 */
 	protected source: ZipEntryFile;
 
 	/**
-	 * The relative folder path to an asset relative to the book.
+	 * The relative folder path of an asset relative to the book.
 	 * Will also used as the relative folder path in the output folder.
 	 */
 	assetFolderPath: string[];
 
 	/**
-	 * The mimetype of the asset as defined in the book's manifest.
+	 * The mimetype of the asset as reported by the book's manifest.
 	 */
 	mimetype: string;
 
 	/**
 	 * Create anew instance of an importable asset.
 	 *
-	 * @param source The epub ZIP archive source of the asset.
+	 * @param source The epub ZIP archive source handle of the asset.
 	 * @param sourcePath The path relative to the book's folder in the epub ZIP archive.
 	 * @param mimetype Asset mimetype
 	 */
