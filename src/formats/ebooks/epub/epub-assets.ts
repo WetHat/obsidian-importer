@@ -341,6 +341,7 @@ export class PageAsset extends ImportableAsset {
 			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
 			`tags: ${this.book.tags}`,
 			'---',
+			''
 		];
 		markdown.push(convertToMarkdown(this.page));
 		return bookOutpuFolder.vault.create(outputPath, markdown.join('\n'));
