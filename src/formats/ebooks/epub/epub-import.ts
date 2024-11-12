@@ -119,35 +119,65 @@ class BookMetadata {
 /**
  * A builder class to facilitate the import of epub books to an Obsidian folder.
  *
- * The responsibilities of this class are:
+ * ```svgbob
+ * ┌────────────┐       creates        ┌────────────────┐
+ * │ EpubBook   ├─────────────────────▶┤ Obsidian Book │
+ * └─────┬──────┘                      └──────┬─────────┘
+ *       │                                    ▲
+ *  constructs                                │
+ *       │                                    │
+ *       │  ┌────────────┐                    │
+ *       ├─▶┤ PageAsset  ├───┐             imports
+ *       │  └────────────┘   │                │
+ *       │  ┌────────────┐   │                │
+ *       ├─▶┤ MediaAsset ├───┼────────────────┘
+ *       │  └────────────┘   │
+ *       │  ┌────────────┐   │
+ *       └─▶┤ TocAsset   ├───┘
+ *          └────────────┘
+ * ```
+ *
+ * The responsibilities of this class include:
  * 1. Epub contents analysis : Inspect the contents of an epub ZIP file in {@link EpubBook.addAssets}
  *    and obtain the book's manifest {@link EpubBook.parseManifest} and meta data {@link BookMetadata}.
- * 2. Factory setup: create specific factory objects, subclassed from {@link ImportableAsset},
- *     for the book's assets listed in its manifest.
- * 3. Perform the import: Create the book's cover page and call {@link ImportableAsset.import} to
+ * 2. Factory orchestration: create specific factory objects, subclassed from {@link ImportableAsset},
+ *    for the book's assets listed in its manifest.
+ * 3. Import: Create the book's cover page and call {@link ImportableAsset.import} to
  *    for all book assetes to create the Obsidian representation of the book in the import folder.
  * 4. Progress reporting.
  */
 export class EpubBook {
 	private vault: Vault;
-	private sourcePrefix: string; // the ZIP directory path to the e-book
-	private mimeMap = new Map<string, string>(); // asset source path => mimetype
+	private sourcePrefix: string; // the ZIP directory path relative to the e-book
+	private mimeMap = new Map<string, string>(); // asset source path => mimetype of asset
 	private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
 	private meta: BookMetadata; // The books metadata
 	private filenameRegistry = new Set<string>;
 
 	readonly parser = new DOMParser(); // the parser instance to use
 
+	/**
+	 * The version 2 or 3 table of contentd of an epub book.
+	 */
 	toc?: TocAsset | PageAsset;
 
+	/**
+	 * The tags retrieved from the bool's metadata.
+	 */
 	private _tags: string[] = [];
 	private _titlePageFilename?: string;
 
-	// some progress data
+	/**
+	 * The import context object providing progress reporting.
+	 */
 	private ctx: ImportContext;
+
 	private fileCount = 0;
 	private processed = 0;
 
+	/**
+	 * @returns The book's abstract in Markdown format.
+	 */
 	get abstract(): string[] {
 		const description = htmlToMarkdown(this.description ?? '-')
 			.split('\n')
@@ -160,19 +190,29 @@ export class EpubBook {
 	}
 
 	/**
-	 * @type {string[]}
+	 * @returns the list of tags retrieved from the book's metadata.
 	 */
 	get tags(): string[] {
 		return this._tags;
 	}
 
+	/**
+	 *  @returns The Book's publish date.
+	 */
 	get published(): string | undefined {
 		return this.meta.asString('date');
 	}
+
+	/**
+	 * @returns The language the book is written in.
+	 */
 	get language(): string {
 		return this.meta.asString('language') ?? 'Unspecified';
 	}
 
+	/**
+	 * @returns The book's cover image.
+	 */
 	get coverImage(): string | undefined {
 		return this.meta.asString('cover-image');
 	}
