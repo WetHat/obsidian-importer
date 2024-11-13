@@ -12,7 +12,6 @@ There is a utility function `ts.forEachChild` that allows you to visit all the c
 Here is simplified snippet of the source code to demonstrate how it functions:
 
 ```
-
 export function forEachChild<T>(node: Node, cbNode: (node: Node) => T, cbNodeArray?: (nodes: Node[]) => T): T {
         if (!node) {
             return;

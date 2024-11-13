@@ -73,7 +73,7 @@ function emitJavaScript(jsFilePath: string, root?: SourceFile) {
 The important function call here : `initializeEmitterWithSourceMaps` which is a function local to `emitJavaScript` that overrides some locals that were already defined here. At the bottom of `initializeEmitterWithSourceMaps` you will notice the overriding:
 
 ```
-    // end of `initializeEmitterWithSourceMaps`
+// end of `initializeEmitterWithSourceMaps`
 
     writeEmittedFiles = writeJavaScriptAndSourceMapFile;
     emit = emitNodeWithSourceMap;

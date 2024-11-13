@@ -17,7 +17,7 @@ For example, you can use husky to make sure files are formatted by prettier auto
 - Add `scripts` to `package.json`:
 
 ```
-    "precommit": "npm run prettier:write",
+"precommit": "npm run prettier:write",
 ```
 
 Now whenever you commit code and there are any formatting changes that need to be made, you'd get them as a _modified_ file in your git log. You can now

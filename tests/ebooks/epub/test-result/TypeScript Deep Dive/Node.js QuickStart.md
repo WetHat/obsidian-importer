@@ -28,7 +28,7 @@ All your TypeScript code goes in `src` and the generated JavaScript goes in `lib
 Now just add a `script` target to your `package.json` based on your application entry e.g. assuming its `index.ts`:
 
 ```
-  "scripts": {
+"scripts": {
     "start": "npm run build:live",
     "build": "tsc -p .",
     "build:live": "nodemon --watch 'src/**/*.ts' --exec \"ts-node\" src/index.ts"

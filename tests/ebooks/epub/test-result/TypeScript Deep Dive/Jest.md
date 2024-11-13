@@ -82,7 +82,7 @@ Add `package.json`:
 - For a file `foo.ts`:
     
     ```
-      export const sum
+    export const sum
         = (...a: number[]) =>
           a.reduce((acc, val) => acc + val, 0);
     ```
@@ -90,7 +90,7 @@ Add `package.json`:
 - A simple `foo.test.ts`:
     
     ```
-      import { sum } from '../foo';
+    import { sum } from '../foo';
     
       test('basic', () => {
         expect(sum()).toBe(0);
@@ -131,7 +131,7 @@ Enzyme allows you to test react components with dom support. There are three ste
 2. Add `"snapshotSerializers"` and `"setupTestFrameworkScriptFile"` to your `jest.config.js`:
     
     ```
-     module.exports = {
+    module.exports = {
        // OTHER PORTIONS AS MENTIONED BEFORE
     
        // Setup Enzyme
@@ -143,7 +143,7 @@ Enzyme allows you to test react components with dom support. There are three ste
 3. Create `src/setupEnzyme.ts` file.
     
     ```
-     import { configure } from 'enzyme';
+    import { configure } from 'enzyme';
      import EnzymeAdapter from 'enzyme-adapter-react-16';
      configure({ adapter: new EnzymeAdapter() });
     ```
@@ -154,7 +154,7 @@ Now here is an example react component and test:
 - `checkboxWithLabel.tsx`:
     
     ```
-      import * as React from 'react';
+    import * as React from 'react';
     
       export class CheckboxWithLabel extends React.Component<{
         labelOn: string,
@@ -189,7 +189,7 @@ Now here is an example react component and test:
 - `checkboxWithLabel.test.tsx`:
     
     ```
-      import * as React from 'react';
+    import * as React from 'react';
       import { shallow } from 'enzyme';
       import { CheckboxWithLabel } from './checkboxWithLabel';
     
