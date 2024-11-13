@@ -184,7 +184,6 @@ var todayAfter1second = today.addMilliseconds(1000);
 If you look inside `lib.d.ts` for string you will find stuff similar to what we saw for `Date` (`String` global variable, `StringConstructor` interface, `String` interface). One thing of note though is that the `String` interface also impacts string _literals_ as demonstrated in the below code sample:
 
 ```
-
 interface String {
     endsWith(suffix: string): boolean;
 }

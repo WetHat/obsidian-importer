@@ -15,7 +15,7 @@ Prettier is a great tool by facebook that makes code formatting so much easier t
 - Add `scripts` to `package.json`:
 
 ```
-    "prettier:base": "prettier --parser typescript --single-quote",
+"prettier:base": "prettier --parser typescript --single-quote",
     "prettier:check": "npm run prettier:base -- --list-different \"src/**/*.{ts,tsx}\"",
     "prettier:write": "npm run prettier:base -- --write \"src/**/*.{ts,tsx}\""
 ```

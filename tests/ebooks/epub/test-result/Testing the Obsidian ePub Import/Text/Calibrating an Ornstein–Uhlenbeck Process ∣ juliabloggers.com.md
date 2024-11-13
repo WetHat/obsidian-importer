@@ -97,7 +97,7 @@ plot!(0:dt:maxT, p2, label = "Mean Reversion")
 plot!(0:dt:maxT, p3, label = "Random Walk")
 ```
 
-![Different values an OU process can look](https://i0.wp.com/dm13450.github.io/assets/ouprocess/oudemo.png?w=625&ssl=1 "Different values an OU process can look")
+![Different values an OU process can look](../Images/ouprocess.png "Different values an OU process can look")
 
 The mean reversion (orange) hasn’t moved away from the long-term average ($\mu=0$) and the momentum has diverged the furthest from the starting point, which lines up with the name. The random walk, inbetween both as we would expect.
 
@@ -194,7 +194,7 @@ plot(bootMom, bootRev,
      link=:all)
 ```
 
-![Bootstrapping an OU process](https://i0.wp.com/dm13450.github.io/assets/ouprocess/bootPlot.png?w=625&ssl=1 "Bootstrapping an OU process")
+![Bootstrapping an OU process](../Images/ouprocessBootstrap.png "Bootstrapping an OU process")
 
 The momentum bootstrap has worked and centred around the correct  
 value, but the same cannot be said for the reversion plot. However, it  
@@ -313,9 +313,9 @@ understanding of how varied the samples can be.
 plot(revPlot, momPlot, layout = (2,1), link=:all)
 ```
 
-![Multiple sample estimation of an OU process](https://i0.wp.com/dm13450.github.io/assets/ouprocess/multisample.png?w=625&ssl=1 "Multiple sample estimation of an OU process")
+![Multiple sample estimation of an OU process](../Images/ouprocessMultipleSamples.png "Multiple sample estimation of an OU process")
 
-We can see the heavy-tailed nature of the estimation process, but  
+We can see the heavy-MZtailed nature of the estimation process, but  
 thankfully the histograms are centred around the correct number. This  
 goes to show how difficult it is to estimate the mean reversion  
 parameter even in this simple setup. So for a real dataset, you need to  
@@ -343,7 +343,7 @@ This entry was posted in [Julia](https://www.juliabloggers.com/category/julia/) 
 
 Search for:  
 
-[![RSS feed](https://www.juliabloggers.com/wp-content/plugins/jetpack/images/rss/orange-large.png)](https://www.juliabloggers.com/feed/ "Subscribe to posts")
+[![RSS feed](../Images/RSS.png)](https://www.juliabloggers.com/feed/ "Subscribe to posts")
 
 ### Recent Posts ^sigil-toc-id-21
 

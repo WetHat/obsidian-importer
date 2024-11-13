@@ -41,7 +41,7 @@ echo {} > cypress.json
 Add a few scripts to the `e2e/package.json` file:
 
 ```
-  "scripts": {
+"scripts": {
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },
