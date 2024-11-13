@@ -423,7 +423,7 @@ print('I repeat, the value is', i)
 When you run this, you get the following error:
 
 ```
-  File "whitespace.py", line 3
+File "whitespace.py", line 3
     print('Value is', i)
     ^
 IndentationError: unexpected indent
