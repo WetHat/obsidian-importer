@@ -75,9 +75,7 @@ export class TextTransformer {
  * const linter = new ObsidianHTMLLinter(document.body);
  * linter
  *     .cleanupCodeBlock()
- *     .detectCode()
- *     .flattenTables()
- *     .cleanupFakeCode()
+ *     ...
  *     .injectCodeBlock();
  * ~~~
  */
@@ -117,11 +115,29 @@ export class ObsidianHTMLLinter {
     constructor(element: HTMLElement) {
         this.element = element;
     }
-
+    /**
+     * Transmute `<audio>` and  `<video>` tags to `<img>` so that Obsidian embeds them properly.
+     *
+     * @returns instance of this class for method chaining.
+     */
+    fixEmbeds() {
+        this.element.querySelectorAll("audio,video,img")
+            .forEach(el => {
+                el.setAttribute("src",el.getAttribute("src")?.replace(/ /g,"%20") ?? "");
+                if (el.localName !== "img") {
+                    el.replaceWith(createEl('img', {
+                        attr: {
+                            src: el.getAttribute("src"),
+                            alt: el.getAttribute('alt'),
+                        }
+                }))
+            }});
+        return this;
+    }
     /**
      * Put mermaid diagrams into a code block so that Obsidian can pick them up.
      *
-     * @param element the HTML element to scan for mermaid diagrams
+    * @returns instance of this class for method chaining.
      */
     mermaidToCodeBlock() :ObsidianHTMLLinter{
         const
