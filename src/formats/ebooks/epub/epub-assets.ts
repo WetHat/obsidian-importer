@@ -288,6 +288,7 @@ export class PageAsset extends ImportableAsset {
 				// a content page
 				const linter = new ObsidianHTMLLinter(this.page.body);
 				linter
+					.fixEmbeds()
 					.cleanupCodeBlock()
 					.mermaidToCodeBlock()
 					.detectCode()
