@@ -221,7 +221,7 @@ export class PageAsset extends ImportableAsset {
 	 *
 	 * @param targetID Id of an element in the page document.
 	 * @returns The fragment identifier to a page element in Obsidian format (`#^...`)
-	 *          or an empty string if no elemnt with the given targetD could be cound
+	 *          or an empty string if no element with the given targetD could be found
 	 */
 	fragmentIdentifier(targetID: string): string {
 		if (!this.page) {
