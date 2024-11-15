@@ -12,10 +12,11 @@ export class TextTransformer {
     /**
      * Detect LaTeX math code and prepare it for Obsidian
      *
-     * Looks for  LaTex Math markers `\[, \(, \), \]` and chenges them
+     * - Looks for LaTex Math markers `\[, \(, \), \], \begin{...}, \end{...}` and changes them
      * to `$$` or `$`.
+     * - Removes some unsupported LaTeX math constructs.
      *
-     * Note: This transformaer should always called first as it sets
+     * Note: This transformer should always called first as it sets
      * element attributes.
      *
      * @returns This instance for method chaining design pattern.
@@ -24,7 +25,8 @@ export class TextTransformer {
         const text = this.textNode.textContent;
         if (text) {
             const transformed = text // non-greedy matches
-                .replace(/\\\[\s*([\s\S]+?)\\\]/g, '$$$$ $1 $$$$')
+                .replace(/\\\[\s*([\s\S]+?)\\\]|(\\begin\{[^}{]+\}[\s\S]+\\end\{[^}{]+\})/g, '$$$$ $1$2 $$$$')
+                .replace(/\\label\{[^}{]+\}/g,'') // unsupported by Obsidian
                 .replace(/\\\((.*?)\\\)/g, "$$$1$$");
             if (text !== transformed) {
                 this.textNode.textContent = transformed;
