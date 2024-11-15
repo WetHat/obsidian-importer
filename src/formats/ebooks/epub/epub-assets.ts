@@ -315,7 +315,7 @@ export class PageAsset extends ImportableAsset {
 			const href = a.getAttribute('href');
 			if (href && !href.includes('://')) {
 				const
-					parts = href.split('#'),
+					parts = decodeURIComponent(href).split('#'),
 					[path, id] = parts,
 					targetAsset = path ? book.getAsset(this.pathFromBook(path)) : this;
 				if (targetAsset instanceof PageAsset) {
