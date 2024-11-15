@@ -56,7 +56,7 @@ export function toFrontmatterTagname(tagname: string) {
 }
 
 /**
- * Strategies for attaching link target markers to HTML elements,
+ * Strategies for attaching link target markers to HTML elements.
  */
 const enum BlockMarkerStrategy {
 	/**
@@ -115,7 +115,7 @@ const MARK_STRATEGIES = new Map<string, BlockMarkerStrategy>([
  * hence this function finds the best element to attach a marker to and marks it with a code block
  * which is turned into a proper Obsidian link target during Markdown post-processing.
  *
- * THe link target marker is processed by {@link convertToMarkdown}.
+ * The link target marker is processed by {@link convertToMarkdown}.
  *
  * @param element An element of a HTML document to mark as Obsidian link target.
  * @returns The obsidian compatible link target id (not necessarily the given the element's id).
@@ -208,7 +208,7 @@ export function markElementAsLinkTarget(element: Element): string | undefined {
 /**
  * Convert and post-process a HTML document to Markdown.
  *
- * During post-processing all moustace type markers `{{placeholder}}` with
+ * During post-processing all moustache type markers `{{...}}` with
  * Obsidian Markdown elements.
  *
  * @param html The HTML document to convert and post-process.
