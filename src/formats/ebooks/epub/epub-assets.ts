@@ -42,7 +42,7 @@ export abstract class ImportableAsset {
 	}
 
 	/**
-	 * A utility function to build path to an asset relative to the book or source folder.
+	 * A utility function to build a path to an asset relative to the book or source folder.
 	 *
 	 * Works for both source and output paths as they share a common, relative folder path.
 	 *
