@@ -1,7 +1,7 @@
 import { ZipReader } from '@zip.js/zip.js';
 import { parseFilePath, PickedFile } from 'filesystem';
 import { ImportContext } from 'main';
-import { Vault, TFolder, htmlToMarkdown } from 'obsidian';
+import { TFolder, htmlToMarkdown } from 'obsidian';
 import { readZip, ZipEntryFile } from 'zip';
 import { ImportableAsset, MediaAsset, PageAsset, TocAsset } from './epub-assets';
 import { toFrontmatterTagname, titleToBasename } from '../ebook-transformers';
@@ -147,7 +147,6 @@ class BookMetadata {
  * 4. Progress reporting.
  */
 export class EpubBook {
-	private vault: Vault;
 	private sourcePrefix: string; // the ZIP directory path relative to the e-book
 	private mimeMap = new Map<string, string>(); // asset source path => mimetype of asset
 	private assetMap = new Map<string, ImportableAsset>(); // asset source path => book asset
@@ -157,15 +156,9 @@ export class EpubBook {
 	readonly parser = new DOMParser(); // the parser instance to use
 
 	/**
-	 * The version 2 or 3 table of contentd of an epub book.
+	 * The version 2 or 3 table of content of an epub book.
 	 */
 	toc?: TocAsset | PageAsset;
-
-	/**
-	 * The tags retrieved from the bool's metadata.
-	 */
-	private _tags: string[] = [];
-	private _titlePageFilename?: string;
 
 	/**
 	 * The import context object providing progress reporting.
@@ -188,6 +181,11 @@ export class EpubBook {
 			...description,
 		];
 	}
+
+	/**
+	 * The tags retrieved from the book's metadata.
+	 */
+	private _tags: string[] = [];
 
 	/**
 	 * @returns the list of tags retrieved from the book's metadata.
@@ -221,6 +219,7 @@ export class EpubBook {
 		return this.meta.asString('title') ?? 'Untitled Book';
 	}
 
+	private _titlePageFilename?: string;
 	private get titlePageFilename(): string {
 		if (!this._titlePageFilename) {
 			this._titlePageFilename = titleToBasename("§ About: " + this.title) + ".md"
@@ -240,8 +239,7 @@ export class EpubBook {
 		return this.meta.asString('description') ?? undefined;
 	}
 
-	constructor(vault: Vault, ctx: ImportContext) {
-		this.vault = vault;
+	constructor(ctx: ImportContext) {
 		this.ctx = ctx;
 	}
 
@@ -294,11 +292,11 @@ export class EpubBook {
 		}
 	}
 
-
 	/**
 	 * Register a filename for an asset.
 	 *
-	 * Registration is needed to make filenames unique.
+	 * Registration is needed to make filenames unique. Duplicate filenames may occur because page
+	 * files are named after their titles rather than their original filenames in the EPUB ZIP archive.
 	 *
 	 * @param filename The filename to register
 	 * @returns `true` if the filename is unique and was registered successfully; `false` if the filename is already in use.
@@ -313,7 +311,7 @@ export class EpubBook {
 
 	/**
 	 * Get an conversion adapter instance of an asset that was
-	 * mentioned in the book's manifest (`content.opf`),
+	 * mentioned in the book's manifest (`content.opf`).
 	 *
 	 * @param path source path to the asset relative to the book.
 	 * @returns the adapter object associated with the asset or
@@ -330,7 +328,7 @@ export class EpubBook {
 	 * from `content.opf.)
 	 * @param entries ZIP file entries
 	 */
-	async addAssets(entries: ZipEntryFile[]): Promise<void> {
+	private async addAssets(entries: ZipEntryFile[]): Promise<void> {
 		this.fileCount = entries.length + 1; // one more for the book's _about_ page.
 
 		// find the books manifest first so that we know what the relevant files are.
@@ -432,24 +430,24 @@ export class EpubBook {
 		if (this.toc instanceof TocAsset) {
 			await this.toc.parse(this);
 		}
-
-
 	}
 
-	async import(outputFolder: TFolder): Promise<void> {
+	private async importAssets(outputFolder: TFolder): Promise<number> {
 		// creating the book's import folder
-		const bookFolderPath = outputFolder.path + '/' + titleToBasename(this.title);
-		if (await this.vault.adapter.exists(bookFolderPath)) {
-			this.ctx.reportFailed(`import of '${this.title}' failed`, 'The output folder already exists');
-			return;
+		const
+			bookFolderPath = outputFolder.path + '/' + titleToBasename(this.title),
+			vault = outputFolder.vault;
+		if (await vault.adapter.exists(bookFolderPath)) {
+			this.ctx.reportFailed(`import of '${this.title}' failed`, 'The output folder for this book already exists!');
+			return 0;
 		}
-		const bookFolder = await this.vault.createFolder(bookFolderPath);
+		const bookFolder = await vault.createFolder(bookFolderPath);
 		this.ctx.status(`Saving Ebook to ${bookFolder.path}`);
 
 		// reconnect the link targets in all pages
 		for (const asset of this.assetMap.values()) {
 			if (this.ctx.cancelled) {
-				return;
+				return this.processed;
 			}
 			if (asset instanceof PageAsset) {
 				asset.reconnectLinks(this);
@@ -470,14 +468,14 @@ export class EpubBook {
 			"",
 			`![[${this.toc?.outputPath}]]`,
 		];
-		await this.vault.create(bookFolderPath + "/" + this.titlePageFilename, titlePageContent.join("\n"));
+		await vault.create(bookFolderPath + "/" + this.titlePageFilename, titlePageContent.join("\n"));
 		this.ctx.reportNoteSuccess(this.titlePageFilename);
 		this.ctx.reportProgress(++this.processed, this.fileCount);
 
 		// import all recognized assets of the book (as determined by the book manifest)
 		for (const asset of this.assetMap.values()) {
 			if (this.ctx.cancelled) {
-				return;
+				return this.processed;
 			}
 			try {
 				await asset.import(bookFolder);
@@ -494,31 +492,26 @@ export class EpubBook {
 
 			this.ctx.reportProgress(++this.processed, this.fileCount);
 		}
+		return this.processed;
 	}
-}
 
-/**
- * Import an e-pub format e-book.
- *
- * The import process has 3 major phases:
- * 1. reading the e-pub ZIP contents
- * 2. passing the ZIP contents to the {@link EpubBook} builder object for
- *    analysis {@link EpubBook.addAssets}.
- * 3. Saving the book's assets to the given output folder {@link EpubBook.import}
- *
- * @param vault The Obsidian vault to import to.
- * @param epub THe ePub file selected for import.
- * @param outputFolder Obsidian folder to import the book to.
- * @param ctx Import progress reporting object.
- * @returns THe e-pub book factory object which performed the import.
- */
-export async function importEpubBook(vault: Vault, epub: PickedFile, outputFolder: TFolder, ctx: ImportContext): Promise<EpubBook> {
-	const doc = new EpubBook(vault, ctx);
-
-	await readZip(epub, async (zip: ZipReader<any>, entries: ZipEntryFile[]): Promise<void> => {
-		await doc.addAssets(entries);
-		await doc.import(outputFolder);
-		ctx.status(`import of ${epub.name} complete`);
-	});
-	return doc;
+	/**
+	 * Import the epub format e-book from its ZIP archive.
+	 *
+	 * The epub import is a three-step process:
+	 * 1. Identify the assets that make up the book.
+	 * 2. Process the assets to build the book in memory.
+	 * 3. Save the book's assets as Obsidian files into the output folder.
+	 * @param outputFolder The Obsidian folder to import the book to.
+	 * @param epub The epub ZIP archive selected for import.
+	 * @returns `true` for a successful import; `false` otherwise.
+	 */
+	async import(outputFolder: TFolder, epub: PickedFile): Promise<boolean> {
+		await readZip(epub, async (zip: ZipReader<any>, entries: ZipEntryFile[]): Promise<void> => {
+			await this.addAssets(entries);
+			await this.importAssets(outputFolder);
+		});
+		this.ctx.status(`import of ${epub.name} complete`);
+		return this.fileCount > 0 && this.fileCount === this.processed;
+	}
 }

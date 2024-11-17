@@ -1,7 +1,7 @@
 import { Notice } from 'obsidian';
 import { FormatImporter } from '../format-importer';
 import { ImportContext } from '../main';
-import { importEpubBook } from './ebooks/epub/epub-import';
+import { EpubBook } from './ebooks/epub/epub-import';
 
 export class EbookImporter extends FormatImporter {
 	init(): void {
@@ -26,11 +26,10 @@ export class EbookImporter extends FormatImporter {
 		for (const file of files) {
 			switch(file.extension) {
 				case 'epub':
-					await importEpubBook(vault, file, outputFolder, ctx);
+					const epub = new EpubBook(ctx);
+					await epub.import(outputFolder,file);
 					break;
 			}
 		}
-
-		ctx.reportNoteSuccess(files[0].fullpath);
 	}
 }
