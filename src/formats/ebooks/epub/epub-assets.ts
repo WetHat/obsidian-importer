@@ -1,4 +1,3 @@
-
 import { TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
@@ -7,7 +6,6 @@ import { ObsidianHTMLLinter } from '../html-lint';
 
 /**
  * Adapter base class for assets in an e-pub ZIP archive that can be imported to Obsidian.
- *
  */
 export abstract class ImportableAsset {
 	/**
@@ -214,10 +212,10 @@ export class PageAsset extends ImportableAsset {
 	}
 
 	/**
-	 * Get the fragment identifier (anchor) of page element,
+	 * Get the fragment identifier (anchor) of a page element.
 	 *
-	 * This method injects a code block into the location of the elment with the given
-	 * id for Markdown postprocessing to pick up.
+	 * As a side-effect, this method injects a code block at the location of the element with the given
+	 * ID, allowing Markdown postprocessing to pick it up.
 	 *
 	 * @param targetID Id of an element in the page document.
 	 * @returns The fragment identifier to a page element in Obsidian format (`#^...`)
