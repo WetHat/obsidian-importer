@@ -111,6 +111,16 @@ const MARK_STRATEGIES = new Map<string, BlockMarkerStrategy>([
 ]);
 
 /**
+ * A comma separated list of HTML elements which can be link targets.
+ *
+ * This list is designed to be used in querySelector css queries.
+ */
+const TARGETABLE_ELEMENTS = Array.from(MARK_STRATEGIES.entries())
+	.filter(([_, value]) => value !== BlockMarkerStrategy.Descend)
+	.map(([key, _]) => key)
+	.join(",");
+
+/**
  * Mark an HTML element as Obsidian link target.
  *
  * Obsidian link targtes have the form `^id` where 'id' is alpanumeric and needs to be attached
@@ -138,29 +148,16 @@ export function markElementAsLinkTarget(element: Element): string | undefined {
 	}
 
 	if (strategy === BlockMarkerStrategy.Descend) {
-		// descend into the targetElement's structure to find a child element with
-		// an 'append' or `insertAfter` strategy
-		let
-			markerElement: Element | null = targetElement,
-			markerStrategy: BlockMarkerStrategy | undefined = strategy;
-
-		// inspect the first child element chain for an 'append' or `insertAfter` action
-		do {
-			markerElement = markerElement.firstElementChild;
-			markerStrategy = MARK_STRATEGIES.get(markerElement?.localName ?? '');
-		} while (markerElement && markerStrategy === BlockMarkerStrategy.Descend);
-
-		if (markerElement && markerStrategy !== BlockMarkerStrategy.Descend) {
-			// An elment to attach the marker to has been found
-			targetElement = markerElement;
-			strategy = markerStrategy;
-		}
-		else {
-			// no luck. Use  default strategy
+		// find a targetable element
+		const targetable = targetElement.querySelector(TARGETABLE_ELEMENTS);
+		if (targetable) {
+			targetElement = targetable;
+			strategy = MARK_STRATEGIES.get(targetElement.localName);
+		} else {
+			// no luck. Use default strategy
 			strategy = BlockMarkerStrategy.InsertAfter;
 		}
 	}
-
 	// Now that we have an element to work with, check if it already has a marker we can use.
 	// we do that to avoid proliveration of multiple markers on the same element.
 	let aliasID: string | undefined;
