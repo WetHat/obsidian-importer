@@ -1,5 +1,5 @@
 ---
-book: "[[§ About꞉ TypeScript Deep Dive.md|TypeScript Deep Dive]]"
+book: "[[📓 About꞉ TypeScript Deep Dive.md|TypeScript Deep Dive]]"
 tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
 ---
 
@@ -46,7 +46,7 @@ tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
 8. [Library QuickStart](Library%20QuickStart.md) 1.8
 9. [TypeScript's Type System](TypeScript's%20Type%20System.md) 1.9
     1. [JS Migration Guide](JS%20Migration%20Guide.md) 1.9.1
-    2. [@types](%40types.html) 1.9.2
+    2. [@types](@types.md) 1.9.2
     3. [Ambient Declarations](Ambient%20Declarations.md) 1.9.3
         1. [Declaration Files](Declaration%20Files.md) 1.9.3.1
         2. [Variables](Variables.md) 1.9.3.2

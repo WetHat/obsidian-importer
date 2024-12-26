@@ -1,5 +1,5 @@
 ---
-book: "[[..//§ About꞉ Testing the Obsidian ePub Import.md|Testing the Obsidian ePub Import]]"
+book: "[[..//📓 About꞉ Testing the Obsidian ePub Import.md|Testing the Obsidian ePub Import]]"
 tags: Obsidian/Plugin,RegressionTest
 ---
 
