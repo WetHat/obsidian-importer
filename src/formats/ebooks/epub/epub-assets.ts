@@ -68,7 +68,7 @@ export abstract class ImportableAsset {
 			targetPath = relPath.split('/');
 		while (targetPath.length > 0 && targetPath[0] === '..') {
 			thisPath.pop();
-			targetPath.unshift();
+			targetPath.shift();
 		}
 		return [
 			...thisPath,
