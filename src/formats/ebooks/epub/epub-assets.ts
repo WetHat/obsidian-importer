@@ -452,7 +452,7 @@ export class TocAsset extends ImportableAsset {
 	}
 
 	get outputFilename(): string {
-		return titleToBasename(`§ Outline: ${this.book?.title ?? "This BooK"}`) + ".md";
+		return titleToBasename(`☰ Outline: ${this.book?.title ?? "This BooK"}`) + ".md";
 	}
 
 	private parseNavPoint(level: number, navPoint: Element, book: EpubBook): NavLink {

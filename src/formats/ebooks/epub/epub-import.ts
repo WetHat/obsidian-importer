@@ -222,7 +222,7 @@ export class EpubBook {
 	private _titlePageFilename?: string;
 	private get titlePageFilename(): string {
 		if (!this._titlePageFilename) {
-			this._titlePageFilename = titleToBasename("§ About: " + this.title) + ".md"
+			this._titlePageFilename = titleToBasename("📓 About: " + this.title) + ".md"
 		}
 		return this._titlePageFilename;
 	}
