@@ -16,7 +16,7 @@ export abstract class ImportableAsset {
 
 	/**
 	 * The relative folder path of an asset relative to the book.
-	 * Will also used as the relative folder path in the output folder.
+	 * Will also be used as the relative folder path in the output folder.
 	 */
 	assetFolderPath: string[];
 
