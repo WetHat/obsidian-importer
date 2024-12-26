@@ -189,7 +189,8 @@ export function markElementAsLinkTarget(element: Element): string | undefined {
 
 	const marker = element.doc.createElement('code');
 	marker.setAttribute('marker', id);
-	// attach the marker to the correct position
+	// attach a marker `code` element to the correct position so that the target placeholder
+	// makes it all the way through to Markdown.
 	switch (strategy) {
 		case BlockMarkerStrategy.Append:
 			marker.setText('{{ ^' + id + '}}');
