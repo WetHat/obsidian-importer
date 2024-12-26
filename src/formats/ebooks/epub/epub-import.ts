@@ -355,6 +355,7 @@ export class EpubBook {
 						// we need to parse right away so that all pages are
 						// available when the TOC is parsed. Also this might
 						// be the toc (epub 3).
+						console.log(`Parsing ${epubPath}`);
 						const isToc = tocPath === epubPath;
 						await page.parse(this, isToc);
 						if (isToc && !this.toc) {
