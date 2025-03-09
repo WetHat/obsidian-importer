@@ -245,7 +245,7 @@ export class EpubBook {
 
 	relativePathToTitlePage(asset: ImportableAsset): string {
 		const relpath = "../".repeat(asset.assetFolderPath.length);
-		return relpath ? (relpath + "/" + this.titlePageFilename) : this.titlePageFilename;
+		return relpath ? (relpath + this.titlePageFilename) : this.titlePageFilename;
 	}
 
 	private getSourcePath(source: ZipEntryFile): string {
