@@ -125,13 +125,14 @@ export class ObsidianHTMLLinter {
                 parent = br.parentElement;
             if (parent) {
                 parent.insertAfter(element.doc.createTextNode("\n"), br);
+                reduceLineFeeds = true;
             }
             br.remove();
         }
 
         if (reduceLineFeeds) {
              // Remove additional empty lines produced by divs.
-            element.textContent?.replace(/\n+/g, "\n") ?? null;
+            element.textContent = element.textContent?.replace(/\n+/g, "\n") ?? null;
         } else {
             element.textContent = element.textContent ?? null;
         }
@@ -341,7 +342,7 @@ export class ObsidianHTMLLinter {
                 code.className = 'language-undefined';
             }
 
-            code.textContent = ObsidianHTMLLinter.expandBR(pre as HTMLElement).textContent?.trim() ?? "";
+            code.textContent = ObsidianHTMLLinter.expandBR(pre).textContent?.trim() ?? "";
             pre.replaceChildren(code);
             pre.removeAttribute("class");
         }
