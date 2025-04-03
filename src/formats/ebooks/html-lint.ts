@@ -25,9 +25,12 @@ export class TextTransformer {
         const text = this.textNode.textContent;
         if (text) {
             const transformed = text // non-greedy matches
-                .replace(/\\\[\s*([\s\S]+?)\\\]|(\\begin\{[^}{]+\}[\s\S]+\\end\{[^}{]+\})/g, '$$$$ $1$2 $$$$')
-                .replace(/\\label\{[^}{]+\}/g,'') // unsupported by Obsidian
-                .replace(/\\\((.*?)\\\)/g, "$$$1$$");
+                .replace(/[\$\s]*\\\[([\s\S]*?)\\\][\$\s]*/g,'\n$$$$\n$1\n$$$$\n') // matches \[...\] block math
+                .replace(/[\s\$]*(\\begin\{align\}[\s\S]*?\\end\{align\})[\s\$]*/g,'\n$$$$\n$1\n$$$$\n') // matches \begin{align}...\end{align} block math
+                .replace(/[\s\$]*(\\begin\{equation\}[\s\S]*?\\end\{equation\})[\s\$]*/g,'\n$$$$\n$1\n$$$$\n') // matches \begin{equation}...\end{equation} block math
+                .replace(/\\\((.*?)\\\)/g, "$$$1$$") // matches \(...\) inline math
+                .replace(/\\label\{[^}{]+\}/g, ''); // unsupported by Obsidian
+
             if (text !== transformed) {
                 this.textNode.textContent = transformed;
                 if (this.textNode.parentElement) {
@@ -81,7 +84,7 @@ export class TextTransformer {
  */
 export class ObsidianHTMLLinter {
     /**
-     * A Regular Expression to test for valid HTML attribute names.
+     * A Regular Expression to test for valid HTML attribute and class names.
      */
     private static VALIDATTR = /^[a-zA-Z][a-zA-Z_-]*$/;
 
@@ -91,25 +94,49 @@ export class ObsidianHTMLLinter {
     private element: HTMLElement;
 
     /**
-     * Expand all `<br>` elements to linefeeds.
+     * Add linefeeds to `<code>` and `<pre>` elements to ensure proper Obsidian code block formatting.
      *
-     * This cleanup method is used change unecessary `<br>` elements
-     * to linefeeds in pre-formatted (`<pre>`) HTML.
+     * This cleanup method is used to change unecessary `<br>` elements
+     * to linefeeds and add linefeeds after `<div>`elements to preserve the structure of `<pre>`
+     * or `<code>` elements in Obsidian code blocks.
      *
-     * @param element The elment to scan for `<br>`
+     * @param element The `<pre>` or `<code>` elment to process.
      * @returns The modified element.
      */
     private static expandBR(element: HTMLElement): HTMLElement {
+        let reduceLineFeeds = false
+        // Take into account that `<div> elements in preformatted blocks produce linefeeds.`
+        const divs = element.getElementsByTagName("div");
+        for (let i = 0; i < divs.length; i++) {
+            const
+                div = divs[i],
+                parent = div.parentElement;
+            if (parent) {
+                parent.insertAfter(element.doc.createTextNode("\n"), div);
+                reduceLineFeeds = true;
+            }
+        }
+
+        // Remove all <br> elements and replace them with linefeeds.
         const brs = element.getElementsByTagName("br");
         while (brs.length > 0) {
             const
-                br = brs[0], parent = br.parentElement;
+                br = brs[0],
+                parent = br.parentElement;
             if (parent) {
                 parent.insertAfter(element.doc.createTextNode("\n"), br);
             }
             br.remove();
         }
-        return element;
+
+        if (reduceLineFeeds) {
+             // Remove additional empty lines produced by divs.
+            element.textContent?.replace(/\n+/g, "\n") ?? null;
+        } else {
+            element.textContent = element.textContent ?? null;
+        }
+
+        return element; // return the element for method chaining.
     }
 
     constructor(element: HTMLElement) {
@@ -121,17 +148,18 @@ export class ObsidianHTMLLinter {
      * @returns instance of this class for method chaining.
      */
     fixEmbeds() {
-        this.element.querySelectorAll("audio,video,img")
+        this.element.querySelectorAll("audio,:not(iframe) > video,img")
             .forEach(el => {
-                el.setAttribute("src",el.getAttribute("src")?.replace(/ /g,"%20") ?? "");
+                el.setAttribute("src", el.getAttribute("src")?.replace(/ /g, "%20") ?? "");
                 if (el.localName !== "img") {
                     el.replaceWith(createEl('img', {
                         attr: {
                             src: el.getAttribute("src"),
                             alt: el.getAttribute('alt'),
                         }
-                }))
-            }});
+                    }))
+                }
+            });
         return this;
     }
     /**
@@ -139,7 +167,7 @@ export class ObsidianHTMLLinter {
      *
     * @returns instance of this class for method chaining.
      */
-    mermaidToCodeBlock() :ObsidianHTMLLinter{
+    mermaidToCodeBlock(): ObsidianHTMLLinter {
         const
             mermaids = this.element.getElementsByClassName('mermaid'),
             mermaidCount = mermaids.length;
@@ -204,7 +232,7 @@ export class ObsidianHTMLLinter {
         for (let i = 0; i < codeBlocks.length; i++) {
             const code = codeBlocks[i];
             ObsidianHTMLLinter.expandBR(code);
-            const codeTxt = code.innerText.trim();
+            const codeTxt = code.textContent?.trim() ?? "";
             code.textContent = codeTxt;
             const parent = code.parentElement;
             if ("pre" === parent?.localName) {
@@ -223,7 +251,7 @@ export class ObsidianHTMLLinter {
      * @returns instance of this class for method chaining.
      */
     detectCode(): ObsidianHTMLLinter {
-        this.element.querySelectorAll("[data-syntax-language],div[class*=code]")
+        this.element.querySelectorAll("[data-syntax-language],[class*=code]")
             .forEach(e => {
                 // identify the <code> element
                 let code = e.localName === "code"
@@ -265,8 +293,8 @@ export class ObsidianHTMLLinter {
     /**
      * Cleanup incorrectly used '<code>' elements.
      *
-     * if there are nested `<code>` or `<pre>` elements, the outer `<code>` element is
-     * converted to a `<div>`.
+     * Cleanup Criteria: If there are nested `<code>` or `<pre>` elements inside a `<code>`element,
+     * the outer `<code>` element is converted to a `<div>`.
      *
      * @returns instance of this class for method chaining.
      */
@@ -301,9 +329,11 @@ export class ObsidianHTMLLinter {
     injectCodeBlock(): ObsidianHTMLLinter {
         const pres = this.element.querySelectorAll("pre:not(:has(code))");
         for (let i = 0; i < pres.length; i++) {
-            const pre = pres[i];
+            const pre = pres[i] as HTMLPreElement;
             const
-                code = this.element.doc.createElement('code'), preClasses = Array.from(pre.classList), lang = preClasses.filter(cl => cl.startsWith("language-"));
+                code = this.element.doc.createElement('code'),
+                preClasses = Array.from(pre.classList),
+                lang = preClasses.filter(cl => cl.contains("language-") || cl.contains("lang-"));
 
             if (lang.length > 0)
                 code.className = preClasses[0];
@@ -435,13 +465,32 @@ export class ObsidianHTMLLinter {
                     name = att.name;
                 if (!ObsidianHTMLLinter.VALIDATTR.test(name)) {
                     illegalNames.push(name);
-                }
-                // Detect code classes
-                if (att.name === "class" && att.value.contains("highlight")) {
-                    if (att.value.contains("code")) {
-                        att.value = "code";
+                } else if (name === "class") {
+                    // detect and retain code related classes.
+                    const classes = att.value.split(" ");
+                    let
+                        nCodeAtts = 0,
+                        keep: string[] = [];
+                    classes
+                        .forEach(cl => {
+                            if (cl.contains("code")) {
+                                nCodeAtts++;
+                            } else if (ObsidianHTMLLinter.VALIDATTR.test(cl)) {
+                                // that appears to be a good class name.
+                                keep.push(cl);
+                            }
+                        });
+                    if (nCodeAtts > 0) {
+                        // make sure we keep the 'code' class name, so that we can find this element downstream.
+                        keep.push("code");
+                        // we now remove all highlight classes to avoid confusion in the extractor.
+                        keep = keep.filter(cl => !cl.contains("highlight") && !cl.contains("hljs"));
+                    }
+                    if (keep.length > 0) {
+                        // keep only checked attributes
+                        att.value = keep.join(" ");
                     } else {
-                        // that meeds to go so we get past downstream filters.
+                        // remove the class attribute as it is empty.
                         illegalNames.push(name);
                     }
                 }
