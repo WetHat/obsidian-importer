@@ -171,8 +171,7 @@ export class PageAsset extends ImportableAsset {
 	page?: Document;
 
 	private _pageTitle?: string;
-
-	private _filename?: string;
+	private _basename?: string;
 
 	linkTargetMap = new Map<string, string>(); // id => sanitized ID
 
@@ -199,15 +198,14 @@ export class PageAsset extends ImportableAsset {
 		if (this.book) {
 			// the page title is also used as the filename.
 			// hence we generate a unique filename right here.
-			const basename = titleToBasename(value);
+			this._basename = titleToBasename(value);
 			let
 				ndx = 0,
-				filename = basename + '.md';
+				filename = this._basename + '.md';
 			while (!this.book.registerFilename(filename)) {
 				// filename conflict - try a new name.
-				filename = `${basename} (${++ndx}).md`;
+				this._basename = `${this._basename} (${++ndx})`;
 			}
-			this._filename = filename;
 		}
 	}
 
@@ -255,7 +253,7 @@ export class PageAsset extends ImportableAsset {
 	}
 
 	get outputFilename(): string {
-		return this._filename ?? (this.source.basename + '.md');
+		return (this._basename ?? this.source.basename) + '.md';
 	}
 
 	async parse(book: EpubBook, toc: boolean): Promise<void> {
@@ -338,10 +336,13 @@ export class PageAsset extends ImportableAsset {
 			throw new Error('Book page not available for import');
 		}
 
-		const outputPath = await this.getVaultOutputPath(bookOutpuFolder);
-		const markdown = [
+		const
+			outputPath = await this.getVaultOutputPath(bookOutpuFolder),
+			aliases = this._basename && this._basename !== this.pageTitle ? [`aliases: ["${this.pageTitle}"]`] : [],
+			markdown : string[] = [
 			'---',
 			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
+			...aliases,
 			`tags: ${this.book.tags}`,
 			'---',
 			''
@@ -440,6 +441,7 @@ export class TocAsset extends ImportableAsset {
 		let content: string[] = this.book ? [
 			'---',
 			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
+			`aliases: ["☰ ${this.book?.title ?? "This Book"}"]`,
 			`tags: ${this.book.tags}`,
 			'---',
 			''
@@ -452,7 +454,7 @@ export class TocAsset extends ImportableAsset {
 	}
 
 	get outputFilename(): string {
-		return titleToBasename(`☰ Outline: ${this.book?.title ?? "This BooK"}`) + ".md";
+		return titleToBasename(`☰ ${this.book?.title ?? "This Book"}`) + ".md";
 	}
 
 	private parseNavPoint(level: number, navPoint: Element, book: EpubBook): NavLink {

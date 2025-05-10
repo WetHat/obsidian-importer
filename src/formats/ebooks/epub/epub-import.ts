@@ -219,12 +219,12 @@ export class EpubBook {
 		return this.meta.asString('title') ?? 'Untitled Book';
 	}
 
-	private _titlePageFilename?: string;
-	private get titlePageFilename(): string {
-		if (!this._titlePageFilename) {
-			this._titlePageFilename = titleToBasename("📓 About: " + this.title) + ".md"
+	private _titlePageBasename?: string;
+	private get titlePageBasename(): string {
+		if (!this._titlePageBasename) {
+			this._titlePageBasename = '📓'+titleToBasename(this.title);
 		}
-		return this._titlePageFilename;
+		return this._titlePageBasename;
 	}
 
 	get author(): string {
@@ -245,7 +245,7 @@ export class EpubBook {
 
 	relativePathToTitlePage(asset: ImportableAsset): string {
 		const relpath = "../".repeat(asset.assetFolderPath.length);
-		return relpath ? (relpath + this.titlePageFilename) : this.titlePageFilename;
+		return relpath ? (relpath + this.titlePageBasename + '.md') : (this.titlePageBasename + ".md");
 	}
 
 	private getSourcePath(source: ZipEntryFile): string {
@@ -436,7 +436,7 @@ export class EpubBook {
 	private async importAssets(outputFolder: TFolder): Promise<number> {
 		// creating the book's import folder
 		const
-			bookFolderPath = outputFolder.path + '/' + titleToBasename(this.title),
+			bookFolderPath = outputFolder.path + '/' + this.titlePageBasename,
 			vault = outputFolder.vault;
 		if (await vault.adapter.exists(bookFolderPath)) {
 			this.ctx.reportFailed(`import of '${this.title}' failed`, 'The output folder for this book already exists!');
@@ -454,13 +454,13 @@ export class EpubBook {
 				asset.reconnectLinks(this);
 			}
 		}
+
 		// create the books about page
 		const titlePageContent = [
 			'---',
 			`book: "${this.title}"`,
 			`author: "${this.author}"`,
-			'aliases: ',
-			`  - "${this.title}"`,
+			`aliases: ["${this.title}"]`,
 			`publisher: "${this.publisher}"`,
 			`tags: [${this.tags.join(',')}]`,
 			'---',
@@ -469,8 +469,8 @@ export class EpubBook {
 			"",
 			`![[${this.toc?.outputPath}]]`,
 		];
-		await vault.create(bookFolderPath + "/" + this.titlePageFilename, titlePageContent.join("\n"));
-		this.ctx.reportNoteSuccess(this.titlePageFilename);
+		await vault.create(bookFolderPath + "/" + this.titlePageBasename + ".md", titlePageContent.join("\n"));
+		this.ctx.reportNoteSuccess(this.titlePageBasename);
 		this.ctx.reportProgress(++this.processed, this.fileCount);
 
 		// import all recognized assets of the book (as determined by the book manifest)
