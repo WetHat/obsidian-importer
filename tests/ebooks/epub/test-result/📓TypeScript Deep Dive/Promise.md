@@ -466,7 +466,7 @@ loadJSONAsync('good.json')
     });
 ```
 
-The reason why this function was simpler is because the "`loadFile`(async) + `JSON.parse` (sync) =＞ `catch`" consolidation was done by the promise chain. Also the callback was not called by _us_ but called by the promise chain so we didn't have the chance of making the mistake of wrapping it in a `try/catch`.
+The reason why this function was simpler is because the "`loadFile`(async) + `JSON.parse` (sync) =\> `catch`" consolidation was done by the promise chain. Also the callback was not called by _us_ but called by the promise chain so we didn't have the chance of making the mistake of wrapping it in a `try/catch`.
 
 ### Parallel control flow
 

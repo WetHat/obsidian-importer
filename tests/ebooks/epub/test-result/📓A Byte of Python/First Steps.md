@@ -82,7 +82,7 @@ Change `untitled` to `helloworld` as the location of the project, you should see
 
 Click the `Create` button.
 
-Right-click on the `helloworld` in the sidebar and select `New` -＞ `Python File`:
+Right-click on the `helloworld` in the sidebar and select `New` -\> `Python File`:
 
 ![PyCharm -> New -> Python File](pycharm_new_python_file.png)
 
@@ -108,7 +108,7 @@ You should now see the output (what it prints) of your program:
 
 ![PyCharm output](pycharm_output.png)
 
-Phew! That was quite a few steps to get started, but henceforth, every time we ask you to create a new file, remember to just right-click on `helloworld` on the left -＞ `New` -＞ `Python File` and continue the same steps to type and run as shown above.
+Phew! That was quite a few steps to get started, but henceforth, every time we ask you to create a new file, remember to just right-click on `helloworld` on the left -\> `New` -\> `Python File` and continue the same steps to type and run as shown above.
 
 You can find more information about PyCharm in the [PyCharm Quickstart](https://www.jetbrains.com/pycharm-educational/quickstart/) page.
 

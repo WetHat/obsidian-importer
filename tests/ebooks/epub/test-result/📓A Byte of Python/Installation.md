@@ -31,7 +31,7 @@ NOTE: For people who already know programming, if you are familiar with Docker, 
 
 If you want to be able to use Python from the Windows command line i.e. the DOS prompt, then you need to set the PATH variable appropriately.
 
-For Windows 2000, XP, 2003 , click on `Control Panel` -＞ `System` -＞ `Advanced` -＞ `Environment Variables`. Click on the variable named `PATH` in the _System Variables_ section, then select `Edit` and add `;C:\Python35` (please verify that this folder exists, it will be different for newer versions of Python) to the end of what is already there. Of course, use the appropriate directory name.
+For Windows 2000, XP, 2003 , click on `Control Panel` -\> `System` -\> `Advanced` -\> `Environment Variables`. Click on the variable named `PATH` in the _System Variables_ section, then select `Edit` and add `;C:\Python35` (please verify that this folder exists, it will be different for newer versions of Python) to the end of what is already there. Of course, use the appropriate directory name.
 
 For older versions of Windows, open the file `C:\AUTOEXEC.BAT` and add the line `PATH=%PATH%;C:\Python35` and restart the system. For Windows NT, use the `AUTOEXEC.NT` file.
 
@@ -47,14 +47,14 @@ For Windows Vista:
 
 For Windows 7 and 8:
 
-- Right click on Computer from your desktop and select `Properties` or click `Start` and choose `Control Panel` -＞ `System and Security` -＞ `System`. Click on `Advanced system settings` on the left and then click on the `Advanced` tab. At the bottom click on `Environment Variables` and under `System variables`, look for the `PATH` variable, select and then press `Edit`.
+- Right click on Computer from your desktop and select `Properties` or click `Start` and choose `Control Panel` -\> `System and Security` -\> `System`. Click on `Advanced system settings` on the left and then click on the `Advanced` tab. At the bottom click on `Environment Variables` and under `System variables`, look for the `PATH` variable, select and then press `Edit`.
 - Go to the end of the line under Variable value and append `;C:\Python35` (please verify that this folder exists, it will be different for newer versions of Python) to the end of what is already there. Of course, use the appropriate folder name.
 - If the value was `%SystemRoot%\system32;` It will now become `%SystemRoot%\system32;C:\Python36`
 - Click `OK` and you are done. No restart is required, however you may have to close and reopen the command line.
 
 For Windows 10:
 
-Windows Start Menu ＞ `Settings` ＞ `About` ＞ `System Info` (this is all the way over to the right) ＞ `Advanced System Settings` ＞ `Environment Variables` (this is towards the bottom) ＞ (then highlight `Path` variable and click `Edit`) ＞ `New` ＞ (type in whatever your python location is. For example, `C:\Python35\`)
+Windows Start Menu \> `Settings` \> `About` \> `System Info` (this is all the way over to the right) \> `Advanced System Settings` \> `Environment Variables` (this is towards the bottom) \> (then highlight `Path` variable and click `Edit`) \> `New` \> (type in whatever your python location is. For example, `C:\Python35\`)
 
 ### Running Python prompt on Windows
 

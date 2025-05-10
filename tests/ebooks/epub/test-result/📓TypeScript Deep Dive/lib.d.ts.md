@@ -293,8 +293,8 @@ The libs can be categorized as follows:
 
 > NOTE: the `--lib` option provides extremely fine tuned control. So you most likely want to pick an item from the bulk + environment categories. If --lib is not specified a default library is injected:
 > 
-> - For --target es5 =＞ es5, dom, scripthost
-> - For --target es6 =＞ es6, dom, dom.iterable, scripthost
+> - For --target es5 =\> es5, dom, scripthost
+> - For --target es6 =\> es6, dom, dom.iterable, scripthost
 
 My Personal Recommendation:
 
@@ -307,7 +307,7 @@ My Personal Recommendation:
 
 Example Including Symbol with ES5:
 
-Symbol API is not included when target is es5. In fact, we receive an error like: ［ts］ Cannot find name 'Symbol'. We can use "target": "es5" in combination with "lib" to provide Symbol API in TypeScript:
+Symbol API is not included when target is es5. In fact, we receive an error like: \[ts\] Cannot find name 'Symbol'. We can use "target": "es5" in combination with "lib" to provide Symbol API in TypeScript:
 
 ```
 "compilerOptions": {

@@ -37,12 +37,12 @@ package
     
 - In your `tsconfig.json`
     
-    - have `compilerOptions`: `"outDir": "lib"` + `"declaration": true` + `"declarationMap" : true` ＜ This generates `.js` (JavaScript) `.d.ts` (declarations for TypeSafety) and `.d.ts.map` (enables `declaration .d.ts` =＞ `source .ts` IDE navigation) in the lib folder.
-    - have `include: ["src"]` ＜ This includes all the files from the `src` dir.
+    - have `compilerOptions`: `"outDir": "lib"` + `"declaration": true` + `"declarationMap" : true` \< This generates `.js` (JavaScript) `.d.ts` (declarations for TypeSafety) and `.d.ts.map` (enables `declaration .d.ts` =\> `source .ts` IDE navigation) in the lib folder.
+    - have `include: ["src"]` \< This includes all the files from the `src` dir.
 - In your `package.json` have
     
-    - `"main": "lib/index"` ＜ This tells to load `lib/index.js` for runtime code.
-    - `"types": "lib/index"` ＜ This tells TypeScript to load `lib/index.d.ts` for type checking.
+    - `"main": "lib/index"` \< This tells to load `lib/index.js` for runtime code.
+    - `"types": "lib/index"` \< This tells TypeScript to load `lib/index.d.ts` for type checking.
 
 Example package:
 

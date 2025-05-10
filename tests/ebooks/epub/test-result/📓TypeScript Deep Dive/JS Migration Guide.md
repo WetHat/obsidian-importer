@@ -22,7 +22,7 @@ With that assumption out of the way, in general the process consists of the foll
 
 Let us discuss a few of these points further.
 
-Note that all JavaScript is _valid_ TypeScript. That is to say that if you give the TypeScript compiler some JavaScript -＞ the JavaScript emitted by the TypeScript compiler will behave exactly the same as the original JavaScript. This means that changing the extension from `.js` to `.ts` will not adversely affect your codebase.
+Note that all JavaScript is _valid_ TypeScript. That is to say that if you give the TypeScript compiler some JavaScript -\> the JavaScript emitted by the TypeScript compiler will behave exactly the same as the original JavaScript. This means that changing the extension from `.js` to `.ts` will not adversely affect your codebase.
 
 ### Suppressing Errors
 
@@ -87,7 +87,7 @@ declare var $: JQuery;
 
 This provides you an easier future update path.
 
-Again, a high quality `jquery.d.ts` exists at [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped). But you now know how to overcome any JavaScript -＞ TypeScript friction _quickly_ when using third party JavaScript. We will look at ambient declarations in detail next.
+Again, a high quality `jquery.d.ts` exists at [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped). But you now know how to overcome any JavaScript -\> TypeScript friction _quickly_ when using third party JavaScript. We will look at ambient declarations in detail next.
 
 # Third Party NPM modules
 

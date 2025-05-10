@@ -9,7 +9,7 @@ tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
 
 There are two `emitters` provided with the TypeScript compiler:
 
-- `emitter.ts`: this is the emitter you are most likely to be interested in. Its the TS -＞ JavaScript emitter.
+- `emitter.ts`: this is the emitter you are most likely to be interested in. Its the TS -\> JavaScript emitter.
 - `declarationEmitter.ts`: this is the emitter used to create a _declaration file_ (a `.d.ts`) for a _TypeScript source file_ (a `.ts` file).
 
 We will look at `emitter.ts` in this section.
