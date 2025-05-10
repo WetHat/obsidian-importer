@@ -54,10 +54,10 @@ export class TextTransformer {
         if (text && parent && parent.localName !== "code" && !parent.classList.contains("math")) {
             // replace Obsidian unfriendly html entities and characters.
             const transformed = text
-                .replace(/>/g, '＞')
-                .replace(/</g, '＜')
-                .replace(/\[/g, '［')
-                .replace(/\]/g, '］');
+                .replace(/>/g, '\\>')
+                .replace(/</g, '\\<')
+                .replace(/\[/g, '\\[')
+                .replace(/\]/g, '\\]');
 
             if (transformed !== text) {
                 this.textNode.textContent = transformed;
