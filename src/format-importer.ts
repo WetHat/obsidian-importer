@@ -185,7 +185,7 @@ export abstract class FormatImporter {
 		// Increase number until the path is unique.
 		let i = 1;
 		let outputPath = prelimOutPath;
-		while(claimedPaths.includes(outputPath) || !!this.vault.getAbstractFileByPath(outputPath)) {
+		while (claimedPaths.includes(outputPath) || !!this.vault.getAbstractFileByPath(outputPath)) {
 			outputPath = path.join(parsedPrelimOutPath.parent, `${parsedPrelimOutPath.name} ${i}${fullExt}`);
 			i++;
 		}
@@ -193,9 +193,28 @@ export abstract class FormatImporter {
 		return outputPath;
 	}
 
+	async pause(durationSeconds: number, reason: string, ctx: ImportContext|undefined): Promise<void> {
+		const promise = new Promise(resolve => setTimeout(resolve, durationSeconds * 1_000));
+
+		if (ctx) {
+			const previousStatusMessage = ctx.statusMessage;
+			ctx.status(`⏸️ Pausing import for ${durationSeconds} seconds (${reason})`);
+			await promise;
+			ctx.status(previousStatusMessage);
+		}
+		else {
+			await promise;
+		}
+	}
+
 	abstract import(ctx: ImportContext): Promise<any>;
 
 	// Utility functions for vault
+
+	/** Remove any characters that would be illegal on any platform. */
+	sanitizeFilePath(path: string): string {
+		return path.replace(/[:|?<>*\\]/g, '');
+	}
 
 	/**
 	 * Recursively create folders, if they don't exist.

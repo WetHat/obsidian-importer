@@ -53,6 +53,7 @@ export class ImportContext {
 	skipped: string[] = [];
 	failed: string[] = [];
 	maxFileNameLength: number = 100;
+	statusMessage: string = '';
 
 	cancelled: boolean = false;
 
@@ -113,6 +114,7 @@ export class ImportContext {
 	 * @param message
 	 */
 	status(message: string) {
+		this.statusMessage = message;
 		this.statusEl.setText(message.trim() + '...');
 	}
 
@@ -341,11 +343,11 @@ export default class ImporterPlugin extends Plugin {
 	}
 
 	async loadData(): Promise<ImporterData> {
-	    return Object.assign({}, DEFAULT_DATA, await super.loadData());
+		return Object.assign({}, DEFAULT_DATA, await super.loadData());
 	}
 
 	async saveData(data: ImporterData): Promise<void> {
-	    await super.saveData(data);
+		await super.saveData(data);
 	}
 
 	/**
@@ -364,6 +366,7 @@ export class ImporterModal extends Modal {
 	plugin: ImporterPlugin;
 	importer: FormatImporter;
 	selectedId: string;
+	abortController: AbortController;
 
 	current: ImportContext | null = null;
 
@@ -372,6 +375,7 @@ export class ImporterModal extends Modal {
 		this.plugin = plugin;
 		this.titleEl.setText('Import data into Obsidian');
 		this.modalEl.addClass('mod-importer');
+		this.abortController = new AbortController();
 
 		let keys = Object.keys(plugin.importers);
 		if (keys.length > 0) {
@@ -448,7 +452,7 @@ export class ImporterModal extends Modal {
 							if (this.current === ctx) {
 								this.current = null;
 							}
-							buttonsEl.createEl('button', { text: 'Upload more' }, el => {
+							buttonsEl.createEl('button', { text: 'Import more' }, el => {
 								el.addEventListener('click', () => this.updateContent());
 							});
 							cancelButtonEl.detach();
@@ -466,6 +470,8 @@ export class ImporterModal extends Modal {
 	onClose() {
 		const { contentEl, current } = this;
 		contentEl.empty();
+		this.abortController.abort('import was canceled by user');
+
 		if (current) {
 			current.cancel();
 		}
