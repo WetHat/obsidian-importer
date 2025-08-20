@@ -201,10 +201,10 @@ export class PageAsset extends ImportableAsset {
 			this._basename = titleToBasename(value);
 			let
 				ndx = 0,
-				filename = this._basename + '.md';
-			while (!this.book.registerFilename(filename)) {
+				basename = this._basename;
+			while (!this.book.registerFilename(this._basename + '.md')) {
 				// filename conflict - try a new name.
-				this._basename = `${this._basename} (${++ndx})`;
+				this._basename = `${basename} (${++ndx})`;
 			}
 		}
 	}
