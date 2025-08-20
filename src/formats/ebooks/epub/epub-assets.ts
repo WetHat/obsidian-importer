@@ -343,7 +343,7 @@ export class PageAsset extends ImportableAsset {
 			'---',
 			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
 			...aliases,
-			`tags: ${this.book.tags}`,
+			`tags: [${this.book.tags}]`,
 			'---',
 			''
 		];
