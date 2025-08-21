@@ -1,7 +1,7 @@
 import { TFile, TFolder } from 'obsidian';
 import { ZipEntryFile } from 'zip';
 import { EpubBook } from './epub-import';
-import { convertToMarkdown, markElementAsLinkTarget, titleToBasename} from '../ebook-transformers';
+import { convertToMarkdown, markElementAsLinkTarget, titleToBasename } from '../ebook-transformers';
 import { ObsidianHTMLLinter } from '../html-lint';
 
 /**
@@ -277,6 +277,11 @@ export class PageAsset extends ImportableAsset {
 					while (nav.firstChild) {
 						section.append(nav.firstChild);
 					}
+					if (nav.id) {
+						// make sure we can link to this section
+						section.setAttribute('id', nav.id);
+						markElementAsLinkTarget(section);
+					}
 					nav.remove();
 				});
 			}
@@ -291,7 +296,7 @@ export class PageAsset extends ImportableAsset {
 					.flattenTables()
 					.cleanupFakeCode()
 					.injectCodeBlock()
-					.transformText( tm => {
+					.transformText(tm => {
 						tm
 							.mathTransformer()
 							.entityTransformer();
@@ -311,10 +316,12 @@ export class PageAsset extends ImportableAsset {
 		this.page?.body.querySelectorAll('a[href]').forEach(a => {
 			const href = a.getAttribute('href');
 			if (href && !href.includes('://')) {
-				const
-					parts = decodeURIComponent(href).split('#'),
-					[path, id] = parts,
-					targetAsset = path ? book.getAsset(this.pathFromBook(path)) : this;
+				const [path, id] = decodeURIComponent(href).split('#');
+				if (!path) {
+					a.setAttribute('href', "#^" + id); // local link
+					return;
+				}
+				const targetAsset = book.getAsset(this.pathFromBook(path));
 				if (targetAsset instanceof PageAsset) {
 					const link = this.relativePathTo(targetAsset) + targetAsset.fragmentIdentifier(id);
 					a.setAttribute('href', link.replace(/\s/g, '%20'));
@@ -339,14 +346,14 @@ export class PageAsset extends ImportableAsset {
 		const
 			outputPath = await this.getVaultOutputPath(bookOutpuFolder),
 			aliases = this._basename && this._basename !== this.pageTitle ? [`aliases: ["${this.pageTitle}"]`] : [],
-			markdown : string[] = [
-			'---',
-			`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
-			...aliases,
-			`tags: [${this.book.tags}]`,
-			'---',
-			''
-		];
+			markdown: string[] = [
+				'---',
+				`book: "[[${this.book.relativePathToTitlePage(this)}|${this.book.title}]]"`,
+				...aliases,
+				`tags: [${this.book.tags}]`,
+				'---',
+				''
+			];
 		markdown.push(convertToMarkdown(this.page));
 		return bookOutpuFolder.vault.create(outputPath, markdown.join('\n'));
 	}
