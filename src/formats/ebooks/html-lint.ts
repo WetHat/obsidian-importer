@@ -28,7 +28,7 @@ export class TextTransformer {
                 .replace(/[\$\s]*\\\[([\s\S]*?)\\\][\$\s]*/g,'\n$$$$\n$1\n$$$$\n') // matches \[...\] block math
                 .replace(/[\s\$]*(\\begin\{align\}[\s\S]*?\\end\{align\})[\s\$]*/g,'\n$$$$\n$1\n$$$$\n') // matches \begin{align}...\end{align} block math
                 .replace(/[\s\$]*(\\begin\{equation\}[\s\S]*?\\end\{equation\})[\s\$]*/g,'\n$$$$\n$1\n$$$$\n') // matches \begin{equation}...\end{equation} block math
-                .replace(/\\\((.*?)\\\)/g, "$$$1$$") // matches \(...\) inline math
+                .replace(/\\\(([\s\S]*?)\\\)/g, "$$$1$$") // matches \(...\) inline math
                 .replace(/\\label\{[^}{]+\}/g, ''); // unsupported by Obsidian
 
             if (text !== transformed) {
