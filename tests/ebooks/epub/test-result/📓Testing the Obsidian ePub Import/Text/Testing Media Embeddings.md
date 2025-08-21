@@ -1,6 +1,6 @@
 ---
 book: "[[../📓Testing the Obsidian ePub Import.md|Testing the Obsidian ePub Import]]"
-tags: Obsidian/Plugin,RegressionTest
+tags: [Obsidian/Plugin,RegressionTest]
 ---
 
 # Testing Media Embeddings

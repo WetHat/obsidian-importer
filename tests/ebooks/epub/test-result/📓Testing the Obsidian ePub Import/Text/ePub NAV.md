@@ -1,9 +1,9 @@
 ---
 book: "[[../📓Testing the Obsidian ePub Import.md|Testing the Obsidian ePub Import]]"
-tags: Obsidian/Plugin,RegressionTest
+tags: [Obsidian/Plugin,RegressionTest]
 ---
 
-# Table of Contents
+# Table of Contents ^toc
 
 1. [Regression Testing Code Syntax Highlighting Import](Code%20Syntax%20highlighting.md)
     1. [A top level code block](Code%20Syntax%20highlighting.md#^sigil-toc-id-1)
@@ -53,7 +53,11 @@ tags: Obsidian/Plugin,RegressionTest
 9. [Testing Media Embeddings](Testing%20Media%20Embeddings.md)
     1. [audio](Testing%20Media%20Embeddings.md#^sigil-toc-id-28)
     2. [video](Testing%20Media%20Embeddings.md#^sigil-toc-id-29)
+10. [Maxima non standard inline math](Maxima%205.48.1%20Manual.md)
+    1. [Elementary Functions](Maxima%205.48.1%20Manual.md#^Elementary-Functions-1)
+    2. [Functions For Numbers](Maxima%205.48.1%20Manual.md#^Functions-for-Numbers-1)
+    3. [Functions for Complex Numbers](Maxima%205.48.1%20Manual.md#^Functions-for-Complex-Numbers-1)
 
-# Landmarks
+# Landmarks ^landmarks
 
-1. [Table of Contents](ePub%20NAV.md)
+1. [Table of Contents](#^toc)

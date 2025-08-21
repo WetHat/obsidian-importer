@@ -1,7 +1,7 @@
 ---
 book: "[[../📓Testing the Obsidian ePub Import.md|Testing the Obsidian ePub Import]]"
 aliases: ["Calibrating an Ornstein–Uhlenbeck Process | juliabloggers.com"]
-tags: Obsidian/Plugin,RegressionTest
+tags: [Obsidian/Plugin,RegressionTest]
 ---
 
 # In-the-wild Math and code from juliabloggers ^sigil-toc-id-19
