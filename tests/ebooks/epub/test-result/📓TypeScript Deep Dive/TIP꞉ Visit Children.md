@@ -1,7 +1,7 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
 aliases: ["TIP: Visit Children"]
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # TIP: Visit Children

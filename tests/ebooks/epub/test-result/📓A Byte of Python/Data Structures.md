@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # Data Structures
@@ -73,7 +73,7 @@ My shopping list is now ['banana', 'carrot', 'mango', 'rice']
 
 The variable `shoplist` is a shopping list for someone who is going to the market. In `shoplist`, we only store strings of the names of the items to buy but you can add _any kind of object_ to a list including numbers and even other lists.
 
-We have also used the `for..in` loop to iterate through the items of the list. By now, you must have realised that a list is also a sequence. The speciality of sequences will be discussed in a [later section](Data%20Structures.md#^sequence).
+We have also used the `for..in` loop to iterate through the items of the list. By now, you must have realised that a list is also a sequence. The speciality of sequences will be discussed in a [later section](#^sequence).
 
 Notice the use of the `end` parameter in the call to `print` function to indicate that we want to end the output with a space instead of the usual line break.
 
@@ -126,7 +126,7 @@ Number of animals in the new zoo is 5
 
 **How It Works**
 
-The variable `zoo` refers to a tuple of items. We see that the `len` function can be used to get the length of the tuple. This also indicates that a tuple is a [sequence](Data%20Structures.md#^sequence) as well.
+The variable `zoo` refers to a tuple of items. We see that the `len` function can be used to get the length of the tuple. This also indicates that a tuple is a [sequence](#^sequence) as well.
 
 We are now shifting these animals to a new zoo since the old zoo is being closed. Therefore, the `new_zoo` tuple contains some animals which are already there along with the animals brought over from the old zoo. Back to reality, note that a tuple within a tuple does not lose its identity.
 

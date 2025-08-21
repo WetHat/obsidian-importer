@@ -1,21 +1,21 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Getting Started
 
-- [Getting Started with TypeScript](Getting%20Started.md#^getting-started-with-typescript)
-- [TypeScript Version](Getting%20Started.md#^typescript-version)
+- [Getting Started with TypeScript](#^getting-started-with-typescript)
+- [TypeScript Version](#^typescript-version)
 
-# Getting Started With TypeScript ^getting-started-with-typescript
+# Getting Started With TypeScript
 
 TypeScript compiles into JavaScript. JavaScript is what you are actually going to execute (either in the browser or on the server). So you are going to need the following:
 
 - TypeScript compiler (OSS available [in source](https://github.com/Microsoft/TypeScript/) and on [NPM](https://www.npmjs.com/package/typescript))
 - A TypeScript editor (you can use notepad if you want but I use [vscode 🌹](https://code.visualstudio.com/) with an [extension I wrote](https://marketplace.visualstudio.com/items?itemName=basarat.god). Also [lots of other IDES support it as well](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Editor-Support))
 
-## TypeScript Version ^typescript-version
+## TypeScript Version
 
 Instead of using the _stable_ TypeScript compiler we will be presenting a lot of new stuff in this book that may not be associated with a version number yet. I generally recommend people to use the nightly version because **the compiler test suite only catches more bugs over time**.
 

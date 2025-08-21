@@ -1,18 +1,18 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Arrow Functions
 
-- [Arrow Functions](Arrow%20Functions.md#^arrow-functions)
-- [Tip: Arrow Function Need](Arrow%20Functions.md#^tip-arrow-function-need)
-- [Tip: Arrow Function Danger](Arrow%20Functions.md#^tip-arrow-function-danger)
-- [Tip: Libraries that use `this`](Arrow%20Functions.md#^tip-arrow-functions-with-libraries-that-use-this)
-- [Tip: Arrow Function inheritance](Arrow%20Functions.md#^tip-arrow-functions-and-inheritance)
-- [Tip: Quick object return](Arrow%20Functions.md#^tip-quick-object-return)
+- [Arrow Functions](#^arrow-functions)
+- [Tip: Arrow Function Need](#^tip-arrow-function-need)
+- [Tip: Arrow Function Danger](#^tip-arrow-function-danger)
+- [Tip: Libraries that use `this`](#^tip-arrow-functions-with-libraries-that-use-this)
+- [Tip: Arrow Function inheritance](#^tip-arrow-functions-and-inheritance)
+- [Tip: Quick object return](#^tip-quick-object-return)
 
-### Arrow Functions ^arrow-functions
+### Arrow Functions
 
 Lovingly called the _fat arrow_ (because `->` is a thin arrow and `=>` is a fat arrow) and also called a _lambda function_ (because of other languages). Another commonly used feature is the fat arrow function `()=>something`. The motivation for a _fat arrow_ is:
 
@@ -89,7 +89,7 @@ setTimeout(function() { console.log(person.age); },2000); // 2
 
 > [A sweet video about this pattern 🌹](https://egghead.io/lessons/typescript-make-usages-of-this-safe-in-class-methods)
 
-#### Tip: Arrow Function Need ^tip-arrow-function-need
+#### Tip: Arrow Function Need
 
 Beyond the terse syntax, you only _need_ to use the fat arrow if you are going to give the function to someone else to call. Effectively:
 
@@ -107,11 +107,11 @@ person.growOld();
 
 then `this` is going to be the correct calling context (in this example `person`).
 
-#### Tip: Arrow Function Danger ^tip-arrow-function-danger
+#### Tip: Arrow Function Danger
 
 In fact if you want `this` _to be the calling context_ you should _not use the arrow function_. This is the case with callbacks used by libraries like jquery, underscore, mocha and others. If the documentation mentions functions on `this` then you should probably just use a `function` instead of a fat arrow. Similarly if you plan to use `arguments` don't use an arrow function.
 
-#### Tip: Arrow functions with libraries that use `this` ^tip-arrow-functions-with-libraries-that-use-this
+#### Tip: Arrow functions with libraries that use `this`
 
 Many libraries do this e.g. `jQuery` iterables (one example [https://api.jquery.com/jquery.each/](https://api.jquery.com/jquery.each/)) will use `this` to pass you the object that it is currently iterating over. In this case if you want to access the library passed `this` as well as the surrounding context just use a temp variable like `_self` like you would in the absence of arrow functions.
 
@@ -123,7 +123,7 @@ something.each(function() {
 });
 ```
 
-#### Tip: Arrow functions and inheritance ^tip-arrow-functions-and-inheritance
+#### Tip: Arrow functions and inheritance
 
 Arrow functions as properties on classes work fine with inheritance:
 
@@ -165,7 +165,7 @@ class ExtendedAdder extends Adder {
 }
 ```
 
-### Tip: Quick object return ^tip-quick-object-return
+### Tip: Quick object return
 
 Sometimes you need a function that just returns a simple object literal. However, something like
 

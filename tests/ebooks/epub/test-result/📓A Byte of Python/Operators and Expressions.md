@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # Operators and Expressions
@@ -147,7 +147,7 @@ If you had an expression such as `2 + 3 * 4`, is the addition done first or the 
 
 The following table gives the precedence table for Python, from the lowest precedence (least binding) to the highest precedence (most binding). This means that in a given expression, Python will first evaluate the operators and expressions lower in the table before the ones listed higher in the table.
 
-The following table, taken from the [Python reference manual](http://docs.python.org/3/reference/expressions.html#operator-precedence), is provided for the sake of completeness. It is far better to use parentheses to group operators and operands appropriately in order to explicitly specify the precedence. This makes the program more readable. See [Changing the Order of Evaluation](Operators%20and%20Expressions.md#^changing-order-of-evaluation) below for details.
+The following table, taken from the [Python reference manual](http://docs.python.org/3/reference/expressions.html#operator-precedence), is provided for the sake of completeness. It is far better to use parentheses to group operators and operands appropriately in order to explicitly specify the precedence. This makes the program more readable. See [Changing the Order of Evaluation](#^changing-order-of-evaluation) below for details.
 
 - `lambda` : Lambda Expression
 - `if - else` : Conditional expression
@@ -170,7 +170,7 @@ The operators which we have not already come across will be explained in later c
 
 Operators with the _same precedence_ are listed in the same row in the above table. For example, `+` and `-` have the same precedence.
 
-## Changing the Order Of Evaluation ^changing-order-of-evaluation
+## Changing the Order Of Evaluation
 
 To make the expressions more readable, we can use parentheses. For example, `2 + (3 * 4)` is definitely easier to understand than `2 + 3 * 4` which requires knowledge of the operator precedences. As with everything else, the parentheses should be used reasonably (do not overdo it) and should not be redundant, as in `(2 + (3 * 4))`.
 

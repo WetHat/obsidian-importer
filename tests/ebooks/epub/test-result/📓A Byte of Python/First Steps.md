@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # First Steps
@@ -131,11 +131,11 @@ You can find more information about PyCharm in the [PyCharm Quickstart](https://
 
 ## Using A Source File
 
-Now let's get back to programming. There is a tradition that whenever you learn a new programming language, the first program that you write and run is the 'Hello World' program - all it does is just say 'Hello World' when you run it. As Simon Cozens[1](First%20Steps.md#^fn-1) says, it is the "traditional incantation to the programming gods to help you learn the language better." ^reffn-1
+Now let's get back to programming. There is a tradition that whenever you learn a new programming language, the first program that you write and run is the 'Hello World' program - all it does is just say 'Hello World' when you run it. As Simon Cozens[1](#^fn_1) says, it is the "traditional incantation to the programming gods to help you learn the language better."
 
 Start your choice of editor, enter the following program and save it as `hello.py`.
 
-If you are using PyCharm, we have already [discussed how to run from a source file](First%20Steps.md#^pycharm).
+If you are using PyCharm, we have already [discussed how to run from a source file](#^pycharm).
 
 For other editors, open a new file `hello.py` and type this:
 
@@ -192,5 +192,4 @@ Now that you are a Python user, let's learn some more Python concepts.
 
 ---
 
-> 1. the author of the amazing 'Beginning Perl' book [↩](First%20Steps.md#^reffn-1 "Jump back to footnote [1] in the text.")
-^fn-1
+> 1. the author of the amazing 'Beginning Perl' book [↩](#^reffn_1 "Jump back to footnote [1] in the text.")

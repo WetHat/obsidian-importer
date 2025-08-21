@@ -1,6 +1,6 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Browser QuickStart
@@ -26,7 +26,7 @@ cd react-typescript
 npm install
 ```
 
-Now use it as a base and jump to [develop your amazing application](Browser%20QuickStart.md#^develop-your-amazing-application)
+Now use it as a base and jump to [develop your amazing application](#^develop-your-amazing-application)
 
 ## Project Setup Detailed
 
@@ -156,7 +156,7 @@ ReactDOM.render(
 );
 ```
 
-# Develop your amazing application ^develop-your-amazing-application
+# Develop your amazing application
 
 > You can get the latest packages using `npm install typescript@latest react@latest react-dom@latest @types/react@latest @types/react-dom@latest webpack@latest webpack-dev-server@latest webpack-cli@latest ts-loader@latest clean-webpack-plugin@latest html-webpack-plugin@latest --save-exact`
 

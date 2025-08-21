@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # Basics
@@ -72,7 +72,7 @@ All white space i.e. spaces and tabs, within the quotes, are preserved as-is.
 
 Strings in double quotes work exactly the same way as strings in single quotes. An example is `"What's your name?"`.
 
-### Triple Quotes ^triple-quotes
+### Triple Quotes
 
 You can specify multi-line strings using triple quotes - (`"""` or `'''`). You can use single quotes and double quotes freely within the triple quotes. An example is:
 
@@ -221,7 +221,7 @@ Suppose, you want to have a string which contains a single quote (`'`), how will
 
 Another way of specifying this specific string would be `"What's your name?"` i.e. using double quotes. Similarly, you have to use an escape sequence for using a double quote itself in a double quoted string. Also, you have to indicate the backslash itself using the escape sequence `\\`.
 
-What if you wanted to specify a two-line string? One way is to use a triple-quoted string as shown [previously](Basics.md#^triple-quotes) or you can use an escape sequence for the newline character - `\n` to indicate the start of a new line. An example is:
+What if you wanted to specify a two-line string? One way is to use a triple-quoted string as shown [previously](#^triple-quotes) or you can use an escape sequence for the newline character - `\n` to indicate the start of a new line. An example is:
 
 ```
 'This is the first line\nThis is the second line'

@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # Installation
@@ -58,7 +58,7 @@ Windows Start Menu \> `Settings` \> `About` \> `System Info` (this is all the wa
 
 ### Running Python prompt on Windows
 
-For Windows users, you can run the interpreter in the command line if you have [set the `PATH` variable appropriately](Installation.md#^dos-prompt).
+For Windows users, you can run the interpreter in the command line if you have [set the `PATH` variable appropriately](#^dos-prompt).
 
 To open the terminal in Windows, click the start button and click `Run`. In the dialog box, type `cmd` and press `[enter]` key.
 

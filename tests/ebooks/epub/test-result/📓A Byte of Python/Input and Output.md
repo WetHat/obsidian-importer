@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # Input and Output
@@ -61,7 +61,7 @@ We take that text and reverse it. If the original text and reversed text are equ
 
 Checking whether a text is a palindrome should also ignore punctuation, spaces and case. For example, "Rise to vote, sir." is also a palindrome but our current program doesn't say it is. Can you improve the above program to recognize this palindrome?
 
-If you need a hint, the idea is that...[1](Input%20and%20Output.md#^fn-1) ^reffn-1
+If you need a hint, the idea is that...[1](#^fn_1)
 
 ## Files
 
@@ -217,5 +217,4 @@ Next, we will explore the concept of exceptions.
 
 ---
 
-> 1. Use a tuple (you can find a list of _all_ [punctuation marks here](http://grammar.ccc.commnet.edu/grammar/marks/marks.htm)) to hold all the forbidden characters, then use the membership test to determine whether a character should be removed or not, i.e. forbidden = (`!`, `?`, `.`, ...). [↩](Input%20and%20Output.md#^reffn-1 "Jump back to footnote [1] in the text.")
-^fn-1
+> 1. Use a tuple (you can find a list of _all_ [punctuation marks here](http://grammar.ccc.commnet.edu/grammar/marks/marks.htm)) to hold all the forbidden characters, then use the membership test to determine whether a character should be removed or not, i.e. forbidden = (`!`, `?`, `.`, ...). [↩](#^reffn_1 "Jump back to footnote [1] in the text.")

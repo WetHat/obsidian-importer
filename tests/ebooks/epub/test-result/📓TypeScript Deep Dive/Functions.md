@@ -1,20 +1,20 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Functions
 
-- [Parameter Annotations](Functions.md#^parameter-annotations)
-- [Return Type Annotation](Functions.md#^return-type-annotation)
-- [Optional Parameters](Functions.md#^optional-parameters)
-- [Overloading](Functions.md#^overloading)
+- [Parameter Annotations](#^parameter-annotations)
+- [Return Type Annotation](#^return-type-annotation)
+- [Optional Parameters](#^optional-parameters)
+- [Overloading](#^overloading)
 
 ## Functions
 
 The TypeScript type system pays a lot of love to functions, after all they are the core building blocks of a composable system.
 
-### Parameter annotations ^parameter-annotations
+### Parameter annotations
 
 Of course you can annotate function parameters just like you can annotate other variables:
 
@@ -28,7 +28,7 @@ function foo(sampleParameter: { bar: number }) { }
 
 Here I used inline type annotations. Of course you can use interfaces etc.
 
-### Return type annotation ^return-type-annotation
+### Return type annotation
 
 You can annotate the return type after the function parameter list with the same style as you use for a variable, e.g. `: Foo` in the below example:
 
@@ -69,7 +69,7 @@ sendAsJSON(foo());
 
 If you don't plan to return anything from a function, you can annotate it as `:void`. You can generally drop `:void` and leave it to the inference engine though.
 
-### Optional Parameters ^optional-parameters
+### Optional Parameters
 
 You can mark a parameter as optional:
 
@@ -93,7 +93,7 @@ foo(123);           // 123, hello
 foo(123, 'world');  // 123, world
 ```
 
-### Overloading ^overloading
+### Overloading
 
 TypeScript allows you to _declare_ function overloads. This is useful for documentation + type safety purpose. Consider the following code:
 

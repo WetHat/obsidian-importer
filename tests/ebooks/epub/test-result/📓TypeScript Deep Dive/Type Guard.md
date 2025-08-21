@@ -1,14 +1,14 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Type Guard
 
-- [Type Guard](Type%20Guard.md#^type-guard)
-- [User Defined Type Guards](Type%20Guard.md#^user-defined-type-guards)
+- [Type Guard](#^type-guard)
+- [User Defined Type Guards](#^user-defined-type-guards)
 
-## Type Guard ^type-guard
+## Type Guard
 
 Type Guards allow you to narrow down the type of an object within a conditional block.
 
@@ -162,7 +162,7 @@ function foo(a?: number | null) {
 }
 ```
 
-### User Defined Type Guards ^user-defined-type-guards
+### User Defined Type Guards
 
 JavaScript doesn't have very rich runtime introspection support built in. When you are using just plain JavaScript Objects (using structural typing to your advantage), you do not even have access to `instanceof` or `typeof`. For these cases you can create _User Defined Type Guard functions_. These are just functions that return `someArgumentName is SomeType`. Here is an example:
 

@@ -1,21 +1,21 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Enums
 
-- [Enums](Enums.md#^enums)
-- [Number Enums and numbers](Enums.md#^number-enums-and-numbers)
-- [Number Enums and strings](Enums.md#^number-enums-and-strings)
-- [Changing the number associated with a number enum](Enums.md#^changing-the-number-associated-with-a-number-enum)
-- [Enums are open ended](Enums.md#^enums-are-open-ended)
-- [Number Enums as flags](Enums.md#^number-enums-as-flags)
-- [String Enums](Enums.md#^string-enums)
-- [Const enums](Enums.md#^const-enums)
-- [Enum with static functions](Enums.md#^enum-with-static-functions)
+- [Enums](#^enums)
+- [Number Enums and numbers](#^number-enums-and-numbers)
+- [Number Enums and strings](#^number-enums-and-strings)
+- [Changing the number associated with a number enum](#^changing-the-number-associated-with-a-number-enum)
+- [Enums are open ended](#^enums-are-open-ended)
+- [Number Enums as flags](#^number-enums-as-flags)
+- [String Enums](#^string-enums)
+- [Const enums](#^const-enums)
+- [Enum with static functions](#^enum-with-static-functions)
 
-### Enums ^enums
+### Enums
 
 An enum is a way to organize a collection of related values. Many other programming languages (C/C#/Java) have an `enum` data type but JavaScript does not. However, TypeScript does. Here is an example definition of a TypeScript enum:
 
@@ -36,7 +36,7 @@ card = "not a member of card suit"; // Error : string is not assignable to type 
 
 These enums values are `number`s so I'll call them Number Enums from hence forth.
 
-#### Number Enums and Numbers ^number-enums-and-numbers
+#### Number Enums and Numbers
 
 TypeScript enums are number based. This means that numbers can be assigned to an instance of the enum, and so can anything else that is compatible with `number`.
 
@@ -50,7 +50,7 @@ var col = Color.Red;
 col = 0; // Effectively same as Color.Red
 ```
 
-#### Number Enums and Strings ^number-enums-and-strings
+#### Number Enums and Strings
 
 Before we look further into enums let's look at the JavaScript that it generates, here is a sample TypeScript:
 
@@ -86,7 +86,7 @@ console.log(Tristate["False"]); // 0
 console.log(Tristate[Tristate.False]); // "False" because `Tristate.False == 0`
 ```
 
-#### Changing the number associated with a Number Enum ^changing-the-number-associated-with-a-number-enum
+#### Changing the number associated with a Number Enum
 
 By default enums are `0` based and then each subsequent value increments by 1 automatically. As an example consider the following:
 
@@ -110,7 +110,7 @@ enum Color {
 
 > TIP: I quite commonly initialize the first enum with `= 1` as it allows me to do a safe truthy check on an enum value.
 
-#### Number Enums as flags ^number-enums-as-flags
+#### Number Enums as flags
 
 One excellent use of enums is the ability to use enums as `Flags`. Flags allow you to check if a certain condition from a set of conditions is true. Consider the following example where we have a set of properties about animals:
 
@@ -179,7 +179,7 @@ enum AnimalFlags {
 }
 ```
 
-#### String Enums ^string-enums
+#### String Enums
 
 We've only looked at enums where the member values are `number`s. You are actually allowed to have enum members with string values as well. e.g.
 
@@ -209,7 +209,7 @@ if (value === EvidenceTypeEnum.PASSPORT){
 }
 ```
 
-#### Const Enums ^const-enums
+#### Const Enums
 
 If you have an enum definition like the following:
 
@@ -250,7 +250,7 @@ i.e. the compiler:
 
 Inlining has obvious performance benefits. The fact that there is no `Tristate` variable at runtime is simply the compiler helping you out by not generating JavaScript that is not actually used at runtime. However, you might want the compiler to still generate the JavaScript version of the enum definition for stuff like _number to string_ or _string to number_ lookups as we saw. In this case you can use the compiler flag `--preserveConstEnums` and it will still generate the `var Tristate` definition so that you can use `Tristate["False"]` or `Tristate[0]` manually at runtime if you want. This does not impact _inlining_ in any way.
 
-### Enum with static functions ^enum-with-static-functions
+### Enum with static functions
 
 You can use the declaration `enum` + `namespace` merging to add static methods to an enum. The following demonstrates an example where we add a static member `isBusinessDay` to an enum `Weekday`:
 
@@ -282,7 +282,7 @@ console.log(Weekday.isBusinessDay(mon)); // true
 console.log(Weekday.isBusinessDay(sun)); // false
 ```
 
-#### Enums are open ended ^enums-are-open-ended
+#### Enums are open ended
 
 > NOTE: open ended enums are only relevant if you are not using modules. You should be using modules. Hence this section is last.
 

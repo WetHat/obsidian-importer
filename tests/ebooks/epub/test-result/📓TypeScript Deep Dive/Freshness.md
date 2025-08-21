@@ -1,15 +1,15 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Freshness
 
-- [Freshness](Freshness.md#^freshness)
-- [Allowing extra properties](Freshness.md#^allowing-extra-properties)
-- [Use Case: React](Freshness.md#^use-case-react-state)
+- [Freshness](#^freshness)
+- [Allowing extra properties](#^allowing-extra-properties)
+- [Use Case: React](#^use-case-react-state)
 
-## Freshness ^freshness
+## Freshness
 
 TypeScript provides a concept of **Freshness** (also called _strict object literal checking_) to make it easier to type check object literals that would otherwise be structurally type compatible.
 
@@ -60,7 +60,7 @@ logIfHasName({neme: 'I just misspelled name to neme'}); // Error: object literal
 
 The reason why only object literals are type checked this way is because in this case additional properties _that aren't actually used_ is almost always a typo or a misunderstanding of the API.
 
-### Allowing extra properties ^allowing-extra-properties
+### Allowing extra properties
 
 A type can include an index signature to explicitly indicate that excess properties are permitted:
 
@@ -69,7 +69,7 @@ var x: { foo: number, [x: string]: unknown };
 x = { foo: 1, baz: 2 };  // Ok, `baz` matched by index signature
 ```
 
-### Use Case: React State ^use-case-react-state
+### Use Case: React State
 
 [Facebook ReactJS](https://facebook.github.io/react/) offers a nice use case for object freshness. Quite commonly in a component you call `setState` with only a few properties instead of passing in all the properties, i.e.:
 

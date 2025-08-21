@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # What Next
@@ -13,7 +13,7 @@ I would suggest that you tackle this problem:
 
 > Create your own command-line _address-book_ program using which you can browse, add, modify, delete or search for your contacts such as friends, family and colleagues and their information such as email address and/or phone number. Details must be stored for later retrieval.
 
-This is fairly easy if you think about it in terms of all the various stuff that we have come across till now. If you still want directions on how to proceed, then here's a hint [1](What%20Next.md#^fn-1). ^reffn-1
+This is fairly easy if you think about it in terms of all the various stuff that we have come across till now. If you still want directions on how to proceed, then here's a hint [1](#^fn_1).
 
 Once you are able to do this, you can claim to be a Python programmer. Now, immediately [send me an email](https://swaroopch.com/contact) thanking me for this great book ;-). This step is optional but recommended. Also, please consider [buying a printed copy](https://swaroopch.com/buybook) to support the continued development of this book.
 
@@ -154,5 +154,4 @@ We have now come to the end of this book but, as they say, this is the _the begi
 
 ---
 
-> 1. Create a class to represent the person's information. Use a dictionary to store person objects with their name as the key. Use the pickle module to store the objects persistently on your hard disk. Use the dictionary built-in methods to add, delete and modify the persons. [↩](What%20Next.md#^reffn-1 "Jump back to footnote [1] in the text.")
-^fn-1
+> 1. Create a class to represent the person's information. Use a dictionary to store person objects with their name as the key. Use the pickle module to store the objects persistently on your hard disk. Use the dictionary built-in methods to add, delete and modify the persons. [↩](#^reffn_1 "Jump back to footnote [1] in the text.")

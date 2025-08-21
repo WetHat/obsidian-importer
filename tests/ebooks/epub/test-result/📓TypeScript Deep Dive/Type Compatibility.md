@@ -1,26 +1,26 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # Type Compatibility
 
-- [Type Compatibility](Type%20Compatibility.md#^type-compatibility)
-- [Soundness](Type%20Compatibility.md#^soundness)
-- [Structural](Type%20Compatibility.md#^structural)
-- [Generics](Type%20Compatibility.md#^generics)
-- [Variance](Type%20Compatibility.md#^variance)
-- [Functions](Type%20Compatibility.md#^functions)
-    - [Return Type](Type%20Compatibility.md#^return-type)
-    - [Number of arguments](Type%20Compatibility.md#^number-of-arguments)
-    - [Optional and rest parameters](Type%20Compatibility.md#^optional-and-rest-parameters)
-    - [Types of arguments](Type%20Compatibility.md#^types-of-arguments)
-- [Enums](Type%20Compatibility.md#^enums)
-- [Classes](Type%20Compatibility.md#^classes)
-- [Generics](Type%20Compatibility.md#^generics)
-- [FootNote: Invariance](Type%20Compatibility.md#^footnote-invariance)
+- [Type Compatibility](#^type-compatibility)
+- [Soundness](#^soundness)
+- [Structural](#^structural)
+- [Generics](#^generics)
+- [Variance](#^variance)
+- [Functions](#^functions)
+    - [Return Type](#^return-type)
+    - [Number of arguments](#^number-of-arguments)
+    - [Optional and rest parameters](#^optional-and-rest-parameters)
+    - [Types of arguments](#^types-of-arguments)
+- [Enums](#^enums)
+- [Classes](#^classes)
+- [Generics](#^generics)
+- [FootNote: Invariance](#^footnote-invariance)
 
-## Type Compatibility ^type-compatibility
+## Type Compatibility
 
 Type Compatibility (as we discuss here) determines if one thing can be assigned to another. E.g. `string` and `number` are not compatible:
 
@@ -32,7 +32,7 @@ str = num; // ERROR: `number` is not assignable to `string`
 num = str; // ERROR: `string` is not assignable to `number`
 ```
 
-## Soundness ^soundness
+## Soundness
 
 TypeScript's type system is designed to be convenient and allows for _unsound_ behaviours e.g. anything can be assigned to `any` which means telling the compiler to allow you to do whatever you want:
 
@@ -44,7 +44,7 @@ foo = "Hello";
 foo.toPrecision(3); // Allowed as you typed it as `any`
 ```
 
-## Structural ^structural
+## Structural
 
 TypeScript objects are structurally typed. This means the _names_ don't matter as long as the structures match
 
@@ -86,7 +86,7 @@ iTakePoint2D(point3D); // extra information okay
 iTakePoint2D({ x: 0 }); // Error: missing information `y`
 ```
 
-## Variance ^variance
+## Variance
 
 Variance is an easy to understand and important concept for type compatibility analysis.
 
@@ -103,11 +103,11 @@ In type compatibility of complex types composed of such `Base` and `Child` types
 
 > Note: For a completely sound type system in the presence of mutable data like JavaScript, `invariant` is the only valid option. But as mentioned _convenience_ forces us to make unsound choices.
 
-## Functions ^functions
+## Functions
 
 There are a few subtle things to consider when comparing two functions.
 
-### Return Type ^return-type
+### Return Type
 
 `covariant`: The return type must contain at least enough data.
 
@@ -125,7 +125,7 @@ iMakePoint2D = iMakePoint3D; // Okay
 iMakePoint3D = iMakePoint2D; // ERROR: Point2D is not assignable to Point3D
 ```
 
-### Number of arguments ^number-of-arguments
+### Number of arguments
 
 Fewer arguments are okay (i.e. functions can choose to ignore additional parameters). After all you are guaranteed to be called with at least enough arguments.
 
@@ -141,7 +141,7 @@ iTakeSomethingAndPassItAnErr((err, data) => null) // Okay
 iTakeSomethingAndPassItAnErr((err, data, more) => null);
 ```
 
-### Optional and Rest Parameters ^optional-and-rest-parameters
+### Optional and Rest Parameters
 
 Optional (pre determined count) and Rest parameters (any count of arguments) are compatible, again for convenience.
 
@@ -156,7 +156,7 @@ bas = bar = foo;
 
 > Note: optional (in our example `bar`) and non optional (in our example `foo`) are only compatible if strictNullChecks is false.
 
-### Types of arguments ^types-of-arguments
+### Types of arguments
 
 `bivariant` : This is designed to support common event handling scenarios
 
@@ -200,7 +200,7 @@ iTakePoint3D = iTakePoint2D; // Okay : Reasonable
 iTakePoint2D = iTakePoint3D; // Okay : WHAT
 ```
 
-## Enums ^enums
+## Enums
 
 - Enums are compatible with numbers, and numbers are compatible with enums.
 
@@ -226,7 +226,7 @@ let color = Color.Red;
 status = color; // ERROR
 ```
 
-## Classes ^classes
+## Classes
 
 - Only instance members and methods are compared. _constructors_ and _statics_ play no part.
 
@@ -270,7 +270,7 @@ animal = size; // ERROR
 size = animal; // ERROR
 ```
 
-## Generics ^generics
+## Generics
 
 Since TypeScript has a structural type system, type parameters only affect compatibility when used by a member. For example, in the following `T` has no impact on compatibility:
 
@@ -328,7 +328,7 @@ cats.add(new Animal()); // Error
 cats.add(new Cat()); // Okay
 ```
 
-## FootNote: Invariance ^footnote-invariance
+## FootNote: Invariance
 
 We said invariance is the only sound option. Here is an example where both `contra` and `co` variance are shown to be unsafe for arrays.
 

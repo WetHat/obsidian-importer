@@ -1,20 +1,20 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # lib.d.ts
 
-- [lib.d.ts](lib.d.ts.md#^libdts)
-- [Example Usage](lib.d.ts.md#^example-usage)
-- [Inside look](lib.d.ts.md#^libdts-inside-look)
-- [Modifying Native types](lib.d.ts.md#^modifying-native-types)
-- [Using custom lib.d.ts](lib.d.ts.md#^using-your-own-custom-libdts)
-- [Compiler `target` effect on lib.d.ts](lib.d.ts.md#^compiler-target-effect-on-libdts)
-- [`lib` option](lib.d.ts.md#^lib-option)
-- [Polyfill for old JavaScript engines](lib.d.ts.md#^polyfill-for-old-javascript-engines)
+- [lib.d.ts](#^libdts)
+- [Example Usage](#^example-usage)
+- [Inside look](#^libdts-inside-look)
+- [Modifying Native types](#^modifying-native-types)
+- [Using custom lib.d.ts](#^using-your-own-custom-libdts)
+- [Compiler `target` effect on lib.d.ts](#^compiler-target-effect-on-libdts)
+- [`lib` option](#^lib-option)
+- [Polyfill for old JavaScript engines](#^polyfill-for-old-javascript-engines)
 
-## `lib.d.ts` ^libdts
+## `lib.d.ts`
 
 A special declaration file `lib.d.ts` ships with every installation of TypeScript. This file contains the ambient declarations for various common JavaScript constructs present in JavaScript runtimes and the DOM.
 
@@ -23,7 +23,7 @@ A special declaration file `lib.d.ts` ships with every installation of TypeScrip
 
 You can exclude this file from the compilation context by specifying the `--noLib` compiler command line flag (or `"noLib" : true` in `tsconfig.json`).
 
-### Example Usage ^example-usage
+### Example Usage
 
 As always let's look at examples of this file being used in action:
 
@@ -43,7 +43,7 @@ var bar = foo.toString(); // ERROR: Property 'toString' does not exist on type '
 
 So now that you understand the importance of `lib.d.ts`, what do its contents look like? We examine that next.
 
-### `lib.d.ts` Inside Look ^libdts-inside-look
+### `lib.d.ts` Inside Look
 
 The contents of `lib.d.ts` are primarily a bunch of _variable_ declarations e.g. `window`, `document`, `math` and a bunch of similar _interface_ declarations e.g. `Window` , `Document`, `Math`.
 
@@ -72,7 +72,7 @@ You can see that there is a _lot_ of type information in these interfaces. In th
 
 There is a good reason for using _interfaces_ for these globals. It allows you to _add additional properties_ to these globals _without_ a need to change `lib.d.ts`. We will cover this concept next.
 
-### Modifying Native Types ^modifying-native-types
+### Modifying Native Types
 
 Since an `interface` in TypeScript is open ended this means that you can just add members to the interfaces declared in `lib.d.ts` and TypeScript will pick up on the additions. Note that you need to make these changes in a [_global module_](Modules.md) for these interfaces to be associated with `lib.d.ts`. We even recommend creating a special file called [`global.d.ts`](global.d.ts.md) for this purpose.
 
@@ -222,7 +222,7 @@ console.log('foo bar'.endsWith('bas')); // false
 console.log('foo bas'.endsWith('bas')); // true
 ```
 
-### Using your own custom lib.d.ts ^using-your-own-custom-libdts
+### Using your own custom lib.d.ts
 
 As we mentioned earlier, using the `--noLib` boolean compiler flag causes TypeScript to exclude the automatic inclusion of `lib.d.ts`. There are various reasons why this is a useful feature. Here are a few of the common ones:
 
@@ -233,13 +233,13 @@ Once you have excluded the default `lib.d.ts` you can include a similarly named 
 
 > Note: be careful with `--noLib`. Once you are in noLib land, if you choose to share your project with others, they will be _forced_ into noLib land (or rather _your lib_ land). Even worse, if you bring _their_ code into your project you might need to port it to _your lib_ based code.
 
-### Compiler target effect on `lib.d.ts` ^compiler-target-effect-on-libdts
+### Compiler target effect on `lib.d.ts`
 
 Setting the compiler target to `es6` causes the `lib.d.ts` to include _additional_ ambient declarations for more modern (es6) stuff like `Promise`. This magical effect of the compiler target changing the _ambience_ of the code is desirable for some people and for others it's problematic as it conflates _code generation_ with _code ambience_.
 
 However, if you want finer grained control of your environment, you should use the `--lib` option which we discuss next.
 
-### lib option ^lib-option
+### lib option
 
 Sometimes (many times) you want to decouple the relationship between the compile target (the generated JavaScript version) and the ambient library support. A common example is `Promise`, e.g. today (in June 2016) you most likely want to `--target es5` but still use the latest features like `Promise`. To support this you can take explicit control of `lib` using the `lib` compiler option.
 
@@ -316,7 +316,7 @@ Symbol API is not included when target is es5. In fact, we receive an error like
 }
 ```
 
-## Polyfill for old JavaScript engines ^polyfill-for-old-javascript-engines
+## Polyfill for old JavaScript engines
 
 > [Egghead PRO Video on this subject](https://egghead.io/lessons/typescript-using-es6-and-esnext-with-typescript)
 

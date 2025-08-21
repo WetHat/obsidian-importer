@@ -1,6 +1,6 @@
 ---
 book: "[[📓TypeScript Deep Dive.md|TypeScript Deep Dive]]"
-tags: BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment
+tags: [BackendDevelopment,DeepDive,Programming,Tutorial,TypeScript,WebDevelopment]
 ---
 
 # StyleGuide
@@ -13,23 +13,23 @@ People have asked me for my opinions on this. Personally I don't enforce these a
 
 Key Sections:
 
-- [Variable](StyleGuide.md#^variable-and-function)
-- [Class](StyleGuide.md#^class)
-- [Interface](StyleGuide.md#^interface)
-- [Type](StyleGuide.md#^type)
-- [Namespace](StyleGuide.md#^namespace)
-- [Enum](StyleGuide.md#^enum)
-- [`null` vs. `undefined`](StyleGuide.md#^null-vs-undefined)
-- [Formatting](StyleGuide.md#^formatting)
-- [Single vs. Double Quotes](StyleGuide.md#^quotes)
-- [Tabs vs. Spaces](StyleGuide.md#^spaces)
-- [Use semicolons](StyleGuide.md#^semicolons)
-- [Annotate Arrays as Type\[]](StyleGuide.md#^array)
-- [File Names](StyleGuide.md#^filename)
-- [`type` vs `interface`](StyleGuide.md#^type-vs-interface)
-- [`==` or `===`](StyleGuide.md)
+- [Variable](#^variable-and-function)
+- [Class](#^class)
+- [Interface](#^interface)
+- [Type](#^type)
+- [Namespace](#^namespace)
+- [Enum](#^enum)
+- [`null` vs. `undefined`](#^null-vs-undefined)
+- [Formatting](#^formatting)
+- [Single vs. Double Quotes](#^quotes)
+- [Tabs vs. Spaces](#^spaces)
+- [Use semicolons](#^semicolons)
+- [Annotate Arrays as `Type[]`](#^array)
+- [File Names](#^filename)
+- [`type` vs `interface`](#^type-vs-interface)
+- [`==` or `===`](#^-or-)
 
-## Variable and Function ^variable-and-function
+## Variable and Function
 
 - Use `camelCase` for variable and function names
 
@@ -49,7 +49,7 @@ var fooVar;
 function barFunc() { }
 ```
 
-## Class ^class
+## Class
 
 - Use `PascalCase` for class names.
 
@@ -89,7 +89,7 @@ class Foo {
 }
 ```
 
-## Interface ^interface
+## Interface
 
 - Use `PascalCase` for name.
 
@@ -117,7 +117,7 @@ interface Foo {
 }
 ```
 
-## Type ^type
+## Type
 
 - Use `PascalCase` for name.
 
@@ -127,7 +127,7 @@ interface Foo {
 
 > Reason: Similar to class
 
-## Namespace ^namespace
+## Namespace
 
 - Use `PascalCase` for names
 
@@ -147,7 +147,7 @@ namespace Foo {
 }
 ```
 
-## Enum ^enum
+## Enum
 
 - Use `PascalCase` for enum names
 
@@ -187,7 +187,7 @@ enum Color {
 }
 ```
 
-## Null vs. Undefined ^null-vs-undefined
+## Null vs. Undefined
 
 - Prefer not to use either for explicit unavailability
 
@@ -263,7 +263,7 @@ if (error !== null) // does not rule out undefined
 if (error != null) // rules out both null and undefined
 ```
 
-## Formatting ^formatting
+## Formatting
 
 The TypeScript compiler ships with a very nice formatting language service. Whatever output it gives by default is good enough to reduce the cognitive overload on the team.
 
@@ -276,7 +276,7 @@ Examples:
 const foo: string = "hello";
 ```
 
-## Quotes ^quotes
+## Quotes
 
 - Prefer single quotes (`'`) unless escaping.
 
@@ -288,25 +288,25 @@ const foo: string = "hello";
 
 > Reason: These generally represent the intent of complex enough strings.
 
-## Spaces ^spaces
+## Spaces
 
 - Use `2` spaces. Not tabs.
 
 > Reason: More JavaScript teams do this (e.g. [airbnb](https://github.com/airbnb/javascript), [idiomatic](https://github.com/rwaldron/idiomatic.js), [standard](https://github.com/feross/standard), [npm](https://github.com/npm/npm), [node](https://github.com/nodejs/node), [google/angular](https://github.com/angular/angular/), [facebook/react](https://github.com/facebook/react)). The TypeScript/VSCode teams use 4 spaces but are definitely the exception in the ecosystem.
 
-## Semicolons ^semicolons
+## Semicolons
 
 - Use semicolons.
 
 > Reasons: Explicit semicolons helps language formatting tools give consistent results. Missing ASI (automatic semicolon insertion) can trip new devs e.g. `foo() \n (function(){})` will be a single statement (not two). TC39 [warning on this as well](https://github.com/tc39/ecma262/pull/1062). Example teams: [airbnb](https://github.com/airbnb/javascript), [idiomatic](https://github.com/rwaldron/idiomatic.js), [google/angular](https://github.com/angular/angular/), [facebook/react](https://github.com/facebook/react), [Microsoft/TypeScript](https://github.com/Microsoft/TypeScript/).
 
-## Array ^array
+## Array
 
 - Annotate arrays as `foos: Foo[]` instead of `foos: Array<Foo>`.
 
 > Reasons: It's easier to read. It's used by the TypeScript team. Makes easier to know something is an array as the mind is trained to detect `[]`.
 
-## Filename ^filename
+## Filename
 
 Name files with `camelCase`. E.g. `utils.ts`, `map.ts` etc.
 
@@ -316,7 +316,7 @@ When the file exports a component and your framework (like React) wants componen
 
 > Reason: Helps with consistency (little overthought required) and its what the ecosystem is doing.
 
-## type vs. interface ^type-vs-interface
+## type vs. interface
 
 - Use `type` when you _might_ need a union or intersection:
 

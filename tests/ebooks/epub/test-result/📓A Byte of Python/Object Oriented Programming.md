@@ -1,6 +1,6 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
-tags: e-book
+tags: [e-book]
 ---
 
 # Object Oriented Programming
@@ -62,7 +62,7 @@ $ python oop_simplestclass.py
 
 We create a new class using the `class` statement and the name of the class. This is followed by an indented block of statements which form the body of the class. In this case, we have an empty block which is indicated using the `pass` statement.
 
-Next, we create an object/instance of this class using the name of the class followed by a pair of parentheses. (We will learn [more about instantiation](Object%20Oriented%20Programming.md#^init) in the next section). For our verification, we confirm the type of the variable by simply printing it. It tells us that we have an instance of the `Person` class in the `__main__` module.
+Next, we create an object/instance of this class using the name of the class followed by a pair of parentheses. (We will learn [more about instantiation](#^init) in the next section). For our verification, we confirm the type of the variable by simply printing it. It tells us that we have an instance of the `Person` class in the `__main__` module.
 
 Notice that the address of the computer memory where your object is stored is also printed. The address will have a different value on your computer since Python can store the object wherever it finds space.
 
@@ -92,7 +92,7 @@ Hello, how are you?
 
 Here we see the `self` in action. Notice that the `say_hi` method takes no parameters but still has the `self` in the function definition.
 
-## The `__init__` method ^init
+## The `__init__` method
 
 There are many method names which have special significance in Python classes. We will see the significance of the `__init__` method now.
 

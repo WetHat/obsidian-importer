@@ -1,7 +1,7 @@
 ---
 book: "[[📓A Byte of Python.md|A Byte of Python]]"
 aliases: ["Appendix: Revision History"]
-tags: e-book
+tags: [e-book]
 ---
 
 # Appendix: Revision History
